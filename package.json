@@ -1,0 +1,12 @@
+{
+  "name": "fast-car",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://e.coding.net/william_zhong/fast-car/fast-car.git",
+  "author": "zhongjx <1433589043@qq.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/mocha": "^9.0.0",
+    "mocha": "^9.1.3"
+  }
+}

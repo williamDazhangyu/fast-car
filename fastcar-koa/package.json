@@ -1,0 +1,23 @@
+{
+  "name": "fastcar-koa",
+  "version": "1.0",
+  "description": "fastcar框架下对koa的包装",
+  "main": "index.js",
+  "author": "william_zhong",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/koa": "^2.13.4",
+    "@types/koa-bodyparser": "^4.3.3",
+    "@types/koa-range": "^0.3.2",
+    "@types/koa-router": "^7.4.4",
+    "@types/koa-static": "^4.0.2"
+  },
+  "dependencies": {
+    "koa": "^2.13.1",
+    "koa-body": "^4.2.0",
+    "koa-bodyparser": "^4.3.0",
+    "koa-range": "^0.3.0",
+    "koa-router": "^10.1.1",
+    "koa-static": "^5.0.0"
+  }
+}

@@ -1,0 +1,82 @@
+{
+    "configurations": [
+        {
+            "name": "Run TS",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${relativeFile}"
+            ],
+            "cwd": "${workspaceRoot}",
+            "protocol": "inspector",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "env": { 
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json" 
+            }
+        },
+        {
+            "name": "Run JS",
+            "type": "node",
+            "request": "launch",
+            "program": "${file}"
+        },
+        {
+            "name": "Run mocha",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "stopOnEntry": false,
+            "args": [
+                "${relativeFile}",
+                "--no-timeouts"
+            ],
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": null,
+            "env": {
+                "NODE_ENV": "testing"
+            },
+            "protocol": "inspector",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ]
+        },
+        {
+            "name": "Run TEST KoaAPP",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${workspaceRoot}/project/testKoa/app.ts"
+            ],
+            "cwd": "${workspaceRoot}",
+            "protocol": "inspector",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "env": { 
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json" 
+            }
+        },
+        {
+            "name": "Run TEST FASTAPP",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${workspaceRoot}/project/testFastCar/app.ts"
+            ],
+            "cwd": "${workspaceRoot}",
+            "protocol": "inspector",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "env": { 
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json" 
+            }
+        },
+    ]
+}
