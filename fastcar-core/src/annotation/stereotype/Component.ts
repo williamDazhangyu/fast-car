@@ -1,9 +1,6 @@
-
-
-import { InstanceKind } from "../../constant/InstanceKind";
-import SetInstanceKind from "./SetInstanceKind";
+import { ComponentKind } from "../../constant/ComponentKind";
+import Injection from "./Injection";
 
 export default function Component(target: any) {
-
-    SetInstanceKind(target, InstanceKind.Component);
+	Injection(target, ComponentKind.Component);
 }

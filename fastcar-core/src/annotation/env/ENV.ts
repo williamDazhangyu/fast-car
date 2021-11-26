@@ -1,9 +1,10 @@
 import "reflect-metadata";
-//设置初始化的env
+import { CommonConstant } from "../../constant/CommonConstant";
+import FastCarApplication from "../../service/FastCarApplication";
+
+//设置初始化的env 注入在原始的application上面
 export function ENV(name: string) {
-
-    return function (target: any) {
-
-        Reflect.defineMetadata('ENV', name, target.prototype);
-    }
+	return function(target: any) {
+		Reflect.defineMetadata(CommonConstant.ENV, name, FastCarApplication.prototype);
+	};
 }

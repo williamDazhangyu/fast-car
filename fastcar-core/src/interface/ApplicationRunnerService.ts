@@ -1,5 +1,3 @@
-
 export default interface ApplicationRunnerService {
-
-    run(): void;
+	run(): void;
 }

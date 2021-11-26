@@ -2,168 +2,127 @@
  * @version 1.0 数据格式处理
  */
 export default class DATAFORMAT {
+	static twoDigits(num: number) {
+		return num.toString().padStart(2, "0");
+	}
 
-    static twoDigits(num: number) {
+	static toMysqlDay(datetime: number = Date.now()) {
+		let dataC = new Date(datetime);
+		let day = `${DATAFORMAT.twoDigits(dataC.getFullYear())}-${DATAFORMAT.twoDigits(dataC.getMonth() + 1)}-${DATAFORMAT.twoDigits(dataC.getDate())}`;
 
-        return num.toString().padStart(2, '0');
-    }
+		return day;
+	}
 
-    static toMysqlDay(datetime: number = Date.now()) {
+	static toMysqlHms(datetime: number = Date.now()) {
+		let dataC = new Date(datetime);
+		let hms = `${DATAFORMAT.twoDigits(dataC.getHours())}:${DATAFORMAT.twoDigits(dataC.getMinutes())}:${DATAFORMAT.twoDigits(dataC.getSeconds())}`;
 
-        let dataC = new Date(datetime);
-        let day = `${DATAFORMAT.twoDigits(dataC.getFullYear())}-${DATAFORMAT.twoDigits(dataC.getMonth() + 1)}-${DATAFORMAT.twoDigits(dataC.getDate())}`;
+		return hms;
+	}
 
-        return day;
-    }
+	static toHMS(datetime: number) {
+		//先计算小时
+		let hours = Math.floor(datetime / 60 / 60);
+		let minutes = Math.floor((datetime - hours * 60 * 60) / 60);
+		let seconds = datetime - (hours * 60 + minutes) * 60;
 
-    static toMysqlHms(datetime: number = Date.now()) {
+		return `${DATAFORMAT.twoDigits(hours)}时${DATAFORMAT.twoDigits(minutes)}分${DATAFORMAT.twoDigits(seconds)}秒`;
+	}
 
-        let dataC = new Date(datetime);
-        let hms = `${DATAFORMAT.twoDigits(dataC.getHours())}:${DATAFORMAT.twoDigits(dataC.getMinutes())}:${DATAFORMAT.twoDigits(dataC.getSeconds())}`;
+	static toMysqlDateTime(datetime: number = Date.now()) {
+		let dataC = new Date(datetime);
+		let day = `${DATAFORMAT.twoDigits(dataC.getFullYear())}-${DATAFORMAT.twoDigits(dataC.getMonth() + 1)}-${DATAFORMAT.twoDigits(dataC.getDate())}`;
+		let hms = `${DATAFORMAT.twoDigits(dataC.getHours())}:${DATAFORMAT.twoDigits(dataC.getMinutes())}:${DATAFORMAT.twoDigits(dataC.getSeconds())}`;
 
-        return hms;
-    }
+		return day + " " + hms;
+	}
 
-    static toHMS(datetime: number) {
+	static getDateTime(datetimeStr: string) {
+		if (!!datetimeStr) {
+			let dataC = new Date(datetimeStr);
+			return dataC.getTime();
+		}
 
-        //先计算小时
-        let hours = Math.floor(datetime / 60 / 60);
-        let minutes = Math.floor((datetime - hours * 60 * 60) / 60);
-        let seconds = datetime - (hours * 60 + minutes) * 60;
+		return Date.now();
+	}
 
-        return `${DATAFORMAT.twoDigits(hours)}时${DATAFORMAT.twoDigits(minutes)}分${DATAFORMAT.twoDigits(seconds)}秒`;
-    }
+	//统一范围为null
+	static formatNumber(value: any, type: string) {
+		if (type === "int") {
+			return parseInt(value);
+		}
 
-    static toMysqlDateTime(datetime: number = Date.now()) {
+		if (type === "float" || type == "number") {
+			return parseFloat(value);
+		}
+	}
 
-        let dataC = new Date(datetime);
-        let day = `${DATAFORMAT.twoDigits(dataC.getFullYear())}-${DATAFORMAT.twoDigits(dataC.getMonth() + 1)}-${DATAFORMAT.twoDigits(dataC.getDate())}`;
-        let hms = `${DATAFORMAT.twoDigits(dataC.getHours())}:${DATAFORMAT.twoDigits(dataC.getMinutes())}:${DATAFORMAT.twoDigits(dataC.getSeconds())}`;
+	static formatString(value: any) {
+		if (typeof value != "string") {
+			return "";
+		}
 
-        return day + " " + hms;
-    }
+		return value;
+	}
 
-    static getDateTime(datetimeStr: string) {
+	static formatBoolean(value: any) {
+		return !!value;
+	}
 
-        if (!!datetimeStr) {
+	static formatArray(value: any[], type: string) {
+		if (type.startsWith("array")) {
+			if (typeof value === "string") {
+				value = JSON.parse(value);
+			}
 
-            let dataC = new Date(datetimeStr);
-            return dataC.getTime();
-        }
+			if (Array.isArray(value)) {
+				let ntype = type.replace(/array/, "");
+				value = value.map(item => {
+					return DATAFORMAT.formatValue(item, ntype);
+				});
 
-        return Date.now();
-    }
+				return value;
+			}
+		}
 
-    //统一范围为null
-    static formatNumber(value: any, type: string) {
+		return [];
+	}
 
-        let n = null;
-        if (type === "int") {
+	static formatDate(value: any) {
+		if (typeof value === "string") {
+			return DATAFORMAT.toMysqlDateTime(new Date(value).getTime());
+		}
 
-            n = parseInt(value);
-        }
+		if (value instanceof Date) {
+			return DATAFORMAT.toMysqlDateTime(value.getTime());
+		}
 
-        if (type === "float" || type == "number") {
+		return DATAFORMAT.toMysqlDateTime();
+	}
 
-            n = parseFloat(value);
-        }
+	static formatValue(value: any, type: string): any {
+		if (type.startsWith("array")) {
+			return DATAFORMAT.formatArray(value, type);
+		}
 
-        return isNaN(n) ? null : n;
-    }
-
-    static formatString(value: any) {
-
-        if (typeof value != 'string') {
-
-            return "";
-        }
-
-        return value;
-    }
-
-    static formatBoolean(value: any) {
-
-        return !!value;
-    }
-
-    static formatArray(value: any[], type: string) {
-
-        if (type.startsWith('array')) {
-
-            if (typeof value === 'string') {
-
-                value = JSON.parse(value);
-            }
-
-            if (Array.isArray(value)) {
-
-                let ntype = type.replace(/array/, "");
-                value = value.map((item) => {
-
-                    return DATAFORMAT.formatValue(item, ntype);
-                });
-
-                return value;
-            }
-        }
-
-        return [];
-    }
-
-    static formatDate(value: any) {
-
-        if (typeof value === 'string') {
-
-            return DATAFORMAT.toMysqlDateTime(new Date(value).getTime());
-        }
-
-        if (value instanceof Date) {
-
-            return DATAFORMAT.toMysqlDateTime(value.getTime());
-        }
-
-        return DATAFORMAT.toMysqlDateTime();
-    };
-
-    static formatValue(value: any, type: string) {
-
-        //判定类型
-        if (type.startsWith('array')) {
-
-            return DATAFORMAT.formatArray(value, type);
-        }
-
-        let formatFun = DATAFORMAT.formatNumber;
-        switch (type) {
-
-            case "string": {
-
-                formatFun = DATAFORMAT.formatString;
-                break;
-            }
-            case "boolean": {
-
-                formatFun = DATAFORMAT.formatBoolean;
-                break;
-            }
-            case "int":
-            case "float":
-            case "number": {
-
-                formatFun = DATAFORMAT.formatNumber;
-                break;
-            }
-            case "date": {
-
-                formatFun = DATAFORMAT.formatDate;
-                break;
-            }
-            default: {
-
-                return value;
-            }
-        }
-
-        return formatFun(value, type);
-    }
+		switch (type) {
+			case "string": {
+				return DATAFORMAT.formatString(value);
+			}
+			case "boolean": {
+				return DATAFORMAT.formatBoolean(value);
+			}
+			case "int":
+			case "float":
+			case "number": {
+				return DATAFORMAT.formatNumber(value, type);
+			}
+			case "date": {
+				return DATAFORMAT.formatDate(value);
+			}
+			default: {
+				return value;
+			}
+		}
+	}
 }

@@ -1,48 +1,39 @@
-import FileUtil from './FileUtil';
+import FileUtil from "./FileUtil";
 
 export default class TypeUtil {
+	static isFunction(f: any): boolean {
+		let typeName = typeof f;
+		return typeName == "function";
+	}
 
-    static isFunction(f: any): boolean {
+	static isClass(f: any): boolean {
+		if (f.prototype === undefined) {
+			return false;
+		}
 
-        let typeName = typeof f;
-        return typeName == 'function';
-    }
+		if (!f.prototype.constructor) {
+			return false;
+		}
 
-    static isClass(f: any): boolean {
+		return true;
+	}
 
-        if (f.prototype === undefined) {
+	static isString(str: any): boolean {
+		let typeName = typeof str;
+		return typeName == "string";
+	}
 
-            return false;
-        }
+	static isObject(f: any): boolean {
+		let typeName = typeof f;
+		return typeName == "object";
+	}
 
-        if (!f.prototype.constructor) {
+	static isTSORJS(fp: string): boolean {
+		let suffix = FileUtil.getSuffix(fp);
+		return ["ts", "js"].includes(suffix);
+	}
 
-            return false;
-        }
-
-        return true;
-    };
-
-    static isString(str: any): boolean {
-
-        let typeName = typeof str;
-        return typeName == 'string';
-    }
-
-    static isObject(f: any): boolean {
-
-        let typeName = typeof f;
-        return typeName == 'object';
-    }
-
-    static isTSORJS(fp: string): boolean {
-
-        let suffix = FileUtil.getSuffix(fp);
-        return ["ts", "js"].includes(suffix);
-    }
-
-    static isPromise(f: Function) {
-
-        return f.constructor.name === 'AsyncFunction';
-    };
+	static isPromise(f: Function) {
+		return f.constructor.name === "AsyncFunction";
+	}
 }

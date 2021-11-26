@@ -1,6 +1,5 @@
-import * as  uuid from 'uuid';
+import * as uuid from "uuid";
 
 export function getUUID() {
-
-    return uuid.v4().replace(/-/g, '');
+	return uuid.v4().replace(/-/g, "");
 }

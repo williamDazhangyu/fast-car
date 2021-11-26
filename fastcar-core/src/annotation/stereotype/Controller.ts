@@ -1,9 +1,7 @@
-
-import { InstanceKind } from "../../constant/InstanceKind";
-import SetInstanceKind from "./SetInstanceKind";
+import { ComponentKind } from "../../constant/ComponentKind";
+import Injection from "./Injection";
 
 //业务逻辑层
 export default function Controller(target: any) {
-
-    SetInstanceKind(target, InstanceKind.Controller);
+	Injection(target, ComponentKind.Controller);
 }

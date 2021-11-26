@@ -13,8 +13,8 @@
                 "-r",
                 "ts-node/register"
             ],
-            "env": { 
-                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json" 
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
             }
         },
         {
@@ -45,11 +45,11 @@
             ]
         },
         {
-            "name": "Run TEST KoaAPP",
+            "name": "Run Simple",
             "type": "node",
             "request": "launch",
             "args": [
-                "${workspaceRoot}/project/testKoa/app.ts"
+                "${workspaceRoot}/fastcar-core/test/testApp/simple/app.ts"
             ],
             "cwd": "${workspaceRoot}",
             "protocol": "inspector",
@@ -57,26 +57,9 @@
                 "-r",
                 "ts-node/register"
             ],
-            "env": { 
-                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json" 
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceRoot}/fastcar-core/tsconfig.json"
             }
-        },
-        {
-            "name": "Run TEST FASTAPP",
-            "type": "node",
-            "request": "launch",
-            "args": [
-                "${workspaceRoot}/project/testFastCar/app.ts"
-            ],
-            "cwd": "${workspaceRoot}",
-            "protocol": "inspector",
-            "runtimeArgs": [
-                "-r",
-                "ts-node/register"
-            ],
-            "env": { 
-                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json" 
-            }
-        },
+        }
     ]
 }

@@ -1,164 +1,132 @@
 import Format from "./Format";
-import TypeUtil from './TypeUtil';
+import TypeUtil from "./TypeUtil";
 //表单校验器
 export class FormValidationUtil {
+	//是否为空
+	static isNotNull(param: any) {
+		if (param != undefined && param != null) {
+			if (TypeUtil.isString(param)) {
+				return param != "" && param != "";
+			}
 
-     //是否为空
-     static isNotNull(param: any) {
+			if (TypeUtil.isObject(param)) {
+				return Reflect.ownKeys(param).length > 0;
+			}
 
-          if (param != undefined && param != null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-               if (TypeUtil.isString(param)) {
+	static isNull(param: any) {
+		return !FormValidationUtil.isNotNull(param);
+	}
 
-                    return param != "" && param != '';
-               }
+	static isNumber(param: any) {
+		return typeof param === "number";
+	}
 
-               if (TypeUtil.isObject(param)) {
+	static isString(param: any) {
+		return typeof param === "string";
+	}
 
-                    return Reflect.ownKeys(param).length > 0;
-               }
+	static isBoolean(param: any) {
+		return typeof param === "boolean";
+	}
 
-               return true;
-          } else {
+	static isDate(param: any) {
+		return param instanceof Date;
+	}
 
-               return false;
-          }
-     };
+	static isNotMaxSize(param: any, value: number) {
+		if (FormValidationUtil.isString(param)) {
+			return param.length <= value;
+		}
 
-     static isNull(param: any) {
+		if (FormValidationUtil.isNumber(param)) {
+			return param <= value;
+		}
 
-          return !FormValidationUtil.isNotNull(param);
-     }
+		if (FormValidationUtil.isBoolean(param)) {
+			return true;
+		}
 
-     static isNumber(param: any) {
+		let v = FormValidationUtil.isNotNull(param) ? param.toString() : "";
+		return v.length <= value;
+	}
 
-          return typeof param === "number";
-     };
+	static isNotMinSize(param: any, value: number) {
+		if (FormValidationUtil.isString(param)) {
+			return param.length >= value;
+		}
 
-     static isString(param: any) {
+		if (FormValidationUtil.isNumber(param)) {
+			return param >= value;
+		}
 
-          return typeof param === "string";
-     };
+		if (FormValidationUtil.isBoolean(param)) {
+			return true;
+		}
 
-     static isBoolean(param: any) {
+		let v = FormValidationUtil.isNotNull(param) ? param.toString() : "";
+		return v.length >= value;
+	}
 
-          return typeof param === "boolean";
-     };
+	static isArray(param: any, type: string) {
+		if (!Array.isArray(param)) {
+			return false;
+		}
 
-     static isDate(param: any) {
+		let UpType = Format.formatFirstToUp(type);
+		let m = `is${UpType}`;
 
-          return param instanceof Date;
-     };
+		//如果没有该方法 则返回true
+		if (!Reflect.has(FormValidationUtil, m)) {
+			return true;
+		}
 
-     static isNotMaxSize(param: any, value: number) {
+		if (Reflect.has(FormValidationUtil, m)) {
+			return param.every(item => {
+				return Reflect.apply(Reflect.get(FormValidationUtil, m), FormValidationUtil, [item]);
+			});
+		}
 
-          if (FormValidationUtil.isString(param)) {
+		return false;
+	}
 
-               return param.length <= value;
-          }
+	static checkType(param: any, type: string) {
+		//判定类型
+		if (type.startsWith("array")) {
+			let ntype = type.replace(/array/, "");
+			return FormValidationUtil.isArray(param, ntype);
+		}
 
-          if (FormValidationUtil.isNumber(param)) {
+		let formatFun = null;
+		switch (type) {
+			case "string": {
+				formatFun = FormValidationUtil.isString;
+				break;
+			}
+			case "boolean": {
+				formatFun = FormValidationUtil.isBoolean;
+				break;
+			}
+			case "int":
+			case "float":
+			case "number": {
+				formatFun = FormValidationUtil.isNumber;
+				break;
+			}
+			case "date": {
+				formatFun = FormValidationUtil.isDate;
+				break;
+			}
+			default: {
+				return true;
+			}
+		}
 
-               return param <= value;
-          }
-
-          if (FormValidationUtil.isBoolean(param)) {
-
-               return true;
-          }
-
-          let v = FormValidationUtil.isNotNull(param) ? param.toString() : "";
-          return v.length <= value;
-     };
-
-     static isNotMinSize(param: any, value: number) {
-
-          if (FormValidationUtil.isString(param)) {
-
-               return param.length >= value;
-          }
-
-          if (FormValidationUtil.isNumber(param)) {
-
-               return param >= value;
-          }
-
-          if (FormValidationUtil.isBoolean(param)) {
-
-               return true;
-          }
-
-          let v = FormValidationUtil.isNotNull(param) ? param.toString() : "";
-          return v.length >= value;
-     };
-
-     static isArray(param: any, type: string) {
-
-          if (!Array.isArray(param)) {
-
-               return false;
-          }
-
-          let UpType = Format.formatFirstToUp(type);
-          let m = `is${UpType}`;
-
-          //如果没有该方法 则返回true
-          if (!Reflect.has(FormValidationUtil, m)) {
-
-               return true;
-          }
-
-          if (Reflect.has(FormValidationUtil, m)) {
-
-               return param.every((item) => {
-
-                    return Reflect.apply(Reflect.get(FormValidationUtil, m), FormValidationUtil, [item]);
-               });
-          }
-
-          return false;
-     }
-
-     static checkType(param: any, type: string) {
-
-          //判定类型
-          if (type.startsWith('array')) {
-
-               let ntype = type.replace(/array/, "");
-               return FormValidationUtil.isArray(param, ntype);
-          }
-
-          let formatFun = null;
-          switch (type) {
-
-               case "string": {
-
-                    formatFun = FormValidationUtil.isString;
-                    break;
-               }
-               case "boolean": {
-
-                    formatFun = FormValidationUtil.isBoolean;
-                    break;
-               }
-               case "int":
-               case "float":
-               case "number": {
-
-                    formatFun = FormValidationUtil.isNumber;
-                    break;
-               }
-               case "date": {
-
-                    formatFun = FormValidationUtil.isDate;
-                    break;
-               }
-               default: {
-
-                    return true;
-               }
-          }
-
-          return Reflect.apply(formatFun, FormValidationUtil, [param, type]);
-     }
+		return Reflect.apply(formatFun, FormValidationUtil, [param, type]);
+	}
 }

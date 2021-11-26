@@ -1,5 +1,6 @@
-import { ScheduledModule, TimerMapModule } from "../common/ConstantFile";
-import { TimeUnit } from "../common/ConstantTime";
+
+import { ScheduledModule, TimerMapModule } from '../constant/ConstantFile';
+import { TimeUnit } from '../constant/ConstantTime';
 import Heartbeat, { ScheduledConfig, ScheduledConfigCron, ScheduledConfigInterval } from '../utils/HeartBeat';
 
 function addScheduledModule(target: any, m: string) {

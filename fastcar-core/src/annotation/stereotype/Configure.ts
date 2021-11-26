@@ -5,14 +5,14 @@ import Component from "./Component";
 
 
 //配置文件层
- export default function Configure(name: string) {
+export default function Configure(name: string) {
 
     return function (target: any) {
 
         //配置对象也为组件
         Component(target);
         //当实例化时 加载默认配置并进行赋值
-        let fp = path.join(module.path, "../../", "resource", name);
+        let fp = path.join(require.main?.path || "", "../../", "resource", name);
         let tmpConfig = FileUtil.getResource(fp);
 
         //进行实例化赋值

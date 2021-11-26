@@ -1,4 +1,4 @@
-export interface LogConfig {
+export interface Log4jsConfig {
     appenders: { [name: string]: any; }
     categories: { [name: string]: { appenders: string[]; level: string; enableCallStack?: boolean; } }
     pm2?: boolean;

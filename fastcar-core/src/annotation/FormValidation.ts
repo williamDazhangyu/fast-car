@@ -14,7 +14,6 @@ interface SizeModel extends CommodModel {
     max?: number,
 }
 
-
 interface RuleModel extends CommodModel {
     index: number, //第几个参数
     fn: Function,
