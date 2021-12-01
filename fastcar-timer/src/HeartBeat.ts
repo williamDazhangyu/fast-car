@@ -1,6 +1,6 @@
 import { Timezone } from "tz-offset";
 import * as nodeCron from "node-cron";
-import { TimeUnit, TimeUnitNum } from "../constant/ConstantTime";
+import { TimeUnit, TimeUnitNum } from "./ConstantTime";
 
 export type ScheduledConfig = {
 	initialDelay?: number; //初始化后第一次延迟多久后执行
@@ -24,7 +24,7 @@ export type ScheduledConfigCron = {
 
 export type TZ = Timezone;
 
-export default class Heartbeat {
+export class Heartbeat {
 	diff!: number; //间隔时长
 	timerId: any;
 	task!: nodeCron.ScheduledTask;
@@ -129,8 +129,8 @@ export default class Heartbeat {
 			Reflect.deleteProperty(this, "timerId");
 		}
 
-		if (this.task) {
-			this.task.destroy();
+		if (Reflect.has(this, "task")) {
+			this.task.stop();
 			Reflect.deleteProperty(this, "task");
 		}
 

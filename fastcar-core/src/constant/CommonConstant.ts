@@ -4,3 +4,5 @@ export enum CommonConstant {
 	Resource = "resource",
 	ENV = "env",
 }
+
+export const FileResSuffix = ["json", "yml", "js"];

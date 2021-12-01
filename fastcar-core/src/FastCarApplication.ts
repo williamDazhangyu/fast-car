@@ -1,20 +1,18 @@
 import "reflect-metadata";
 import * as Events from "events";
 import * as path from "path";
-import ClassLoader from "../utils/classLoader";
-import FileUtil from "../utils/FileUtil";
-import Format from "../utils/Format";
-import MixTool from "../utils/Mix";
-import TypeUtil from "../utils/TypeUtil";
-import { SYSConfig, SYSDefaultConfig } from "../config/SysConfig";
-import { FastCarMetaData } from "../constant/FastCarMetaData";
-import { ApplicationConfig } from "../config/ApplicationConfig";
-import { ComponentKind } from "../constant/ComponentKind";
-import ExceptionMonitor from "../annotation/ExceptionMonitor";
-import { CommonConstant } from "../constant/CommonConstant";
-import { LifeCycleModule } from "../constant/LifeCycleModule";
-
-const fileResSuffix = ["json", "yml", "js"];
+import ClassLoader from "./utils/classLoader";
+import FileUtil from "./utils/FileUtil";
+import Format from "./utils/Format";
+import MixTool from "./utils/Mix";
+import TypeUtil from "./utils/TypeUtil";
+import { SYSConfig, SYSDefaultConfig } from "./config/SysConfig";
+import { FastCarMetaData } from "./constant/FastCarMetaData";
+import { ApplicationConfig } from "./config/ApplicationConfig";
+import { ComponentKind } from "./constant/ComponentKind";
+import ExceptionMonitor from "./annotation/ExceptionMonitor";
+import { CommonConstant, FileResSuffix } from "./constant/CommonConstant";
+import { LifeCycleModule } from "./constant/LifeCycleModule";
 
 @ExceptionMonitor
 class FastCarApplication extends Events {
@@ -34,8 +32,10 @@ class FastCarApplication extends Events {
 		this.init();
 	}
 
-	//配置类
-	getResourcePath() {
+	/***
+	 * @version 1.0 获取资源路径
+	 */
+	getResourcePath(): string {
 		let resourcePath = path.join(this.basePath, CommonConstant.Resource);
 		return resourcePath;
 	}
@@ -57,7 +57,7 @@ class FastCarApplication extends Events {
 			}
 		};
 
-		fileResSuffix.forEach(suffix => {
+		FileResSuffix.forEach(suffix => {
 			let fileContent = FileUtil.getResource(path.join(resPath, `${configName}.${suffix}`));
 			if (fileContent) {
 				replaceSetting(CommonConstant.Settings, fileContent);
@@ -83,17 +83,25 @@ class FastCarApplication extends Events {
 		this.sysConfig.settings.set(key, value);
 	}
 
-	//设置优先级 配置自定义>系统配置>初始化
+	/***
+	 * @version 1.0 获取自定义设置 设置优先级 配置自定义>系统配置>初始化
+	 *
+	 */
 	getSetting(key: string): any {
 		return this.sysConfig.settings.get(key) || Reflect.get(this.sysConfig, key) || Reflect.get(this, key);
 	}
 
+	/***
+	 * @version 1.0 获取应用配置
+	 */
 	getApplicaionConfig(): ApplicationConfig {
 		return this.sysConfig.applicaion;
 	}
 
-	//组件相关类
-	static setInjectionMap(name: string) {
+	/***
+	 * @version 1.0 注入需要初始化的组件
+	 */
+	static setInjectionMap(name: string): void {
 		let loadModule = FastCarMetaData.InjectionMap;
 		let names: string[] = Reflect.getMetadata(loadModule, FastCarApplication) || [];
 		names.push(name);
@@ -101,7 +109,10 @@ class FastCarApplication extends Events {
 		Reflect.defineMetadata(loadModule, names, FastCarApplication);
 	}
 
-	static hasInjectionMap(name: string) {
+	/***
+	 * @version 1.0 判断是否已经有初始化的组件了
+	 */
+	static hasInjectionMap(name: string): boolean {
 		let loadModuleName = FastCarMetaData.InjectionMap;
 		if (!Reflect.hasMetadata(loadModuleName, FastCarApplication)) {
 			return false;
@@ -111,6 +122,9 @@ class FastCarApplication extends Events {
 		return names.includes(name);
 	}
 
+	/***
+	 * @version 1.0 扫描组件
+	 */
 	loadClass() {
 		let tmpFilePath: string[] = Array.of();
 		let includeList: string[] = Reflect.getMetadata(FastCarMetaData.ComponentScan, this);
@@ -167,6 +181,9 @@ class FastCarApplication extends Events {
 		}
 	}
 
+	/**
+	 * @version 1.0 加载需要注入的类
+	 */
 	loadInjectionModule() {
 		let relyname = FastCarMetaData.IocModule;
 
@@ -194,7 +211,10 @@ class FastCarApplication extends Events {
 		});
 	}
 
-	getComponentByType(name: ComponentKind) {
+	/***
+	 * @version 1.0 根据类型获取组件
+	 */
+	getComponentByType(name: ComponentKind): object[] {
 		let instanceList: Object[] = Array.of();
 		this.componentMap.forEach(instance => {
 			let flag = Reflect.hasMetadata(name, instance);
@@ -206,7 +226,10 @@ class FastCarApplication extends Events {
 		return instanceList;
 	}
 
-	getComponentList() {
+	/***
+	 * @version 1.0 获取全部的组件列表
+	 */
+	getComponentList(): object[] {
 		let instanceList: Object[] = Array.of();
 		this.componentMap.forEach((instance, name) => {
 			if (FastCarApplication.hasInjectionMap(name)) {
@@ -217,17 +240,24 @@ class FastCarApplication extends Events {
 		return instanceList;
 	}
 
-	getComponentByName(name: string) {
+	/***
+	 * @version 1.0 根据名称组件
+	 */
+	getComponentByName(name: string): object {
 		return this.componentMap.get(name);
 	}
 
-	//应用生命周期相关
+	/***
+	 * @version 1.0 初始化应用
+	 */
 	init() {
 		this.beforeStartServer();
 		this.startServer();
 	}
 
-	//自动运行
+	/***
+	 * @version 1.0 自动调用方法
+	 */
 	automaticRun(name: LifeCycleModule) {
 		this.componentMap.forEach((item: any, key: string) => {
 			let applicationStart = Reflect.hasMetadata(name, item);
@@ -239,27 +269,36 @@ class FastCarApplication extends Events {
 		});
 	}
 
+	/**
+	 * @version 1.0 开启应用前执行的操作 加载配置,扫描组件，注入依赖组件
+	 */
 	beforeStartServer() {
 		this.loadSysConfig();
 
 		this.loadClass();
 
 		this.loadInjectionModule();
+
+		this.automaticRun(LifeCycleModule.ApplicationStart);
 	}
 
-	//启动服务
+	/***
+	 * @version 1.0 启动服务
+	 */
 	startServer() {
-		//调用app启动时的加载
-		this.automaticRun(LifeCycleModule.ApplicationStart);
 		console.info("start server is run");
 	}
 
-	//停止服务前的一些处理操作
+	/***
+	 * @version 1.0 停止服务前自动调用服务
+	 */
 	beforeStopServer() {
 		this.automaticRun(LifeCycleModule.ApplicationStop);
 	}
 
-	//停止服务
+	/***
+	 * @version 1.0 停止服务
+	 */
 	async stopServer() {}
 }
 

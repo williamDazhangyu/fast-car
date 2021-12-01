@@ -1,0 +1,15 @@
+{
+	"name": "fastcar-mysql",
+	"version": "0.0.1",
+	"description": "基于fastcar-core框架下对mysql的封装",
+	"main": "index.js",
+	"author": "william_zhong",
+	"license": "MIT",
+	"dependencies": {
+		"fastcar-core": "file:../fastcar-core",
+		"mysql": "^2.18.1"
+	},
+	"devDependencies": {
+		"@types/mysql": "^2.15.19"
+	}
+}
