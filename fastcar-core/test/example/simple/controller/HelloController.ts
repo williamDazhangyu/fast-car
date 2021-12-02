@@ -7,7 +7,7 @@ import LogService from "../service/LogService";
 @Controller
 class HelloController {
 	@Autowired
-	private helloService!: HelloService;
+	private hello!: HelloService;
 
 	@Autowired
 	private logService!: LogService;
@@ -16,7 +16,7 @@ class HelloController {
 	private helloConfig!: HelloConfig;
 
 	callHello() {
-		this.helloService.say();
+		this.hello.say();
 	}
 
 	print() {

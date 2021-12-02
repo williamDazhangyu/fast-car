@@ -1,48 +1,38 @@
-import { Readonly, Deprecate } from '../base/decorators/Common';
+import Deprecate from "../../src/annotation/property/Deprecate";
+import Readonly from "../../src/annotation/property/Readonly";
 
-describe('装饰器测试', () => {
+describe("装饰器测试", () => {
+	it("只读装饰器测试", () => {
+		class TestModel {
+			@Readonly
+			info: string;
 
-  it("只读装饰器测试", () => {
+			@Readonly
+			setInfo(s: string) {
+				Reflect.defineProperty(this, "entree", {
+					value: s,
+				});
+			}
+		}
 
-    class TestModel {
+		var m = new TestModel();
+		m.setInfo("111");
+		m.setInfo = () => {};
+	});
 
-      @Readonly
-      info: string;
+	it("弃用装饰器测试", () => {
+		@Deprecate()
+		class TestModel {
+			@Deprecate("hello is Deprecate")
+			async hello() {
+				return new Promise(resolve => {
+					resolve("hello is Deprecate");
+				});
+			}
+		}
 
-      @Readonly
-      setInfo(s: string) {
-
-        Reflect.defineProperty(this, "entree", {
-          value: s
-        });
-      }
-    }
-
-    var m = new TestModel();
-    m.setInfo("111");
-    m.setInfo = ()=>{
-
-    }
-  });
-
-  it("弃用装饰器测试", () => {
-
-    @Deprecate()
-    class TestModel {
-
-      @Deprecate("hello is Deprecate")
-      async hello() {
-
-        return new Promise((resolve) => {
-
-          resolve("hello is Deprecate");
-        });
-      }
-    }
-
-    new TestModel().hello().then((res) => {
-
-      console.log(res);
-    });
-  });
+		new TestModel().hello().then(res => {
+			console.log(res);
+		});
+	});
 });

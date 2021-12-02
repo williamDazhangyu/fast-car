@@ -36,4 +36,8 @@ export default class TypeUtil {
 	static isPromise(f: Function) {
 		return f.constructor.name === "AsyncFunction";
 	}
+
+	static isArray(value: any) {
+		return Array.isArray(value);
+	}
 }

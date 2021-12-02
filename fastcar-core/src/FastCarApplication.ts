@@ -197,11 +197,11 @@ class FastCarApplication extends Events {
 		let relyname = FastCarMetaData.IocModule;
 
 		this.componentMap.forEach((instance, instanceName) => {
-			let moduleList: Set<string> = Reflect.getMetadata(relyname, instance);
+			let moduleList: Map<string, string> = Reflect.getMetadata(relyname, instance);
 			if (!moduleList || moduleList.size == 0) {
 				return;
 			}
-			moduleList.forEach((name: string) => {
+			moduleList.forEach((name: string, propertyKey: string) => {
 				let func = this.componentMap.get(name);
 
 				if (name === "App") {
@@ -215,7 +215,6 @@ class FastCarApplication extends Events {
 					}
 				}
 
-				let propertyKey = Format.formatFirstToLow(name);
 				Reflect.set(instance, propertyKey, func);
 			});
 		});
