@@ -10,7 +10,7 @@ export enum ComponentKind {
 }
 
 declare type SYSConfig = {
-	applicaion: ApplicationConfig; //应用配置
+	application: ApplicationConfig; //应用配置
 	settings: Map<string, any>; //自定义设置项
 };
 
@@ -53,7 +53,7 @@ export class FastCarApplication {
 	 * @version 1.0 获取应用配置
 	 * @return
 	 */
-	getApplicaionConfig(): /* !this.sysConfig.applicaion */ any;
+	getapplicationConfig(): /* !this.sysConfig.application */ any;
 
 	/**
 	 * @version 1.0 扫描组件
@@ -83,6 +83,11 @@ export class FastCarApplication {
 	 * @param name
 	 */
 	getComponentByName(name: string): object;
+
+	/**
+	 * @version 1.0 开启日志系统
+	 */
+	startLog(): void;
 
 	/**
 	 * @version 1.0 初始化应用

@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import * as process from "process";
 import * as Events from "events";
 import * as path from "path";
 import ClassLoader from "./utils/classLoader";
@@ -13,6 +14,8 @@ import { ComponentKind } from "./constant/ComponentKind";
 import ExceptionMonitor from "./annotation/ExceptionMonitor";
 import { CommonConstant, FileResSuffix } from "./constant/CommonConstant";
 import { LifeCycleModule } from "./constant/LifeCycleModule";
+import * as log4js from "log4js";
+import { Log4jsConfig } from "./config/Log4jsConfig";
 
 @ExceptionMonitor
 class FastCarApplication extends Events {
@@ -20,6 +23,7 @@ class FastCarApplication extends Events {
 	sysConfig: SYSConfig; //系统配置
 	basePath: string; //入口文件夹路径
 	baseFileName: string; //入口文件路径
+	sysLogger: log4js.Logger;
 
 	constructor() {
 		super();
@@ -28,7 +32,7 @@ class FastCarApplication extends Events {
 		this.componentMap = new Map();
 		this.basePath = require.main?.path || module.path;
 		this.baseFileName = require.main?.filename || module.filename;
-
+		this.sysLogger = log4js.getLogger();
 		this.init();
 	}
 
@@ -49,11 +53,15 @@ class FastCarApplication extends Events {
 		const replaceSetting = (property: string, fileContent: object) => {
 			let addConfig = Reflect.get(fileContent, property);
 			if (addConfig) {
-				let currConfig = Reflect.get(sysConfig, configName);
+				let currConfig = Reflect.get(sysConfig, property);
 				Reflect.deleteProperty(fileContent, property);
-				Object.keys(addConfig).forEach(key => {
-					currConfig.set(key, addConfig[key]);
-				});
+				if (CommonConstant.Settings == property) {
+					Object.keys(addConfig).forEach(key => {
+						this.sysConfig.settings.set(key, addConfig[key]);
+					});
+				} else {
+					Object.assign(currConfig, addConfig);
+				}
 			}
 		};
 
@@ -75,7 +83,7 @@ class FastCarApplication extends Events {
 	 */
 	loadSysConfig() {
 		this.updateSysConfig(this.sysConfig, CommonConstant.Application);
-		let env = Reflect.getMetadata(CommonConstant.ENV, this) || this.sysConfig.applicaion.env;
+		let env = Reflect.getMetadata(CommonConstant.ENV, this) || this.sysConfig.application.env;
 		this.updateSysConfig(this.sysConfig, `${CommonConstant.Application}-${env}`);
 	}
 
@@ -94,8 +102,8 @@ class FastCarApplication extends Events {
 	/***
 	 * @version 1.0 获取应用配置
 	 */
-	getApplicaionConfig(): ApplicationConfig {
-		return this.sysConfig.applicaion;
+	getapplicationConfig(): ApplicationConfig {
+		return this.sysConfig.application;
 	}
 
 	/***
@@ -162,20 +170,23 @@ class FastCarApplication extends Events {
 
 			let moduleClass = ClassLoader.loadModule(f);
 			if (moduleClass != null) {
+				console.log(f);
 				moduleClass.forEach((func, name) => {
 					if (this.componentMap.has(name)) {
 						let repeatError = new Error(`Duplicate ${name} instance objects are not allowed `);
+						this.sysLogger.error(repeatError.message);
 						throw repeatError;
 					}
 
-					if (TypeUtil.isFunction(func)) {
-						if (FastCarApplication.hasInjectionMap(name)) {
+					//只有依赖注入的组件才能被实例化
+					if (FastCarApplication.hasInjectionMap(name)) {
+						if (TypeUtil.isFunction(func)) {
 							this.componentMap.set(name, new func());
 							return;
 						}
-					}
 
-					this.componentMap.set(name, func);
+						this.componentMap.set(name, func);
+					}
 				});
 			}
 		}
@@ -201,6 +212,7 @@ class FastCarApplication extends Events {
 					if (!this.componentMap.has(name)) {
 						//找不到依赖项
 						let injectionError = new Error(`Unsatisfied dependency expressed through ${name} in ${instanceName} `);
+						this.sysLogger.error(injectionError.message);
 						throw injectionError;
 					}
 				}
@@ -247,59 +259,108 @@ class FastCarApplication extends Events {
 		return this.componentMap.get(name);
 	}
 
+	/**
+	 * @version 1.0 开启日志系统
+	 */
+	startLog() {
+		let logconfig: Log4jsConfig = this.getSetting("log4js");
+		if (logconfig) {
+			let existConfig: Log4jsConfig = Reflect.getMetadata("log4js", this);
+			if (!!existConfig) {
+				logconfig.appenders = Object.assign(existConfig.appenders, logconfig?.appenders);
+				logconfig.categories = Object.assign(existConfig.categories, logconfig?.categories);
+				logconfig = Object.assign(existConfig, logconfig);
+			}
+			//导入日志模块
+			log4js.configure(logconfig);
+			Object.keys(logconfig.categories).forEach(key => {
+				//加入服务
+				this.componentMap.set(Format.formatFirstToUp(key), log4js.getLogger(key));
+			});
+		}
+	}
+
 	/***
 	 * @version 1.0 初始化应用
 	 */
 	init() {
 		this.beforeStartServer();
 		this.startServer();
+		this.addExitEvent();
+	}
+
+	addExitEvent() {
+		process.on("beforeExit", async () => {
+			await this.beforeStopServer();
+			process.exit();
+		});
+
+		process.on("exit", () => {
+			this.stopServer();
+		});
 	}
 
 	/***
 	 * @version 1.0 自动调用方法
 	 */
-	automaticRun(name: LifeCycleModule) {
-		this.componentMap.forEach((item: any, key: string) => {
+	async automaticRun(name: LifeCycleModule) {
+		for (let [key, item] of this.componentMap) {
 			let applicationStart = Reflect.hasMetadata(name, item);
 			if (applicationStart) {
 				if (TypeUtil.isFunction(item.run)) {
-					Reflect.apply(item.run, item, []);
+					if (TypeUtil.isPromise(item.run)) {
+						await item.run();
+					} else {
+						Reflect.apply(item.run, item, []);
+					}
 				}
 			}
-		});
+		}
 	}
 
 	/**
 	 * @version 1.0 开启应用前执行的操作 加载配置,扫描组件，注入依赖组件
 	 */
 	beforeStartServer() {
+		this.sysLogger.info("Start loading system configuration");
 		this.loadSysConfig();
+		this.sysLogger.info("Complete loading system configuration");
 
+		this.startLog();
+
+		this.sysLogger.info("Start scanning component");
 		this.loadClass();
+		this.sysLogger.info("Complete component scan");
 
+		this.sysLogger.info("Start component injection");
 		this.loadInjectionModule();
-
-		this.automaticRun(LifeCycleModule.ApplicationStart);
+		this.sysLogger.info("Complete component injection");
 	}
 
 	/***
 	 * @version 1.0 启动服务
 	 */
-	startServer() {
-		console.info("start server is run");
+	async startServer() {
+		this.sysLogger.info("Call application initialization method");
+		await this.automaticRun(LifeCycleModule.ApplicationStart);
+
+		this.sysLogger.info("start server is run");
 	}
 
 	/***
 	 * @version 1.0 停止服务前自动调用服务
 	 */
-	beforeStopServer() {
-		this.automaticRun(LifeCycleModule.ApplicationStop);
+	async beforeStopServer() {
+		this.sysLogger.info("Call the method before the application stops");
+		await this.automaticRun(LifeCycleModule.ApplicationStop);
 	}
 
 	/***
 	 * @version 1.0 停止服务
 	 */
-	async stopServer() {}
+	stopServer() {
+		this.sysLogger.info("application stop");
+	}
 }
 
 export default FastCarApplication;

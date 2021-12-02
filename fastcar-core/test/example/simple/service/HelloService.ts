@@ -1,13 +1,10 @@
-import Service from '../../../../src/annotation/stereotype/Service';
-
+import Service from "../../../../src/annotation/stereotype/Service";
 
 @Service
 class HelloService {
-
-    say() {
-
-        console.log("hello world");
-    }
+	say() {
+		console.info("hello world");
+	}
 }
 
 export default HelloService;

@@ -3,8 +3,8 @@ import ApplicationRunnerService from "../../../../src/interface/ApplicationRunne
 
 //启动示例
 @ApplicationStart
-export default class Runner implements ApplicationRunnerService {
+export default class StartRunner implements ApplicationRunnerService {
 	run() {
-		console.info("ApplicationStart is Run");
+		console.info("服务启动后调用的方法");
 	}
 }

@@ -2,18 +2,28 @@ import TypeUtil from "./TypeUtil";
 import FileUtil from "./FileUtil";
 
 export default class ClassLoader {
-	static loadModule(filePath: string): Map<string, any> | null {
+	/***
+	 * @version 1.0 加载模块
+	 * @version 1.1 新增是否强制重载模块
+	 *
+	 */
+	static loadModule(filePath: string, force: boolean = false): Map<string, any> | null {
 		//校验后缀名是否为js或者ts
 		if (!TypeUtil.isTSORJS(filePath)) {
 			return null;
 		}
 
-		Reflect.deleteProperty(require.cache, filePath);
+		//避免重复加载或者想要重新进行挂载
+		if (Reflect.has(require.cache, filePath)) {
+			if (force) {
+				Reflect.deleteProperty(require.cache, filePath);
+			}
+		}
 
 		//可能不止一个方法
 		const modulesMap = new Map<string, Object>();
 		//进行方法加载
-		let moduleClass = require(filePath);
+		let moduleClass = require.cache?.filePath || require(filePath);
 		let keys = Object.keys(moduleClass);
 		let fileName = FileUtil.getFileName(filePath);
 
