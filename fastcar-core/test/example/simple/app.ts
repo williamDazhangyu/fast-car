@@ -9,7 +9,6 @@ import HelloController from "./controller/HelloController";
 class APP {}
 
 let s = new APP();
-
 let helloController: HelloController = Reflect.get(s, "componentMap").get("HelloController");
 helloController.callHello();
 helloController.print();

@@ -140,14 +140,12 @@ class FastCarApplication extends Events {
 		if (includeList) {
 			includeList.forEach(item => {
 				let tmpList = FileUtil.getFilePathList(item);
-				tmpList.reverse();
-				tmpFilePath = [...tmpFilePath, ...tmpList];
+				tmpFilePath = tmpFilePath.concat(tmpList);
 			});
 		}
 
 		let filePathList = FileUtil.getFilePathList(this.basePath);
-		filePathList.reverse();
-		filePathList = [...tmpFilePath, ...filePathList];
+		filePathList = tmpFilePath.concat(filePathList);
 		filePathList = [...new Set(filePathList)];
 
 		let excludeList: string[] = Reflect.getMetadata(FastCarMetaData.ComponentScanExclusion, this);

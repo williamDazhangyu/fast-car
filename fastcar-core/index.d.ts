@@ -94,6 +94,8 @@ export class FastCarApplication {
 	 */
 	init(): void;
 
+	addExitEvent(): void;
+
 	/**
 	 * @version 1.0 自动调用方法
 	 * @param name
