@@ -18,6 +18,7 @@ import Service from "./annotation/stereotype/Service";
 import { ComponentKind } from "./constant/ComponentKind";
 import { LifeCycleModule } from "./constant/LifeCycleModule";
 import FastCarApplication from "./FastCarApplication";
+import Log from "./annotation/Log";
 
 const annotation = {
 	ENV,
@@ -37,6 +38,7 @@ const annotation = {
 	NotImplemented,
 	Override,
 	Readonly,
+	Log,
 };
 
 export { LifeCycleModule, ComponentKind, FastCarApplication };

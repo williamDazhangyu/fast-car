@@ -22,6 +22,15 @@ declare type ApplicationConfig = {
 	ssl?: boolean;
 };
 
+declare interface Log4jsConfig {
+	appenders: { [name: string]: any };
+	categories: { [name: string]: { appenders: string[]; level: string; enableCallStack?: boolean } };
+	pm2?: boolean;
+	pm2InstanceVar?: string;
+	levels?: any;
+	disableClustering?: boolean;
+}
+
 export class FastCarApplication {
 	/**
 	 * @version 1.0 获取资源路径
@@ -189,4 +198,7 @@ declare module annotation {
 
 	//用于标记是否只读
 	function Readonly(target: any, name?: string, descriptor?: PropertyDescriptor): void;
+
+	//用于打印日志
+	function Log(config?: Log4jsConfig): Ret;
 }
