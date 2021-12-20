@@ -2,9 +2,18 @@
 	"name": "fastcar-core",
 	"version": "0.0.1",
 	"main": "target/index.js",
-	"types": "index.d.ts",
 	"author": "william_zhong",
 	"license": "MIT",
+	"exports": {
+		".": "./target/index.js",
+		"./annotation": "./target/annotation.js",
+		"./annotation.js": "./target/annotation.js"
+	},
+	"files": [
+		"target",
+		"index.d.ts",
+		"annotation.d.ts"
+	],
 	"dependencies": {
 		"log4js": "^6.3.0",
 		"reflect-metadata": "^0.1.13",

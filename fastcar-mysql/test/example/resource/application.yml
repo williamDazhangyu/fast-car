@@ -1,0 +1,7 @@
+application:
+    name: "simple"
+    port: 1234
+settings:
+    mysql:
+        dataSoucreConfig:
+            - { source: "test", database: "test", host: "localhost", user: "roots", password: "123456", connectionLimit: 10 }

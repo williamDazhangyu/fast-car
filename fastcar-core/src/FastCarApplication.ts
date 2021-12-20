@@ -33,7 +33,6 @@ class FastCarApplication extends Events {
 		this.basePath = require.main?.path || module.path;
 		this.baseFileName = require.main?.filename || module.filename;
 		this.sysLogger = log4js.getLogger();
-		this.init();
 	}
 
 	/***
@@ -83,7 +82,7 @@ class FastCarApplication extends Events {
 	 */
 	loadSysConfig() {
 		this.updateSysConfig(this.sysConfig, CommonConstant.Application);
-		let env = Reflect.getMetadata(CommonConstant.ENV, this) || this.sysConfig.application.env;
+		let env = Reflect.get(this, CommonConstant.ENV) || this.sysConfig.application.env;
 		this.updateSysConfig(this.sysConfig, `${CommonConstant.Application}-${env}`);
 	}
 
@@ -131,9 +130,41 @@ class FastCarApplication extends Events {
 	}
 
 	/***
+	 * @version 1.0 指定加载的组件
+	 *
+	 */
+	static setSpecifyCompent(m: any) {
+		let loadModule = FastCarMetaData.SpecifyMap;
+		let names: string[] = Reflect.getMetadata(loadModule, FastCarApplication) || [];
+		if (TypeUtil.isFunction(m) && names.includes(m.name)) {
+			return;
+		}
+
+		names.push(m);
+		Reflect.defineMetadata(loadModule, names, FastCarApplication);
+	}
+
+	/***
 	 * @version 1.0 扫描组件
+	 * @version 1.1 新增手动注入组件
 	 */
 	loadClass() {
+		//加载特殊的bean
+		let specifyCompents: any[] = Reflect.getMetadata(FastCarMetaData.SpecifyMap, FastCarApplication);
+		if (specifyCompents) {
+			specifyCompents.forEach(func => {
+				if (TypeUtil.isFunction(func)) {
+					this.componentMap.set(func.name, new func());
+					return;
+				}
+
+				if (func.name) {
+					this.componentMap.set(func.name, func);
+				}
+			});
+		}
+
+		//加载文件扫描下的bean
 		let tmpFilePath: string[] = Array.of();
 		let includeList: string[] = Reflect.getMetadata(FastCarMetaData.ComponentScan, this);
 
@@ -161,14 +192,19 @@ class FastCarApplication extends Events {
 			});
 		}
 
+		let resp = this.getResourcePath();
 		for (let f of filePathList) {
 			if (f == this.baseFileName) {
 				continue;
 			}
 
+			//如果是资源路径下的则自动过滤掉
+			if (f.startsWith(resp)) {
+				continue;
+			}
+
 			let moduleClass = ClassLoader.loadModule(f);
 			if (moduleClass != null) {
-				console.log(f);
 				moduleClass.forEach((func, name) => {
 					if (this.componentMap.has(name)) {
 						let repeatError = new Error(`Duplicate ${name} instance objects are not allowed `);
@@ -204,7 +240,8 @@ class FastCarApplication extends Events {
 			moduleList.forEach((name: string, propertyKey: string) => {
 				let func = this.componentMap.get(name);
 
-				if (name === "App") {
+				//如果等于自身则进行注入
+				if (name === FastCarApplication.name) {
 					func = this;
 				} else {
 					if (!this.componentMap.has(name)) {
@@ -223,8 +260,8 @@ class FastCarApplication extends Events {
 	/***
 	 * @version 1.0 根据类型获取组件
 	 */
-	getComponentByType(name: ComponentKind): object[] {
-		let instanceList: Object[] = Array.of();
+	getComponentByType(name: ComponentKind): any[] {
+		let instanceList: any[] = Array.of();
 		this.componentMap.forEach(instance => {
 			let flag = Reflect.hasMetadata(name, instance);
 			if (flag) {
@@ -238,8 +275,8 @@ class FastCarApplication extends Events {
 	/***
 	 * @version 1.0 获取全部的组件列表
 	 */
-	getComponentList(): object[] {
-		let instanceList: Object[] = Array.of();
+	getComponentList(): any[] {
+		let instanceList: any[] = Array.of();
 		this.componentMap.forEach((instance, name) => {
 			if (FastCarApplication.hasInjectionMap(name)) {
 				instanceList.push(instance);
@@ -252,7 +289,7 @@ class FastCarApplication extends Events {
 	/***
 	 * @version 1.0 根据名称组件
 	 */
-	getComponentByName(name: string): object {
+	getComponentByName(name: string): any {
 		return this.componentMap.get(name);
 	}
 
@@ -262,7 +299,7 @@ class FastCarApplication extends Events {
 	startLog() {
 		let logconfig: Log4jsConfig = this.getSetting("log4js");
 		if (logconfig) {
-			let existConfig: Log4jsConfig = Reflect.getMetadata("log4js", this);
+			let existConfig: Log4jsConfig = Reflect.get(this, "log4js");
 			if (!!existConfig) {
 				logconfig.appenders = Object.assign(existConfig.appenders, logconfig?.appenders);
 				logconfig.categories = Object.assign(existConfig.categories, logconfig?.categories);
@@ -301,16 +338,32 @@ class FastCarApplication extends Events {
 	 * @version 1.0 自动调用方法
 	 */
 	async automaticRun(name: LifeCycleModule) {
+		let list = [];
 		for (let [key, item] of this.componentMap) {
-			let applicationStart = Reflect.hasMetadata(name, item);
-			if (applicationStart) {
-				if (TypeUtil.isFunction(item.run)) {
-					if (TypeUtil.isPromise(item.run)) {
-						await item.run();
-					} else {
-						Reflect.apply(item.run, item, []);
-					}
+			let runInfo = Reflect.hasMetadata(name, item);
+			if (runInfo) {
+				let { order, exec } = Reflect.getMetadata(name, item);
+				if (TypeUtil.isFunction(item[exec])) {
+					list.push({
+						order,
+						exec,
+						item,
+					});
 				}
+			}
+		}
+
+		list.sort((a, b) => {
+			return a.order - b.order;
+		});
+
+		for (let { exec, item } of list) {
+			let fn = item[exec];
+
+			if (TypeUtil.isPromise(fn)) {
+				await item[exec]();
+			} else {
+				Reflect.apply(fn, item, []);
 			}
 		}
 	}

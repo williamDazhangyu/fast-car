@@ -22,15 +22,6 @@ declare type ApplicationConfig = {
 	ssl?: boolean;
 };
 
-declare interface Log4jsConfig {
-	appenders: { [name: string]: any };
-	categories: { [name: string]: { appenders: string[]; level: string; enableCallStack?: boolean } };
-	pm2?: boolean;
-	pm2InstanceVar?: string;
-	levels?: any;
-	disableClustering?: boolean;
-}
-
 export class FastCarApplication {
 	/**
 	 * @version 1.0 获取资源路径
@@ -64,6 +55,12 @@ export class FastCarApplication {
 	 */
 	getapplicationConfig(): /* !this.sysConfig.application */ any;
 
+	/***
+	 * @version 1.0 指定加载的组件
+	 *
+	 */
+	static setSpecifyCompent(m: any): void;
+
 	/**
 	 * @version 1.0 扫描组件
 	 */
@@ -79,19 +76,19 @@ export class FastCarApplication {
 	 * @param name
 	 * @return
 	 */
-	getComponentByType(name: ComponentKind): object[];
+	getComponentByType(name: ComponentKind): any[];
 
 	/**
 	 * @version 1.0 获取全部的组件列表
 	 * @return
 	 */
-	getComponentList(): object[];
+	getComponentList(): any[];
 
 	/**
 	 * @version 1.0 根据名称组件
 	 * @param name
 	 */
-	getComponentByName(name: string): object;
+	getComponentByName(name: string): any;
 
 	/**
 	 * @version 1.0 开启日志系统
@@ -148,57 +145,3 @@ export class FastCarApplication {
 type Ret = (target: any) => void;
 
 type RetProperty = (target: any, prop?: string, descriptor?: PropertyDescriptor) => void;
-
-declare module annotation {
-	/**
-	 * 设置初始化的env 注入在原始的application上面
-	 */
-	function ENV(name: string): Ret;
-
-	/***
-	 * 应用启动注解类
-	 */
-	function ApplicationStart(target: any): void;
-	function ApplicationStop(target: any): void;
-
-	/***
-	 * 组件模块扫描类
-	 */
-	function ComponentScan(...names: string[]): Ret;
-	function ComponentScanExclusion(...names: string[]): Ret;
-
-	/***
-	 * 用于描述不同组件的作用类
-	 */
-	function Component(target: any): void;
-	function Configure(target: any): void;
-	function Controller(target: any): void;
-	function Service(target: any): void;
-
-	//此方法用来构造不同的注入，不建议直接用于注解上
-	function Injection(target: any, name: string): void;
-
-	//应用注解类
-	function Application(target: any): any;
-
-	//自动注入类
-	function Autowired(target: any, propertyKey: string): void;
-
-	//异常方法类
-	function ExceptionMonitor(target: any): void;
-
-	//用于标记废弃
-	function Deprecate(msg: string): void;
-
-	//标记为未实现
-	function NotImplemented(target: any, name?: string, descriptor?: PropertyDescriptor): void;
-
-	//用于声明是否被重载了
-	function Override(target: any, name?: string, descriptor?: PropertyDescriptor): void;
-
-	//用于标记是否只读
-	function Readonly(target: any, name?: string, descriptor?: PropertyDescriptor): void;
-
-	//用于打印日志
-	function Log(config?: Log4jsConfig): Ret;
-}

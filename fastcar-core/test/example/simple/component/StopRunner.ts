@@ -1,7 +1,7 @@
 import ApplicationStop from "../../../../src/annotation/lifeCycle/ApplicationStop";
 import ApplicationRunnerService from "../../../../src/interface/ApplicationRunnerService";
 
-@ApplicationStop
+@ApplicationStop()
 export default class StopRunner implements ApplicationRunnerService {
 	async run() {
 		return new Promise(resolve => {

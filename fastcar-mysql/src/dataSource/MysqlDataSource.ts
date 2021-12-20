@@ -1,97 +1,54 @@
-import * as mysql from "mysql";
-import { QueryResult } from "../type/QueryResult";
-import { SqlConfig } from "../type/SqlConfig";
+import * as mysql from "mysql2/promise";
 
-export default class MysqlDataSource {
-	private sqlConfig: SqlConfig;
-	_pool!: mysql.Pool;
+class MysqlDataSource {
+	_pool: mysql.Pool;
 
-	constructor(sqlConfig: SqlConfig) {
-		this.sqlConfig = sqlConfig;
-		this.createMysqlPool();
+	constructor(sqlConfig: mysql.PoolOptions) {
+		this._pool = mysql.createPool(sqlConfig);
+		this.check();
 	}
 
-	private format = function(sql: string, values: any[] = []) {
+	async check() {
+		//获取一个连接进行验证
+		let conn = await this.getConnection();
+		this.releaseConnection(conn);
+	}
+
+	format(sql: string, values: any[] = []) {
 		//防止sql注入
-		return mysql.format(sql, values);
-	};
-
-	private createMysqlPool() {
-		let sqlConfig = this.sqlConfig;
-		let config = Object.assign(sqlConfig, {
-			connectionLimit: sqlConfig.maxConnection || 10, //
-			queueLimit: sqlConfig.queueLimit || 1000,
-		});
-
-		this._pool = mysql.createPool(config);
+		return mysql.format(sql, JSON.parse(JSON.stringify(values)));
 	}
 
-	private async getConnection(): Promise<mysql.PoolConnection> {
-		return new Promise((resolve, reject) => {
-			this._pool.getConnection((err, connection: mysql.PoolConnection) => {
-				if (err) {
-					console.error("GET CONNECTION ERROR", err.message);
-					reject(new Error("GET CONNECTION ERROR"));
-					return;
-				}
-
-				resolve(connection);
-			});
-		});
+	//关于连接的操作
+	async getConnection(): Promise<mysql.PoolConnection> {
+		return await this._pool.getConnection();
 	}
 
-	async query(sql: string, args: any[] = []): Promise<QueryResult> {
-		return new Promise(async resolve => {
-			const connection = await this.getConnection();
-			if (!connection) {
-				console.error("SQL LOST CONNECTION");
-				resolve({
-					error: true,
-					errMsg: "SQL LOST CONNECTION",
-				});
-				return;
-			}
-
-			//防止sql 注入
-			let finalSQL = this.format(sql, args);
-			// console.info('sql---', finalSQL);
-			connection.query(finalSQL, [], function(err, res) {
-				//立马释放连接
-				connection.release();
-
-				//语法错误
-				if (!!err) {
-					console.error("SQLMSG", finalSQL);
-					console.error("SQLERROR", err.stack || err.message);
-
-					resolve({
-						error: true,
-						errMsg: err.stack || err.message,
-					});
-					return;
-				}
-
-				resolve({
-					error: false,
-					data: res,
-				});
-			});
-		});
+	releaseConnection(conn: mysql.PoolConnection) {
+		conn.release();
 	}
 
 	//关于事务的操作
-	async beginTransaction() {}
+	async beginTransaction(conn: mysql.PoolConnection) {
+		await conn.beginTransaction();
+	}
+
+	async commit(conn: mysql.PoolConnection) {
+		await conn.commit();
+	}
+
+	async rollback(conn: mysql.PoolConnection) {
+		await conn.rollback();
+	}
 
 	//关闭连接池
 	async close() {
-		return new Promise(resolve => {
-			this._pool.end(err => {
-				if (!!err) {
-					resolve("fail");
-				} else {
-					resolve("OK");
-				}
-			});
-		});
+		await this._pool.end();
+	}
+
+	getPool() {
+		return this._pool;
 	}
 }
+
+export default MysqlDataSource;

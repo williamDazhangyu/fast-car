@@ -2,7 +2,7 @@ import ApplicationStart from "../../../../src/annotation/lifeCycle/ApplicationSt
 import ApplicationRunnerService from "../../../../src/interface/ApplicationRunnerService";
 
 //启动示例
-@ApplicationStart
+@ApplicationStart()
 export default class StartRunner implements ApplicationRunnerService {
 	run() {
 		console.info("服务启动后调用的方法");

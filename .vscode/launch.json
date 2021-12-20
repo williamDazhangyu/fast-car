@@ -62,6 +62,23 @@
             "env": {
                 "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
             }
+        },
+        {
+            "name": "Run MysqlSimple",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${workspaceRoot}/fastcar-mysql/test/example/app.ts"
+            ],
+            "cwd": "${workspaceRoot}/fastcar-mysql",
+            "protocol": "inspector",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
+            }
         }
     ]
 }

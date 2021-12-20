@@ -84,16 +84,20 @@ export default class FileUtil {
 			if (currStats.isFile()) {
 				//进行解析
 				let content = fs.readFileSync(fp, "utf-8");
-				if (currSuffix == "yml") {
-					return yaml.parse(content);
-				}
-
-				if (currSuffix == "json") {
-					return JSON.parse(content);
-				}
-
-				if (currSuffix == "js" || currSuffix == "ts") {
-					return require(fp);
+				switch (currSuffix) {
+					case "yml": {
+						return yaml.parse(content);
+					}
+					case "json": {
+						return JSON.parse(content);
+					}
+					case "js":
+					case "ts": {
+						return require(fp);
+					}
+					default: {
+						return null;
+					}
 				}
 			}
 		}

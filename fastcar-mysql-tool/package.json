@@ -1,0 +1,15 @@
+{
+	"name": "fastcar-mysql-tool",
+	"version": "1.0.0",
+	"main": "index.js",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/camelcase": "^5.2.0",
+		"@types/prettier": "^2.4.2"
+	},
+	"dependencies": {
+		"camelcase": "^6.2.1",
+		"prettier": "^2.5.1",
+		"mysql2": "^2.3.3"
+	}
+}

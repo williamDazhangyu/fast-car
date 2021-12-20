@@ -12,8 +12,5 @@
     "emitDecoratorMetadata": true, //启用元数据
     "moduleResolution": "node", //使用node作为模块解析
     "strict": true, //启用严格模式
-  },
-  "include": [
-    "src/**/*"
-  ]
+  }
 }

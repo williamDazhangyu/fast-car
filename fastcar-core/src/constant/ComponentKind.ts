@@ -3,4 +3,5 @@ export enum ComponentKind {
 	Controller = "Controller",
 	Service = "Service",
 	Component = "Component",
+	Repository = "Repository",
 }
