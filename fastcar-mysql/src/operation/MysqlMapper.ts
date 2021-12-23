@@ -4,7 +4,7 @@ import { Autowired } from "fastcar-core/annotation";
 import MysqlDataSourceManager from "../dataSource/MysqlDataSourceManager";
 import { OrderEnum, OrderType, SqlQuery, SqlWhere } from "./OperationType";
 import { MapperType } from "../type/MapperType";
-import { InnerJoinEnum, SqlConditions } from "./OperationType";
+import { OperatorEnum, SqlConditions } from "./OperationType";
 import { DataFormat } from "fastcar-core/utils";
 
 type RowType = {
@@ -77,24 +77,28 @@ class MysqlMapper<T> {
 			let item = where[key];
 			let tmpStr = "";
 
+			if (!item.operator) {
+				item.operator = Array.isArray(item.value) ? OperatorEnum.in : OperatorEnum.eq;
+			}
+
 			//规避sql注入 统一使用?做处理
-			switch (item.innerJoin) {
-				case InnerJoinEnum.isNUll: {
+			switch (item.operator) {
+				case OperatorEnum.isNUll: {
 					tmpStr = `ISNULL(${alias})`;
 					break;
 				}
-				case InnerJoinEnum.isNotNull: {
+				case OperatorEnum.isNotNull: {
 					tmpStr = `${alias} IS NOT NULL`;
 					break;
 				}
 				default: {
-					tmpStr = `${alias} ${item.innerJoin} ?`;
+					tmpStr = `${alias} ${item.operator} ?`;
 					params.push(item.value);
 					break;
 				}
 			}
 
-			let outerJoin = item?.outerJoin || "AND";
+			let outerJoin = item?.operator || "AND";
 			if (index < maxLength - 1 && tmpStr) {
 				tmpStr += `${outerJoin}`;
 			}

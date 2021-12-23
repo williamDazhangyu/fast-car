@@ -14,8 +14,8 @@ class SimpleService {
 			where: {
 				name: {
 					value: "123",
-					innerJoin: ">=",
-					outerJoin: "AND",
+					// operator: ">=",
+					// join: "AND",
 				},
 			},
 		});

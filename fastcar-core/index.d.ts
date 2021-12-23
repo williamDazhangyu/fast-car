@@ -9,6 +9,14 @@ export enum ComponentKind {
 	Component = "Component",
 }
 
+export enum BootPriority {
+	Base = 0, //一般系统级的会优先启动这一个
+	Sys = 1, //系统优先的
+	Common = 2, //常用
+	Other = 3, //额外的
+	Lowest = 10000, //默认优先级1万最低
+}
+
 declare type SYSConfig = {
 	application: ApplicationConfig; //应用配置
 	settings: Map<string, any>; //自定义设置项
@@ -17,10 +25,49 @@ declare type SYSConfig = {
 declare type ApplicationConfig = {
 	name: string;
 	env: string;
-	port: number;
-	serverIP: string;
-	ssl?: boolean;
 };
+
+export class Logger {
+	new(dispatch: Function, name: string): Logger;
+
+	readonly category: string;
+	level: string;
+
+	log(...args: any[]): void;
+
+	isLevelEnabled(level?: string): boolean;
+
+	isTraceEnabled(): boolean;
+	isDebugEnabled(): boolean;
+	isInfoEnabled(): boolean;
+	isWarnEnabled(): boolean;
+	isErrorEnabled(): boolean;
+	isFatalEnabled(): boolean;
+
+	_log(level: string, data: any): void;
+
+	addContext(key: string, value: any): void;
+
+	removeContext(key: string): void;
+
+	clearContext(): void;
+
+	setParseCallStackFunction(parseFunction: Function): void;
+
+	trace(message: any, ...args: any[]): void;
+
+	debug(message: any, ...args: any[]): void;
+
+	info(message: any, ...args: any[]): void;
+
+	warn(message: any, ...args: any[]): void;
+
+	error(message: any, ...args: any[]): void;
+
+	fatal(message: any, ...args: any[]): void;
+
+	mark(message: any, ...args: any[]): void;
+}
 
 export class FastCarApplication {
 	/**

@@ -1,6 +1,5 @@
 application:
     name: "simple"
-    port: 1234
 settings:
     log4js:
         appenders:

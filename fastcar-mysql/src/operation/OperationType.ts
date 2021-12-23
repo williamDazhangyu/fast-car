@@ -1,4 +1,4 @@
-export enum InnerJoinEnum {
+export enum OperatorEnum {
 	eq = "=",
 	neq = "!=",
 	gt = ">",
@@ -11,7 +11,7 @@ export enum InnerJoinEnum {
 	isNotNull = "IS NOT NULL",
 }
 
-export enum OuterJoinEnum {
+export enum JoinEnum {
 	and = "AND",
 	or = "OR",
 }
@@ -24,8 +24,8 @@ export enum OrderEnum {
 export type SqlWhere = {
 	[key: string]: {
 		value: number | string | number[] | string[] | null;
-		innerJoin?: InnerJoinEnum | string; //内部连接
-		outerJoin?: OuterJoinEnum | string; //各个条件拼凑
+		operator?: OperatorEnum | string; //内部连接
+		join?: JoinEnum | string; //各个条件拼凑
 	};
 };
 

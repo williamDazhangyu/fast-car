@@ -3,5 +3,6 @@ application:
     port: 1234
 settings:
     mysql:
+        printSQL: true
         dataSoucreConfig:
             - { source: "test", database: "test", host: "localhost", user: "root", password: "123456", connectionLimit: 10 }

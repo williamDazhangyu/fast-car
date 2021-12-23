@@ -27,7 +27,10 @@ function addRequireModule(target: any, m: string, alias: string) {
 export default function Autowired(target: any, propertyKey: string) {
 	//反向找设计类型
 	const designType = Reflect.getMetadata("design:type", target, propertyKey);
-	let name = designType.name;
+	let name = "";
+	if (designType) {
+		name = designType.name;
+	}
 	if (!name || SpecWords.includes(name)) {
 		name = Format.formatFirstToUp(propertyKey);
 	}

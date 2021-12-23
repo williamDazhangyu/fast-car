@@ -2,12 +2,17 @@ import { MySqlConfig, MySqlConfigDefault } from "../type/SqlConfig";
 import { SqlExecType } from "../type/SqlExecType";
 import MysqlDataSource from "./MysqlDataSource";
 import { ApplicationStart, Autowired } from "fastcar-core/annotation";
-import { FastCarApplication } from "fastcar-core";
+import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
+import ApplicationStop from "../../../fastcar-core/src/annotation/lifeCycle/ApplicationStop";
 
-@ApplicationStart(0)
+@ApplicationStart(BootPriority.Base, "start")
+@ApplicationStop(BootPriority.Lowest, "stop")
 class MysqlDataSourceManager {
 	@Autowired
 	private app!: FastCarApplication;
+
+	@Autowired
+	private sysLogger!: Logger;
 
 	private sourceMap: Map<string, MysqlDataSource>;
 	private config!: MySqlConfig;
@@ -20,12 +25,20 @@ class MysqlDataSourceManager {
 		this.sourceMap = new Map();
 	}
 
-	run() {
+	start() {
 		let config: MySqlConfig = this.app.getSetting("mysql");
 		if (config) {
 			this.config = Object.assign({}, MySqlConfigDefault, config);
 			this.createDataSource();
 		}
+	}
+
+	stop() {
+		//结束销毁
+		this.sourceMap.forEach((db) => {
+			db.close();
+		});
+		this.sourceMap.clear();
 	}
 
 	createDataSource() {
@@ -68,6 +81,10 @@ class MysqlDataSourceManager {
 
 	//执行sql
 	async execute({ sql, args = [], ds = this.defaultSource }: SqlExecType): Promise<any[]> {
+		if (this.config.printSQL) {
+			this.sysLogger.info("print sql:", sql);
+			this.sysLogger.info("print args:", args.join(","));
+		}
 		return new Promise(async (resolve, reject) => {
 			let dataSoucre = this.sourceMap.get(ds);
 			if (!dataSoucre) {

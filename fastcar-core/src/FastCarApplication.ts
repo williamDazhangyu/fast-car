@@ -33,6 +33,7 @@ class FastCarApplication extends Events {
 		this.basePath = require.main?.path || module.path;
 		this.baseFileName = require.main?.filename || module.filename;
 		this.sysLogger = log4js.getLogger();
+		this.componentMap.set("SysLogger", this.sysLogger);
 	}
 
 	/***

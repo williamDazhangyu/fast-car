@@ -1,3 +1,4 @@
+import { BootPriority } from "../../constant/BootPriority";
 import { LifeCycleModule } from "../../constant/LifeCycleModule";
 import Component from "../stereotype/Component";
 
@@ -6,7 +7,7 @@ import Component from "../stereotype/Component";
  * @params order 排序 序号越小排在越前面 系统级的组件 如数据库等一般为0
  * @params exec 执行方法
  */
-export default function ApplicationStart(order: number = 1, exec: string = "run") {
+export default function ApplicationStart(order: number = BootPriority.Sys, exec: string = "run") {
 	return function(target: any) {
 		if (!Reflect.has(target.prototype, exec)) {
 			throw new Error(`${target.name} has no implementation ${exec} method`);
