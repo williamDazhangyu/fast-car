@@ -6,7 +6,7 @@ export class FormValidationUtil {
 	static isNotNull(param: any) {
 		if (param != undefined && param != null) {
 			if (TypeUtil.isString(param)) {
-				return param != "" && param != "";
+				return param.length > 0;
 			}
 
 			if (TypeUtil.isObject(param)) {

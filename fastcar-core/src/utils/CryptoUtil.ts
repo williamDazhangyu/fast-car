@@ -1,13 +1,13 @@
 import * as crypto from "crypto";
 import { BinaryToTextEncoding } from "crypto";
 
-const serects = {
-	aes: "aes-256-cbc",
-	sha256: "sha256",
-};
+const enum serects {
+	aes = "aes-256-cbc",
+	sha256 = "sha256",
+}
 
 export default class CryptoUtil {
-	static aesDecode(cryptkey: string, iv: string, secretdata: string, aesType: string = serects.aes) {
+	static aesDecode(cryptkey: string, iv: string, secretdata: string, aesType: string = serects.aes): string {
 		let decipher = crypto.createDecipheriv(aesType, cryptkey, iv);
 		let decoded = decipher.update(secretdata, "base64", "utf8");
 
@@ -15,7 +15,7 @@ export default class CryptoUtil {
 		return decoded;
 	}
 
-	static aesEncode(cryptkey: string, iv: string, cleardata: string, aesType: string = serects.aes) {
+	static aesEncode(cryptkey: string, iv: string, cleardata: string, aesType: string = serects.aes): string {
 		let encipher = crypto.createCipheriv(serects.aes, cryptkey, iv);
 		let encoded = encipher.update(cleardata, "utf8", "base64");
 
@@ -23,12 +23,12 @@ export default class CryptoUtil {
 		return encoded;
 	}
 
-	static shaEncode(cryptkey: string, data: string) {
+	static shaEncode(cryptkey: string, data: string): string {
 		let hash = crypto.createHmac("sha256", cryptkey);
 		return hash.update(data).digest("base64");
 	}
 
-	static gcmEncrypt(password: string, msg: string) {
+	static gcmEncrypt(password: string, msg: string): string | null {
 		try {
 			let pwd = Buffer.from(password, "hex");
 			let iv = crypto.randomBytes(12);
@@ -54,7 +54,7 @@ export default class CryptoUtil {
 		}
 	}
 
-	static gcmDecrypt(password: string, serect: string) {
+	static gcmDecrypt(password: string, serect: string): string | null {
 		try {
 			let tmpSerect = Buffer.from(serect, "base64");
 			let pwd = Buffer.from(password, "hex");
@@ -73,7 +73,7 @@ export default class CryptoUtil {
 		}
 	}
 
-	static sha256Encode(text: string, serect: string = crypto.randomBytes(32).toString("hex"), encoding: BinaryToTextEncoding = "base64") {
+	static sha256Encode(text: string, serect: string = crypto.randomBytes(32).toString("hex"), encoding: BinaryToTextEncoding = "base64"): { salt: string; msg: string } {
 		let msg = crypto
 			.createHmac("sha256", serect)
 			.update(text)
@@ -85,7 +85,7 @@ export default class CryptoUtil {
 		};
 	}
 
-	static sha256EncodeContent(str: string, encoding: BinaryToTextEncoding = "base64") {
+	static sha256EncodeContent(str: string, encoding: BinaryToTextEncoding = "base64"): string {
 		let msg = crypto
 			.createHash("sha256")
 			.update(str)
@@ -94,13 +94,13 @@ export default class CryptoUtil {
 		return msg;
 	}
 
-	static sha256Very(msg: string, serect: string, encodeMsg: string, encoding: BinaryToTextEncoding = "base64") {
+	static sha256Very(msg: string, serect: string, encodeMsg: string, encoding: BinaryToTextEncoding = "base64"): boolean {
 		let result = this.sha256Encode(msg, serect, encoding);
 
 		return result.msg === encodeMsg;
 	}
 
-	static getHashStr(num: number = 16) {
+	static getHashStr(num: number = 16): string {
 		return crypto.randomBytes(num).toString("hex");
 	}
 }

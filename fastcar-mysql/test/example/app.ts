@@ -10,7 +10,7 @@ class APP {
 }
 
 let s = new APP();
-// let service: SimpleService = s.app.getComponentByName("SimpleService");
-// service.query().then((res) => {
-// 	console.log(res);
-// });
+let service: SimpleService = s.app.getComponentByName("SimpleService");
+service.query().then((res) => {
+	console.log(res);
+});

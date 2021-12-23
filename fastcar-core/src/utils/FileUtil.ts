@@ -52,7 +52,7 @@ export default class FileUtil {
 	 * @version 1.0 获取后缀名
 	 *
 	 */
-	static getSuffix(filePath: string) {
+	static getSuffix(filePath: string): string {
 		let lastIndex = filePath.lastIndexOf(".") + 1;
 		if (lastIndex <= 0) {
 			return "";
@@ -64,7 +64,7 @@ export default class FileUtil {
 	/***
 	 * @version 1.0 获取文件的文件名
 	 */
-	static getFileName(filePath: string) {
+	static getFileName(filePath: string): string {
 		let pList = filePath.split(path.sep);
 		let lastPath = pList[pList.length - 1];
 		let lastName = lastPath.split(".");

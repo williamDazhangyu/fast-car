@@ -1,32 +1,32 @@
 import "reflect-metadata";
-import { SqlQuery } from "./SqlQuery";
-import { SqlConditions } from "./SqlConditions";
-import { SqlWhere } from "./SqlWhere";
-import { SqlUpdate } from "./SqlUpdate";
-import { SqlDelete } from "./SqlDelete";
 import * as mysql from "mysql2/promise";
-import MysqlCRUD from "./MysqlCRUD";
 import { DesignMeta } from "../type/DesignMeta";
 import { Autowired } from "fastcar-core/annotation";
 import MysqlDataSourceManager from "../dataSource/MysqlDataSourceManager";
+import { OrderEnum, OrderType, SqlQuery, SqlWhere } from "./OperationType";
+import { MapperType } from "../type/MapperType";
+import { InnerJoinEnum, SqlConditions } from "./OperationType";
+import { DataFormat } from "fastcar-core/utils";
+
+type RowType = {
+	str: string;
+	args: Array<any>;
+};
 
 /****
  * @version 1.0 采用crud方式进行数据操作
- * @version 1.1 优化order limit 关键词
- * @version 1.2 新增like关键词
- * @version 1.3 优化关键词判空问题
- * @version 1.4 新增非空判断问题
- * @version 1.5 切换为严格模式下运行
  */
 class MysqlMapper<T> {
 	@Autowired
-	private dsm!: MysqlDataSourceManager;
+	protected dsm!: MysqlDataSourceManager;
 
-	private tableName: string;
-	private classZ: any; //映射的原型类
+	protected tableName: string;
+	protected classZ: any; //映射的原型类
+	protected mappingMap: Map<string, MapperType>; //代码别名-映射关系
+	protected dbFields: Map<string, string>; //数据库别名-代码别名
 
 	constructor() {
-		let tClass = Reflect.getMetadata(DesignMeta.templateType, this);
+		let tClass = Reflect.getMetadata(DesignMeta.entity, this);
 		this.classZ = tClass;
 
 		let tableName = Reflect.getMetadata(DesignMeta.table, tClass);
@@ -34,6 +34,164 @@ class MysqlMapper<T> {
 			throw new Error(`This class ${tClass.name} has no annotation table name`);
 		}
 		this.tableName = tableName;
+		this.mappingMap = Reflect.getMetadata(DesignMeta.mapping, tClass); //映射关系
+		this.dbFields = Reflect.getMetadata(DesignMeta.dbFields, tClass); //作用的列名
+	}
+
+	//获取数据库别名通过代码内的名称
+	protected getFieldName(name: string) {
+		let info = this.mappingMap.get(name);
+		return info ? info.field : name;
+	}
+
+	//分析选定字段
+	protected analysisFields(fields: string[] = []): string {
+		if (fields.length == 0) {
+			return "*";
+		}
+
+		let list = fields.map((item) => {
+			return this.getFieldName(item);
+		});
+		return list.join(",");
+	}
+
+	//解析条件
+	protected analysisWhere(where: SqlWhere = {}): RowType {
+		let keys = Reflect.ownKeys(where);
+		let maxLength = keys.length;
+
+		if (maxLength <= 0) {
+			return {
+				str: "",
+				args: [],
+			};
+		}
+
+		let str = "WHERE ";
+		let cList: string[] = [];
+		let params: any[] = [];
+		let index = 0;
+
+		for (let key in keys) {
+			let alias = this.getFieldName(key);
+			let item = where[key];
+			let tmpStr = "";
+			index++;
+
+			//规避sql注入 统一使用?做处理
+			switch (item.innerJoin) {
+				case InnerJoinEnum.isNUll: {
+					tmpStr = `ISNULL(${alias})`;
+					break;
+				}
+				case InnerJoinEnum.isNotNull: {
+					tmpStr = `${alias} IS NOT NULL`;
+					break;
+				}
+				default: {
+					tmpStr = `${alias} ${item.innerJoin} ?`;
+					params.push(item.value);
+					break;
+				}
+			}
+
+			let outerJoin = item?.outerJoin || "AND";
+			if (index < maxLength && tmpStr) {
+				tmpStr += `${outerJoin}`;
+			}
+
+			cList.push(tmpStr);
+		}
+
+		str += cList.join(" ");
+		return {
+			str: str,
+			args: params,
+		};
+	}
+
+	protected analysisGroups(groups: OrderType = {}): string {
+		let keys = Object.keys(groups);
+
+		if (keys.length > 0) {
+			let list = [];
+			for (let key in keys) {
+				let alias = this.getFieldName(key);
+				list.push(`${alias} ${groups[key]}`);
+			}
+			return `GROUP BY ${list.join(",")}`;
+		}
+
+		return "";
+	}
+
+	protected analysisOrders(orders: OrderType = {}): string {
+		let keys = Object.keys(orders);
+
+		if (keys.length > 0) {
+			let list = [];
+			for (let key in keys) {
+				let alias = this.getFieldName(key);
+				list.push(`${alias} ${orders[key]}`);
+			}
+			return `ORDER BY ${list.join(",")}`;
+		}
+
+		return "";
+	}
+
+	protected analysisRow(row?: Object): RowType | null {
+		if (!row) {
+			return null;
+		}
+
+		let str: string[] = [];
+		let args = Object.keys(row).map((key) => {
+			let alias = this.getFieldName(key);
+			str.push(`${alias} = ? `);
+			return Reflect.get(row, key);
+		});
+
+		return {
+			args: args,
+			str: str.join(","),
+		};
+	}
+
+	protected analysisLimit(conditions: SqlConditions): string {
+		if (!conditions?.limit) {
+			return "";
+		}
+
+		let str = `LIMIT ${conditions.limit} `;
+		if (!!conditions.offest) {
+			str = `LIMIT ${conditions.offest}, ${conditions.limit} `;
+		}
+
+		return str;
+	}
+
+	protected setRow(rowData: Object): T {
+		let t = new this.classZ();
+		this.mappingMap.forEach((item, key) => {
+			let value = Reflect.get(rowData, item.field) || Reflect.get(rowData, key);
+			if (value != null) {
+				let fvalue = DataFormat.formatValue(value, item.tsType);
+				Reflect.set(t, key, fvalue);
+			}
+		});
+
+		return t;
+	}
+
+	protected setRows(rowDataList: Object[]): T[] {
+		let list: T[] = Array.of();
+		rowDataList.forEach((item) => {
+			list.push(this.setRow(item));
+		});
+
+		return list;
 	}
 
 	//获取默认数据源 这边可以自行拓展
@@ -48,12 +206,13 @@ class MysqlMapper<T> {
 
 	//查询单个元素 可以根据
 	async selectOne(conditions: SqlQuery = {}, ds: string = this.getDataSource()): Promise<T | null> {
-		let fields = MysqlCRUD.analysisFields(conditions);
-		let whereC = MysqlCRUD.analysisWhere(conditions);
-		let orderStr = MysqlCRUD.analysisOrders(conditions);
+		let fields = this.analysisFields(conditions.fields);
+		let whereC = this.analysisWhere(conditions.where);
+		let groupStr = this.analysisGroups(conditions.groups);
+		let orderStr = this.analysisOrders(conditions.orders);
 
 		let args = whereC.args;
-		let sql = `SELECT ${fields} FROM ${this.tableName} ${whereC.str} ${orderStr} LIMIT 1`;
+		let sql = `SELECT ${fields} FROM ${this.tableName} ${whereC.str} ${groupStr} ${orderStr} LIMIT 1`;
 
 		let [rows] = await this.dsm.execute({ sql, args, ds });
 
@@ -63,9 +222,7 @@ class MysqlMapper<T> {
 
 		let o = rows.length > 0 ? rows[0] : null;
 		if (o) {
-			let tt = new this.classZ();
-			//进行映射成一个类操作
-			return tt;
+			return this.setRow(o);
 		}
 
 		return null;

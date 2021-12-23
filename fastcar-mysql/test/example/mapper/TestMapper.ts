@@ -1,9 +1,9 @@
 import { Repository } from "fastcar-core/annotation";
-import TemplateType from "../../../src/annotation/TemplateType";
+import Entity from "../../../src/annotation/Entity";
 import MysqlMapper from "../../../src/operation/MysqlMapper";
 import Test from "../model/Test";
 
-@TemplateType(Test)
+@Entity(Test)
 @Repository
 class TestMapper extends MysqlMapper<Test> {}
 
