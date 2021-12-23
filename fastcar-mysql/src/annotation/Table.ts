@@ -15,7 +15,7 @@ export default function Table(name: string) {
 			let field = Reflect.getOwnMetadata(DesignMeta.field, proto, c) || c;
 			let dbType = Reflect.getOwnMetadata(DesignMeta.dbType, proto, c) || "varchar";
 			let maxLength = Reflect.getOwnMetadata(DesignMeta.maxLength, proto, c) || 0;
-			let notNULL = !!Reflect.getOwnMetadata(DesignMeta.notNULL, proto, c);
+			let notNull = !!Reflect.getOwnMetadata(DesignMeta.notNull, proto, c);
 			let primaryKey = !!Reflect.getOwnMetadata(DesignMeta.primaryKey, proto, c);
 
 			let tsName: string = tsType.name;
@@ -26,7 +26,7 @@ export default function Table(name: string) {
 				field, //数据库列名
 				dbType: dbType, //数据类型
 				maxLength: maxLength, //最大长度 当为字符串或者整型时传递
-				notNULL, //是否为空 默认为空
+				notNull, //是否为空 默认为空
 				primaryKey, //是否为主键 默认为false
 			};
 			dbFields.set(field, c);

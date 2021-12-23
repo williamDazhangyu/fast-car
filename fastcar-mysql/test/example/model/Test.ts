@@ -3,7 +3,7 @@ import DBType from "../../../src/annotation/mapper/DBType";
 import PrimaryKey from "../../../src/annotation/mapper/PrimaryKey";
 import Table from "../../../src/annotation/Table";
 import MaxLength from "../../../src/annotation/mapper/MaxLength";
-import NotNULL from "../../../src/annotation/mapper/NotNULL";
+import NotNull from "../../../src/annotation/mapper/NotNull";
 import "reflect-metadata";
 
 @Table("test")
@@ -16,7 +16,7 @@ class Test {
 	@Field("name")
 	@DBType("varchar")
 	@MaxLength(10)
-	@NotNULL
+	@NotNull
 	name!: string;
 
 	@Field("case_name")
@@ -31,6 +31,10 @@ class Test {
 	@Field("flag")
 	@DBType("tinyint")
 	flag!: boolean;
+
+	@Field("money")
+	@DBType("decimal")
+	money!: number;
 }
 
 export default Test;

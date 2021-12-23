@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import * as mysql from "mysql2/promise";
 import { DesignMeta } from "../type/DesignMeta";
 import { Autowired } from "fastcar-core/annotation";
 import MysqlDataSourceManager from "../dataSource/MysqlDataSourceManager";
@@ -71,13 +70,12 @@ class MysqlMapper<T> {
 		let str = "WHERE ";
 		let cList: string[] = [];
 		let params: any[] = [];
-		let index = 0;
 
-		for (let key in keys) {
+		keys.forEach((i, index) => {
+			let key = i.toString();
 			let alias = this.getFieldName(key);
 			let item = where[key];
 			let tmpStr = "";
-			index++;
 
 			//规避sql注入 统一使用?做处理
 			switch (item.innerJoin) {
@@ -97,12 +95,12 @@ class MysqlMapper<T> {
 			}
 
 			let outerJoin = item?.outerJoin || "AND";
-			if (index < maxLength && tmpStr) {
+			if (index < maxLength - 1 && tmpStr) {
 				tmpStr += `${outerJoin}`;
 			}
 
 			cList.push(tmpStr);
-		}
+		});
 
 		str += cList.join(" ");
 		return {
@@ -115,11 +113,13 @@ class MysqlMapper<T> {
 		let keys = Object.keys(groups);
 
 		if (keys.length > 0) {
-			let list = [];
-			for (let key in keys) {
+			let list: string[] = [];
+			keys.forEach((i) => {
+				let key = i.toString();
 				let alias = this.getFieldName(key);
 				list.push(`${alias} ${groups[key]}`);
-			}
+			});
+
 			return `GROUP BY ${list.join(",")}`;
 		}
 
@@ -130,11 +130,13 @@ class MysqlMapper<T> {
 		let keys = Object.keys(orders);
 
 		if (keys.length > 0) {
-			let list = [];
-			for (let key in keys) {
+			let list: string[] = [];
+			keys.forEach((i) => {
+				let key = i.toString();
 				let alias = this.getFieldName(key);
 				list.push(`${alias} ${orders[key]}`);
-			}
+			});
+
 			return `ORDER BY ${list.join(",")}`;
 		}
 
@@ -174,6 +176,7 @@ class MysqlMapper<T> {
 
 	protected setRow(rowData: Object): T {
 		let t = new this.classZ();
+
 		this.mappingMap.forEach((item, key) => {
 			let value = Reflect.get(rowData, item.field) || Reflect.get(rowData, key);
 			if (value != null) {
