@@ -167,7 +167,7 @@ class FastCarApplication extends Events {
 
 		//加载文件扫描下的bean
 		let tmpFilePath: string[] = Array.of();
-		let includeList: string[] = Reflect.getMetadata(FastCarMetaData.ComponentScan, this);
+		let includeList: string[] = Reflect.get(this, FastCarMetaData.ComponentScan);
 
 		if (includeList) {
 			includeList.forEach(item => {
@@ -180,7 +180,7 @@ class FastCarApplication extends Events {
 		filePathList = tmpFilePath.concat(filePathList);
 		filePathList = [...new Set(filePathList)];
 
-		let excludeList: string[] = Reflect.getMetadata(FastCarMetaData.ComponentScanExclusion, this);
+		let excludeList: string[] = Reflect.get(this, FastCarMetaData.ComponentScanExclusion);
 		if (excludeList) {
 			let excludAllPath: string[] = [];
 			excludeList.forEach(item => {
