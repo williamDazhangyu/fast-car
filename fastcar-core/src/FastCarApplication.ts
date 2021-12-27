@@ -7,7 +7,7 @@ import FileUtil from "./utils/FileUtil";
 import Format from "./utils/Format";
 import MixTool from "./utils/Mix";
 import TypeUtil from "./utils/TypeUtil";
-import { SYSConfig, SYSDefaultConfig } from "./config/SysConfig";
+import { LogDefaultConfig, SYSConfig, SYSDefaultConfig } from "./config/SysConfig";
 import { FastCarMetaData } from "./constant/FastCarMetaData";
 import { ApplicationConfig } from "./config/ApplicationConfig";
 import { ComponentKind } from "./constant/ComponentKind";
@@ -32,6 +32,11 @@ class FastCarApplication extends Events {
 		this.componentMap = new Map();
 		this.basePath = require.main?.path || module.path;
 		this.baseFileName = require.main?.filename || module.filename;
+
+		if (!Reflect.has(this, "log4js")) {
+			Reflect.set(this, "log4js", LogDefaultConfig);
+			log4js.configure(LogDefaultConfig);
+		}
 		this.sysLogger = log4js.getLogger();
 		this.componentMap.set("SysLogger", this.sysLogger);
 	}
