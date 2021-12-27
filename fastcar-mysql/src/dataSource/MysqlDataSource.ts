@@ -24,6 +24,13 @@ class MysqlDataSource {
 		return await this._pool.getConnection();
 	}
 
+	//获取事务的连接
+	async getBeginConnection(): Promise<mysql.PoolConnection> {
+		let conn = await this._pool.getConnection();
+		await this.beginTransaction(conn);
+		return conn;
+	}
+
 	releaseConnection(conn: mysql.PoolConnection) {
 		conn.release();
 	}

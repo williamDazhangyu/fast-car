@@ -1,9 +1,8 @@
 import { MySqlConfig, MySqlConfigDefault } from "../type/SqlConfig";
 import { SqlExecType } from "../type/SqlExecType";
 import MysqlDataSource from "./MysqlDataSource";
-import { ApplicationStart, Autowired } from "fastcar-core/annotation";
+import { ApplicationStart, ApplicationStop, Autowired } from "fastcar-core/annotation";
 import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
-import ApplicationStop from "../../../fastcar-core/src/annotation/lifeCycle/ApplicationStop";
 import * as mysql from "mysql2/promise";
 
 @ApplicationStart(BootPriority.Base, "start")
@@ -26,7 +25,7 @@ class MysqlDataSourceManager {
 		this.sourceMap = new Map();
 	}
 
-	start() {
+	start(): void {
 		let config: MySqlConfig = this.app.getSetting("mysql");
 		if (config) {
 			this.config = Object.assign({}, MySqlConfigDefault, config);
@@ -34,7 +33,7 @@ class MysqlDataSourceManager {
 		}
 	}
 
-	stop() {
+	stop(): void {
 		//结束销毁
 		this.sourceMap.forEach((db) => {
 			db.close();
@@ -42,9 +41,9 @@ class MysqlDataSourceManager {
 		this.sourceMap.clear();
 	}
 
-	createDataSource() {
+	createDataSource(): void {
 		if (this.config.dataSoucreConfig.length == 0) {
-			return null;
+			return;
 		}
 
 		this.config.dataSoucreConfig.forEach((item) => {
@@ -76,14 +75,13 @@ class MysqlDataSourceManager {
 		}
 	}
 
-	getDataSoucreByName(name: string) {
+	getDataSoucreByName(name: string): MysqlDataSource | undefined {
 		return this.sourceMap.get(name);
 	}
 
 	//执行sql
 	async execute({ sql, args = [], ds = this.defaultSource }: SqlExecType): Promise<any[]> {
 		if (this.config.printSQL) {
-			//打印sql
 			this.sysLogger.info(mysql.format(sql, args));
 		}
 		return new Promise(async (resolve, reject) => {
@@ -102,18 +100,51 @@ class MysqlDataSourceManager {
 				if (conn) {
 					dataSoucre.releaseConnection(conn);
 				}
-				console.error("sql error", sql);
-				console.error("args:", args);
+				this.sysLogger.error("sql error:", mysql.format(sql, args));
+				this.sysLogger.error("reason:", e.message);
+				this.sysLogger.error("stack:", e.stack);
 				return reject(e);
 			}
 		});
 	}
 
 	//执行多个sql语句 默认开启事务
-	async batchExecute(tasks: SqlExecType[]) {}
+	async batchExecute(tasks: SqlExecType[]): Promise<boolean> {
+		let connMap = new Map<string, mysql.PoolConnection>();
+		let errFlag = false;
+
+		try {
+			for (let task of tasks) {
+				let ds = task.ds || this.getDefaultSoucre();
+				let conn = connMap.get(ds);
+
+				if (!conn) {
+					let db = this.sourceMap.get(ds);
+					if (!db) {
+						throw new Error(`this datasoucre ${ds} cannot be found `);
+					}
+					conn = await db.getBeginConnection();
+					connMap.set(ds, conn);
+				}
+
+				await conn.execute(task.sql, task.args);
+			}
+		} catch (e) {
+			this.sysLogger.error(e);
+			errFlag = true;
+		} finally {
+			for (let [ds, conn] of connMap) {
+				let db = this.sourceMap.get(ds);
+				errFlag ? db?.rollback(conn) : db?.commit(conn);
+				db?.releaseConnection(conn);
+			}
+			connMap.clear();
+			return !errFlag;
+		}
+	}
 
 	//获取一个可用的连接
-	async getConnection(name: string) {
+	async getConnection(name: string): Promise<mysql.PoolConnection | null> {
 		let db = this.sourceMap.get(name);
 		if (!db) {
 			return null;

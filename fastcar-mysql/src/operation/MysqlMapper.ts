@@ -427,10 +427,36 @@ class MysqlMapper<T extends Object> {
 		let queryInfo = Object.assign({}, conditions, { limit: 1 });
 
 		let res = await this.select(queryInfo, ds);
-
 		let o = res.length > 0 ? res[0] : null;
 
 		return o;
+	}
+
+	/***
+	 * @version 1.0 通过主键查找对象
+	 *
+	 */
+	async selectByPrimaryKey(row: T, ds: string = this.getDataSource()): Promise<T | null> {
+		let sqlQuery: SqlQuery = {
+			where: {}, //查询条件
+			limit: 1,
+		};
+		sqlQuery.where = {};
+
+		for (let item of this.mappingList) {
+			let dbValue = this.toDBValue(row, item.name, item.type);
+			if (ValidationUtil.isNotNull(dbValue)) {
+				if (item.primaryKey) {
+					Reflect.set(sqlQuery.where, item.field, dbValue);
+				}
+			}
+		}
+
+		if (Object.keys(sqlQuery.where).length == 0) {
+			return Promise.reject(new Error(`${this.tableName} primary key  is null`));
+		}
+
+		return await this.selectOne(sqlQuery, ds);
 	}
 
 	/***
@@ -491,7 +517,7 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 自定义sql执行
 	 */
-	async execute(sql: string, args: any[] = [], ds: string = this.getDataSource(false)): Promise<any> {
+	async execute(sql: string, args: any[] = [], ds: string = this.getDataSource()): Promise<any> {
 		let [rows] = await this.dsm.execute({ sql, args, ds });
 
 		return rows;

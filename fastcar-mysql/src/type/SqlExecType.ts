@@ -1,5 +1,5 @@
 export type SqlExecType = {
 	sql: string;
-	args: any[];
+	args?: any[];
 	ds?: string;
 };
