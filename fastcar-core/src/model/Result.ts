@@ -1,4 +1,4 @@
-import { FormValidationUtil } from "../utils/FormValidationUtil";
+import ValidationUtil from "../utils/ValidationUtil";
 
 const CODE_OK = 200;
 const CODE_FAIL = 500;
@@ -11,7 +11,7 @@ export default class Result {
 		return {
 			code: CODE_OK,
 			msg: "success",
-			data: FormValidationUtil.isNotNull(data) ? data : {},
+			data: ValidationUtil.isNotNull(data) ? data : {},
 		};
 	}
 

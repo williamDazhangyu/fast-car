@@ -1,5 +1,4 @@
 import FastCarApplication from "../FastCarApplication";
-import MixTool from "../utils/Mix";
 import TypeUtil from "../utils/TypeUtil";
 
 //基础服务的应用

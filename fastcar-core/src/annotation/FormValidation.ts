@@ -1,4 +1,4 @@
-import { FormValidationUtil } from "../utils/FormValidationUtil";
+import ValidationUtil from "../utils/ValidationUtil";
 import TypeUtil from "../utils/TypeUtil";
 import DATAFORMAT from "../utils/DataFormat";
 interface CommodModel {
@@ -101,7 +101,7 @@ export function EnableForm(target: any, methodName: string, descriptor: Property
 			for (let rule of rules) {
 				let value = args[rule.index];
 				//查看是否校验子属性
-				if (FormValidationUtil.isNotNull(value)) {
+				if (ValidationUtil.isNotNull(value)) {
 					if (rule?.prop) {
 						if (Reflect.has(value, rule.prop)) {
 							value = value[rule.prop];
@@ -116,7 +116,7 @@ export function EnableForm(target: any, methodName: string, descriptor: Property
 				}
 
 				//忽略空值
-				if (FormValidationUtil.isNull(value) && rule.fn.name != "isNotNull") {
+				if (ValidationUtil.isNull(value) && rule.fn.name != "isNotNull") {
 					continue;
 				}
 
@@ -146,7 +146,7 @@ export function NotNull(m: CommodModel = {}) {
 	return function(target: any, methodName: string, paramIndex: number) {
 		addRules(target[methodName], {
 			index: paramIndex,
-			fn: FormValidationUtil.isNotNull,
+			fn: ValidationUtil.isNotNull,
 			args: [],
 			message: m.message,
 			prop: m.prop,
@@ -159,7 +159,7 @@ export function Size({ min = 0, max = 0, message = "", prop, defaultValue }: Siz
 	return function(target: any, methodName: string, paramIndex: number) {
 		addRules(target[methodName], {
 			index: paramIndex,
-			fn: FormValidationUtil.isNotMaxSize,
+			fn: ValidationUtil.isNotMaxSize,
 			args: [max],
 			message,
 			prop,
@@ -168,7 +168,7 @@ export function Size({ min = 0, max = 0, message = "", prop, defaultValue }: Siz
 
 		addRules(target[methodName], {
 			index: paramIndex,
-			fn: FormValidationUtil.isNotMinSize,
+			fn: ValidationUtil.isNotMinSize,
 			args: [min],
 			message,
 			prop,
@@ -181,7 +181,7 @@ export function IsNumber(m: CommodModel = {}) {
 	return function(target: any, methodName: string, paramIndex: number) {
 		addRules(target[methodName], {
 			index: paramIndex,
-			fn: FormValidationUtil.isNumber,
+			fn: ValidationUtil.isNumber,
 			args: [],
 			message: m.message,
 			prop: m.prop,
@@ -194,7 +194,7 @@ export function IsString(m: CommodModel = {}) {
 	return function(target: any, methodName: string, paramIndex: number) {
 		addRules(target[methodName], {
 			index: paramIndex,
-			fn: FormValidationUtil.isString,
+			fn: ValidationUtil.isString,
 			args: [],
 			message: m.message,
 			prop: m.prop,
@@ -207,7 +207,7 @@ export function IsBoolean(m: CommodModel = {}) {
 	return function(target: any, methodName: string, paramIndex: number) {
 		addRules(target[methodName], {
 			index: paramIndex,
-			fn: FormValidationUtil.isBoolean,
+			fn: ValidationUtil.isBoolean,
 			args: [],
 			message: m.message,
 			prop: m.prop,
@@ -220,7 +220,7 @@ export function IsArray(m: CommodModel = {}, type: string = "string") {
 	return function(target: any, methodName: string, paramIndex: number) {
 		addRules(target[methodName], {
 			index: paramIndex,
-			fn: FormValidationUtil.isArray,
+			fn: ValidationUtil.isArray,
 			args: [],
 			message: m.message,
 			prop: m.prop,
@@ -232,15 +232,15 @@ export function IsArray(m: CommodModel = {}, type: string = "string") {
 function getFormValue(args: any[], prop: string, paramIndex: number = 0, defaultValue?: any) {
 	let value = args[paramIndex];
 	//查看是否校验子属性
-	if (FormValidationUtil.isNotNull(value)) {
-		if (FormValidationUtil.isNotNull(prop)) {
+	if (ValidationUtil.isNotNull(value)) {
+		if (ValidationUtil.isNotNull(prop)) {
 			if (Reflect.has(value, prop)) {
 				return value[prop];
 			}
 		}
 	}
 
-	if (FormValidationUtil.isNotNull(defaultValue)) {
+	if (ValidationUtil.isNotNull(defaultValue)) {
 		return defaultValue;
 	}
 
@@ -250,7 +250,7 @@ function getFormValue(args: any[], prop: string, paramIndex: number = 0, default
 function delFormValue(args: any[], prop: string, paramIndex: number = 0) {
 	let value = args[paramIndex];
 	//查看是否校验子属性
-	if (FormValidationUtil.isNotNull(value)) {
+	if (ValidationUtil.isNotNull(value)) {
 		if (Reflect.has(value, prop)) {
 			Reflect.deleteProperty(value, prop);
 		}
@@ -259,8 +259,8 @@ function delFormValue(args: any[], prop: string, paramIndex: number = 0) {
 
 function setFormValue(args: any[], prop: string, paramIndex: number = 0, val: any) {
 	//查看是否校验子属性
-	if (FormValidationUtil.isNotNull(args[paramIndex]) || TypeUtil.isObject(args[paramIndex])) {
-		if (FormValidationUtil.isNotNull(prop)) {
+	if (ValidationUtil.isNotNull(args[paramIndex]) || TypeUtil.isObject(args[paramIndex])) {
+		if (ValidationUtil.isNotNull(prop)) {
 			if (Reflect.has(args[paramIndex], prop)) {
 				args[paramIndex][prop] = val;
 			} else {
@@ -305,7 +305,7 @@ export function ValidForm(rules: { [prop: string]: FormRuleModel }) {
 				let val = getFormValue(args, prop, rule.paramIndex, rule.defaultVal);
 
 				//优先判断是否为必填项
-				if (FormValidationUtil.isNull(val)) {
+				if (ValidationUtil.isNull(val)) {
 					if (rule.required) {
 						return getErrMsg(rule, prop, rule.nullMessage);
 					} else {
@@ -315,19 +315,19 @@ export function ValidForm(rules: { [prop: string]: FormRuleModel }) {
 					//进行类型判断并赋值
 					val = DATAFORMAT.formatValue(val, rule.type);
 					//调用check的方法
-					if (!FormValidationUtil.checkType(val, rule.type)) {
+					if (!ValidationUtil.checkType(val, rule.type)) {
 						return getErrMsg(rule, prop, rule.typeMessage);
 					}
 
 					//判断长度
 					if (rule?.minSize) {
-						if (!FormValidationUtil.isNotMinSize(val, rule.minSize)) {
+						if (!ValidationUtil.isNotMinSize(val, rule.minSize)) {
 							return getErrMsg(rule, prop, rule.sizeMessgae ? rule.sizeMessgae : `${prop} should be greater than ${rule.minSize} `);
 						}
 					}
 
 					if (rule?.maxSize) {
-						if (!FormValidationUtil.isNotMaxSize(val, rule.maxSize)) {
+						if (!ValidationUtil.isNotMaxSize(val, rule.maxSize)) {
 							return getErrMsg(rule, prop, rule.sizeMessgae ? rule.sizeMessgae : `${prop} should be less than ${rule.maxSize} `);
 						}
 					}

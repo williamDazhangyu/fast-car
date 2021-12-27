@@ -2,10 +2,11 @@ import "reflect-metadata";
 import { DesignMeta } from "../type/DesignMeta";
 import { Autowired } from "fastcar-core/annotation";
 import MysqlDataSourceManager from "../dataSource/MysqlDataSourceManager";
-import { OrderEnum, OrderType, SqlQuery, SqlWhere } from "./OperationType";
+import { OrderType, RowData, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "./OperationType";
 import { MapperType } from "../type/MapperType";
-import { OperatorEnum, SqlConditions } from "./OperationType";
-import { DataFormat } from "fastcar-core/utils";
+import { OperatorEnum } from "./OperationType";
+import { DataFormat, ValidationUtil } from "fastcar-core/utils";
+import SerializeUtil from "../util/SerializeUtil";
 
 type RowType = {
 	str: string;
@@ -15,13 +16,14 @@ type RowType = {
 /****
  * @version 1.0 采用crud方式进行数据操作
  */
-class MysqlMapper<T> {
+class MysqlMapper<T extends Object> {
 	@Autowired
 	protected dsm!: MysqlDataSourceManager;
 
 	protected tableName: string;
 	protected classZ: any; //映射的原型类
 	protected mappingMap: Map<string, MapperType>; //代码别名-映射关系
+	protected mappingList: MapperType[];
 	protected dbFields: Map<string, string>; //数据库别名-代码别名
 
 	constructor() {
@@ -35,12 +37,25 @@ class MysqlMapper<T> {
 		this.tableName = tableName;
 		this.mappingMap = Reflect.getMetadata(DesignMeta.mapping, tClass); //映射关系
 		this.dbFields = Reflect.getMetadata(DesignMeta.dbFields, tClass); //作用的列名
+		this.mappingList = Array.of();
+
+		this.mappingMap.forEach((item) => {
+			this.mappingList.push(item);
+		});
 	}
 
 	//获取数据库别名通过代码内的名称
 	protected getFieldName(name: string) {
 		let info = this.mappingMap.get(name);
 		return info ? info.field : name;
+	}
+
+	//自动映射数据库字段
+	protected toDBValue(v: any, key: string, type: string) {
+		let value = Reflect.get(v, key);
+		let tmpValue = SerializeUtil.serialize(value, type);
+
+		return tmpValue;
 	}
 
 	//分析选定字段
@@ -74,35 +89,52 @@ class MysqlMapper<T> {
 		keys.forEach((i, index) => {
 			let key = i.toString();
 			let alias = this.getFieldName(key);
-			let item = where[key];
+			let item: any = where[key];
 			let tmpStr = "";
 
-			if (!item.operator) {
-				item.operator = Array.isArray(item.value) ? OperatorEnum.in : OperatorEnum.eq;
-			}
-
-			//规避sql注入 统一使用?做处理
-			switch (item.operator) {
-				case OperatorEnum.isNUll: {
+			//这边进行一个类型推断
+			let outerJoin = "AND";
+			let typeStr = typeof item;
+			if (typeStr != "object" || !Reflect.has(item, "value")) {
+				if (item == null) {
 					tmpStr = `ISNULL(${alias})`;
-					break;
+				} else if (Array.isArray(item)) {
+					tmpStr = `${alias} IN (?)`;
+					params.push(item);
+				} else {
+					tmpStr = `${alias} = ?`;
+					params.push(item);
 				}
-				case OperatorEnum.isNotNull: {
-					tmpStr = `${alias} IS NOT NULL`;
-					break;
+			} else {
+				if (!item.operator) {
+					item.operator = Array.isArray(item.value) ? OperatorEnum.in : OperatorEnum.eq;
 				}
-				default: {
-					tmpStr = `${alias} ${item.operator} ?`;
-					params.push(item.value);
-					break;
+
+				//规避sql注入 统一使用?做处理
+				switch (item.operator) {
+					case OperatorEnum.isNUll: {
+						tmpStr = `ISNULL(${alias})`;
+						break;
+					}
+					case OperatorEnum.isNotNull: {
+						tmpStr = `${alias} IS NOT NULL`;
+						break;
+					}
+					default: {
+						tmpStr = `${alias} ${item.operator} ?`;
+						params.push(item.value);
+						break;
+					}
+				}
+
+				if (item?.operator) {
+					outerJoin = item?.operator;
 				}
 			}
 
-			let outerJoin = item?.operator || "AND";
 			if (index < maxLength - 1 && tmpStr) {
 				tmpStr += `${outerJoin}`;
 			}
-
 			cList.push(tmpStr);
 		});
 
@@ -147,32 +179,28 @@ class MysqlMapper<T> {
 		return "";
 	}
 
-	protected analysisRow(row?: Object): RowType | null {
-		if (!row) {
-			return null;
-		}
-
+	protected analysisRow(row: RowData): RowType | null {
 		let str: string[] = [];
 		let args = Object.keys(row).map((key) => {
 			let alias = this.getFieldName(key);
-			str.push(`${alias} = ? `);
+			str.push(`${alias} = ?`);
 			return Reflect.get(row, key);
 		});
 
 		return {
 			args: args,
-			str: str.join(","),
+			str: str.join(", "),
 		};
 	}
 
-	protected analysisLimit(conditions: SqlConditions): string {
-		if (!conditions?.limit) {
+	protected analysisLimit(limit?: number, offest?: number): string {
+		if (typeof limit != "number" || limit < 0) {
 			return "";
 		}
 
-		let str = `LIMIT ${conditions.limit} `;
-		if (!!conditions.offest) {
-			str = `LIMIT ${conditions.offest}, ${conditions.limit} `;
+		let str = `LIMIT ${limit} `;
+		if (typeof offest == "number" && offest > 0) {
+			str = `LIMIT ${limit}, ${offest} `;
 		}
 
 		return str;
@@ -184,7 +212,7 @@ class MysqlMapper<T> {
 		this.mappingMap.forEach((item, key) => {
 			let value = Reflect.get(rowData, item.field) || Reflect.get(rowData, key);
 			if (value != null) {
-				let fvalue = DataFormat.formatValue(value, item.tsType);
+				let fvalue = DataFormat.formatValue(value, item.type);
 				Reflect.set(t, key, fvalue);
 			}
 		});
@@ -211,304 +239,263 @@ class MysqlMapper<T> {
 		return this.dsm.getDefaultSoucre(read);
 	}
 
-	//查询单个元素 可以根据
-	async selectOne(conditions: SqlQuery = {}, ds: string = this.getDataSource()): Promise<T | null> {
+	/***
+	 * @version 1.0 更新或者添加记录多条记录(一般用于整条记录的更新)
+	 */
+	async saveORUpdate(rows: T | T[], ds: string = this.getDataSource(false)): Promise<number> {
+		if (!Array.isArray(rows)) {
+			rows = [rows];
+		}
+
+		if (rows.length == 0) {
+			return Promise.reject(new Error(`rows is empty by ${this.tableName} saveORUpdate`));
+		}
+
+		let afterKeys: string[] = Array.of();
+		let beforeKeys: string[] = Array.of();
+
+		this.mappingList.forEach((item) => {
+			beforeKeys.push(item.field);
+			if (!item.primaryKey) {
+				afterKeys.push(`${item.field} = VALUES (${item.field})`);
+			}
+		});
+
+		let args: any[] = [];
+		let values: string[] = [];
+		let paramsSymbol = new Array(beforeKeys.length).fill("?");
+
+		rows.forEach((row: T) => {
+			this.mappingList.forEach((item) => {
+				args.push(this.toDBValue(row, item.name, item.type));
+			});
+			values.push(`(${paramsSymbol.join(",")})`);
+		});
+
+		let valueStr = values.join(",");
+		let afterKeyStr = afterKeys.join(",");
+
+		let sql = `INSERT INTO ${this.tableName} (${beforeKeys.join(",")}) VALUES ${valueStr} ON DUPLICATE KEY UPDATE ${afterKeyStr}`;
+		let [okPacket] = await this.dsm.execute({ sql, args, ds });
+
+		return okPacket.insertId;
+	}
+
+	/***
+	 * @version 1.0 插入单条记录返回主键
+	 */
+	async saveOne(row: T, ds: string = this.getDataSource(false)): Promise<number> {
+		let params: string[] = [];
+		let args: any[] = [];
+
+		this.mappingMap.forEach((item) => {
+			let dbValue = this.toDBValue(row, item.name, item.type);
+			if (ValidationUtil.isNotNull(dbValue)) {
+				params.push(item.field);
+				args.push(dbValue);
+			}
+		});
+
+		let paramsSymbol = new Array(params.length).fill("?").join(",");
+		let sql = `INSERT INTO ${this.tableName} (${params.join(",")}) VALUES (${paramsSymbol})`;
+		let [res] = await this.dsm.execute({ sql, args, ds });
+
+		return res.insertId;
+	}
+
+	/***
+	 * @version 1.0 批量插入记录
+	 */
+	async saveList(rows: T[], ds: string = this.getDataSource(false)): Promise<boolean> {
+		if (rows.length < 1) {
+			return Promise.reject(new Error("rows is empty"));
+		}
+
+		let keys: string[] = Array.of();
+		this.mappingList.forEach((item) => {
+			keys.push(item.field);
+		});
+
+		let keysStr = keys.join(",");
+		let sql = `INSERT INTO ${this.tableName} (${keysStr}) VALUES `;
+		let paramsStr = new Array(keys.length).fill("?").join(",");
+
+		for (let i = 0; i < rows.length; ) {
+			let paramsList: string[] = [];
+			let tpmList = rows.slice(0, 1000);
+			let args: any[] = [];
+
+			tpmList.forEach((row: T) => {
+				this.mappingList.forEach((item) => {
+					args.push(this.toDBValue(row, item.name, item.type));
+				});
+				paramsList.push(`(${paramsStr})`);
+			});
+			i += tpmList.length;
+			let tmpSQL = sql + paramsList.join(",");
+			await this.dsm.execute({ sql: tmpSQL, args, ds });
+		}
+
+		return true;
+	}
+
+	/***
+	 * @version 1.0 更新记录
+	 *
+	 */
+	async update(sqlUpdate: SqlUpdate, ds: string = this.getDataSource(false)): Promise<boolean> {
+		let rowStr = this.analysisRow(sqlUpdate.row);
+		if (!rowStr) {
+			return Promise.reject(new Error("row is empty"));
+		}
+		let whereC = this.analysisWhere(sqlUpdate.where);
+		let limitStr = this.analysisLimit(sqlUpdate.limit);
+		let sql = `UPDATE ${this.tableName} SET ${rowStr.str} ${whereC.str} ${limitStr}`;
+
+		let [okPacket] = await this.dsm.execute({ sql, args: [...rowStr.args, ...whereC.args], ds });
+
+		let affectedRows = okPacket.affectedRows;
+		let changedRows = okPacket.changedRows;
+		return affectedRows > 0 && changedRows > 0;
+	}
+
+	/****
+	 * @version 1.0 更新一条数据
+	 *
+	 */
+	async updateOne(sqlUpdate: SqlUpdate, ds: string = this.getDataSource(false)) {
+		return await this.update(Object.assign({}, sqlUpdate, { limit: 1 }), ds);
+	}
+
+	/***
+	 * @version 1.0 根据实体类的主键来更新数据
+	 *
+	 */
+	async updateByPrimaryKey(row: T, ds: string = this.getDataSource(false)) {
+		let sqlUpdate: SqlUpdate = {
+			where: {}, //查询条件
+			row: {},
+			limit: 1,
+		};
+		sqlUpdate.where = {};
+
+		for (let item of this.mappingList) {
+			let dbValue = this.toDBValue(row, item.name, item.type);
+			if (ValidationUtil.isNotNull(dbValue)) {
+				if (item.primaryKey) {
+					Reflect.set(sqlUpdate.where, item.field, dbValue);
+				} else {
+					Reflect.set(sqlUpdate.row, item.field, dbValue);
+				}
+			}
+		}
+
+		if (Object.keys(sqlUpdate.where).length == 0) {
+			return Promise.reject(new Error(`${this.tableName} primary key  is null`));
+		}
+
+		return await this.updateOne(sqlUpdate, ds);
+	}
+
+	/***
+	 * @version 1.0 根据条件进行查找
+	 */
+	async select(conditions: SqlQuery = {}, ds: string = this.getDataSource()): Promise<T[]> {
 		let fields = this.analysisFields(conditions.fields);
 		let whereC = this.analysisWhere(conditions.where);
 		let groupStr = this.analysisGroups(conditions.groups);
 		let orderStr = this.analysisOrders(conditions.orders);
+		let limitStr = this.analysisLimit(conditions?.limit, conditions?.offest);
 
 		let args = whereC.args;
-		let sql = `SELECT ${fields} FROM ${this.tableName} ${whereC.str} ${groupStr} ${orderStr} LIMIT 1`;
+		let sql = `SELECT ${fields} FROM ${this.tableName} ${whereC.str} ${groupStr} ${orderStr} ${limitStr}`;
 
 		let [rows] = await this.dsm.execute({ sql, args, ds });
 
 		if (!Array.isArray(rows)) {
-			rows = [];
+			return [];
 		}
 
-		let o = rows.length > 0 ? rows[0] : null;
-		if (o) {
-			return this.setRow(o);
-		}
-
-		return null;
+		return this.setRows(rows);
 	}
 
-	// //判定是否存在
-	// async exist(tableName: string, conditions?: SqlWhere, sqlSource: string = SQLSOURCE.read): Promise<boolean> {
-	// 	let _pool = this.dataSource.get(sqlSource);
-	// 	if (!_pool) {
-	// 		return Promise.reject(new Error("pool is empty"));
-	// 	}
+	/***
+	 * @version 1.0 查询单个对象
+	 *
+	 */
+	async selectOne(conditions: SqlQuery = {}, ds: string = this.getDataSource()): Promise<T | null> {
+		let queryInfo = Object.assign({}, conditions, { limit: 1 });
 
-	// 	let whereC = MysqlCRUD.analysisWhere({ where: conditions });
-	// 	let args = whereC.args;
-	// 	let sql = `SELECT 1 FROM ${tableName} ${whereC.str} LIMIT 1`;
+		let res = await this.select(queryInfo, ds);
 
-	// 	let queryRes = await _pool.query(sql, args);
-	// 	if (queryRes.error) {
-	// 		return Promise.reject(new Error(`sql is error ${sql}`));
-	// 	}
+		let o = res.length > 0 ? res[0] : null;
 
-	// 	return queryRes.data && queryRes.data.length > 0;
-	// }
+		return o;
+	}
 
-	// async count(tableName: string, conditions?: SqlWhere, sqlSource: string = SQLSOURCE.read): Promise<number> {
-	// 	let _pool = this.dataSource.get(sqlSource);
-	// 	if (!_pool) {
-	// 		return Promise.reject(new Error("pool is empty"));
-	// 	}
+	/***
+	 * @version 1.0 判定是否存在
+	 *
+	 */
+	async exist(sqlWhere: SqlWhere, ds: string = this.getDataSource()): Promise<boolean> {
+		let whereC = this.analysisWhere(sqlWhere);
+		let args = whereC.args;
 
-	// 	let whereC = MysqlCRUD.analysisWhere({ where: conditions });
-	// 	let args = whereC.args;
-	// 	let sql = `SELECT COUNT(1) as num FROM ${tableName} ${whereC.str}`;
+		let sql = `SELECT 1 FROM ${this.tableName} ${whereC.str} LIMIT 1`;
+		let [rows] = await this.dsm.execute({ sql, args, ds });
 
-	// 	let queryRes = await _pool.query(sql, args);
-	// 	if (queryRes.error) {
-	// 		return Promise.reject(new Error(`sql is error ${sql}`));
-	// 	}
+		return rows.length > 0;
+	}
 
-	// 	return queryRes.data[0].num;
-	// }
+	/***
+	 * @version 1.0 统计符合条件的记录
+	 */
+	async count(sqlWhere: SqlWhere, ds: string = this.getDataSource()): Promise<number> {
+		let whereC = this.analysisWhere(sqlWhere);
+		let args = whereC.args;
+		let sql = `SELECT COUNT(1) as num FROM ${this.tableName} ${whereC.str}`;
 
-	// //按条件进行查找
-	// async select(tableName: string, conditions: SqlQuery = {}, sqlSource: string = SQLSOURCE.read): Promise<any[]> {
-	// 	let _pool = this.dataSource.get(sqlSource);
-	// 	if (!_pool) {
-	// 		return Promise.reject(new Error("pool is empty"));
-	// 	}
+		let [rows] = await this.dsm.execute({ sql, args, ds });
 
-	// 	//解析查出的参数
-	// 	let fields = MysqlCRUD.analysisFields(conditions);
-	// 	let whereC = MysqlCRUD.analysisWhere(conditions);
-	// 	let orderStr = MysqlCRUD.analysisOrders(conditions);
-	// 	let limitStr = MysqlCRUD.analysisLimit(conditions);
+		return rows[0].num;
+	}
 
-	// 	let args = whereC.args;
-	// 	let sql = `SELECT ${fields} FROM ${tableName} ${whereC.str} ${orderStr} ${limitStr}`;
+	/***
+	 * @version 1.0 按照条件删除记录
+	 */
+	async delete(sqlDelete: SqlDelete, ds: string = this.getDataSource(false)): Promise<boolean> {
+		let whereC = this.analysisWhere(sqlDelete.where);
+		let limitStr = this.analysisLimit(sqlDelete.limit);
 
-	// 	let queryRes = await _pool.query(sql, args);
-	// 	if (queryRes.error) {
-	// 		return Promise.reject(new Error(`sql is error ${sql}`));
-	// 	}
+		let sql = `DELETE FROM ${this.tableName} ${whereC.str} ${limitStr}`;
 
-	// 	if (!Array.isArray(queryRes.data)) {
-	// 		queryRes.data = [];
-	// 	}
+		let [okPacket] = await this.dsm.execute({ sql, args: whereC.args, ds });
 
-	// 	return queryRes.data.length > 0 ? queryRes.data : [];
-	// }
+		let affectedRows = okPacket.affectedRows;
+		return affectedRows > 0;
+	}
 
-	// //查询全表
-	// async selectAll(tableName: string, sqlSource: string = SQLSOURCE.read): Promise<any[]> {
-	// 	let _pool = this.dataSource.get(sqlSource);
-	// 	if (!_pool) {
-	// 		return Promise.reject(new Error("pool is empty"));
-	// 	}
+	/***
+	 * @version 1.0 删除某条记录
+	 */
+	async deleteOne(sqlWhere: SqlWhere, ds: string = this.getDataSource(false)): Promise<boolean> {
+		return await this.delete(
+			{
+				where: sqlWhere,
+				limit: 1,
+			},
+			ds
+		);
+	}
 
-	// 	let sql = `SELECT * FROM ${tableName}`;
-	// 	let queryRes = await _pool.query(sql);
-	// 	if (queryRes.error) {
-	// 		return Promise.reject(new Error(`sql is error ${sql}`));
-	// 	}
+	/***
+	 * @version 1.0 自定义sql执行
+	 */
+	async execute(sql: string, args: any[] = [], ds: string = this.getDataSource(false)): Promise<any> {
+		let [rows] = await this.dsm.execute({ sql, args, ds });
 
-	// 	if (!Array.isArray(queryRes.data)) {
-	// 		queryRes.data = [];
-	// 	}
-
-	// 	return queryRes.data;
-	// }
-
-	// //更新单条记录
-	// async updateOne(tableName: string, conditions: SqlUpdate, sqlSource: string = SQLSOURCE.write) {
-	// 	conditions.limit = 1;
-	// 	return await this.update(tableName, conditions, sqlSource);
-	// }
-
-	// //按照条件更新记录
-	// async update(tableName: string, conditions: SqlUpdate, sqlSource: string = SQLSOURCE.write): Promise<boolean> {
-	// 	let _pool = this.dataSource.get(sqlSource);
-	// 	if (!_pool) {
-	// 		return Promise.reject(new Error("pool is empty"));
-	// 	}
-
-	// 	let rowStr = MysqlCRUD.analysisRow(conditions);
-	// 	if (!rowStr) {
-	// 		return Promise.reject(new Error("row is empty"));
-	// 	}
-	// 	let whereC = MysqlCRUD.analysisWhere(conditions);
-	// 	let limitStr = MysqlCRUD.analysisLimit(conditions);
-	// 	let sql = `UPDATE ${tableName} SET ${rowStr.str}  ${whereC.str} ${limitStr}`;
-
-	// 	let queryRes = await _pool.query(sql, [...rowStr.args, ...whereC.args]);
-	// 	if (queryRes.error) {
-	// 		return Promise.reject(new Error(`sql is error ${sql}`));
-	// 	}
-
-	// 	let affectedRows = queryRes.data.affectedRows;
-	// 	let changedRows = queryRes.data.changedRows;
-	// 	return affectedRows > 0 && changedRows > 0;
-	// }
-
-	// //删除某条记录
-	// async deleteOne(tableName: string, conditions: SqlConditions = {}, sqlSource: string = SQLSOURCE.write): Promise<boolean> {
-	// 	conditions.limit = 1;
-	// 	return await this.delete(tableName, conditions, sqlSource);
-	// }
-
-	// //按照条件删除记录
-	// async delete(tableName: string, conditions: SqlDelete = {}, sqlSource: string = SQLSOURCE.write): Promise<boolean> {
-	// 	let _pool = this.dataSource.get(sqlSource);
-	// 	if (!_pool) {
-	// 		return Promise.reject(new Error("pool is empty"));
-	// 	}
-
-	// 	let whereC = MysqlCRUD.analysisWhere(conditions);
-	// 	let limitStr = MysqlCRUD.analysisLimit(conditions);
-
-	// 	let sql = `DELETE FROM ${tableName} ${whereC.str} ${limitStr}`;
-
-	// 	let queryRes = await _pool.query(sql, [...whereC.args]);
-	// 	if (queryRes.error) {
-	// 		return Promise.reject(new Error(`sql is error ${sql}`));
-	// 	}
-
-	// 	let affectedRows = queryRes.data.affectedRows;
-	// 	let changedRows = queryRes.data.changedRows;
-
-	// 	return affectedRows > 0 && changedRows > 0;
-	// }
-
-	// //更新或者添加记录多条记录
-	// async saveORUpdate(tableName: string, rows: any | object[], sqlSource: string = SQLSOURCE.write): Promise<boolean> {
-	// 	let _pool = this.dataSource.get(sqlSource);
-	// 	if (!_pool) {
-	// 		return false;
-	// 	}
-
-	// 	if (!Array.isArray(rows)) {
-	// 		rows = [rows];
-	// 	}
-
-	// 	if (rows.length == 0) {
-	// 		return false;
-	// 	}
-
-	// 	let fields = rows[0];
-	// 	let keys = Object.keys(fields);
-
-	// 	let afterKeys = keys.map((key: string) => {
-	// 		return `${key} = VALUES (${key})`;
-	// 	});
-
-	// 	let values: string[] = [];
-	// 	rows.forEach((row: any) => {
-	// 		let valueStr = "";
-	// 		keys.forEach((key) => {
-	// 			if (row[key] === "" || row[key] === null) {
-	// 				row[key] = null;
-	// 			} else {
-	// 				if (typeof key === "string") {
-	// 					//字符串添加转义
-	// 					row[key] = `'${row[key]}'`;
-	// 				}
-	// 			}
-
-	// 			valueStr += "," + row[key];
-	// 		});
-
-	// 		values.push(`(${valueStr.substring(1)})`);
-	// 	});
-
-	// 	let valueStr = values.join(",");
-	// 	let afterKeyStr = afterKeys.join(",");
-
-	// 	let sql = `INSERT INTO ${tableName} (${keys.join(",")}) VALUES ${valueStr} ON DUPLICATE KEY UPDATE ${afterKeyStr}`;
-	// 	let queryRes = await _pool.query(sql);
-
-	// 	return !queryRes.error;
-	// }
-
-	// //插入单条记录返回主键
-	// async saveOne(tableName: string, row: Object, sqlSource: string = SQLSOURCE.write): Promise<number> {
-	// 	let _pool = this.dataSource.get(sqlSource);
-	// 	if (!_pool) {
-	// 		return Promise.reject(new Error("pool is empty"));
-	// 	}
-
-	// 	//参数名 参数值
-	// 	let paramsSymbol: string[] = [];
-	// 	let values: string[] = [];
-	// 	let params = Object.keys(row).map((key) => {
-	// 		paramsSymbol.push("?");
-	// 		values.push(Reflect.get(row, key));
-	// 		return key;
-	// 	});
-
-	// 	let sql = `INSERT INTO ${tableName} (${params.join(",")}) VALUES (${paramsSymbol.join(",")})`;
-	// 	let addRes = await _pool.query(sql, values);
-
-	// 	if (addRes.error) {
-	// 		return Promise.reject(new Error(`sql is error ${sql}`));
-	// 	}
-
-	// 	return addRes.data.insertId;
-	// }
-
-	// //批量插入记录
-	// async saveList(tableName: string, rows: any[]): Promise<boolean> {
-	// 	if (rows.length < 1) {
-	// 		return Promise.reject(new Error("rows is empty"));
-	// 	}
-
-	// 	let row = rows[0];
-	// 	let values = [];
-	// 	let params = Object.keys(row).map((key) => {
-	// 		values.push(row[key]);
-	// 		return key;
-	// 	});
-	// 	let sql = `INSERT INTO ${tableName}  (${params.join(",")}) VALUES `;
-
-	// 	for (let i = 0; i < rows.length; ) {
-	// 		let valueList: string[] = [];
-	// 		let tpmList = rows.slice(0, 1000);
-	// 		tpmList = tpmList.map((tp) => {
-	// 			let transVal: string[] = [];
-	// 			params.forEach((pi: string) => {
-	// 				if (typeof tp[pi] === "string") {
-	// 					//字符串添加转义
-	// 					tp[pi] = `'${tp[pi]}'`;
-	// 				}
-
-	// 				transVal.push(tp[pi]);
-	// 			});
-
-	// 			return transVal;
-	// 		});
-	// 		i += tpmList.length;
-
-	// 		tpmList.forEach((item) => {
-	// 			let tmpValue = `(${item.join(",")})`;
-	// 			valueList.push(tmpValue);
-	// 		});
-
-	// 		let tmpSQL = sql + valueList.join(",");
-	// 		await _pool.query(tmpSQL, []);
-	// 	}
-
-	// 	return true;
-	// }
-
-	// //按照原始的sql进行查找
-	// async query(sql: string, args: any[] = [], sqlSource: string = SQLSOURCE.read): Promise<any> {
-	// 	let queryRes = await _pool.query(sql, args);
-	// 	if (queryRes.error) {
-	// 		return Promise.reject(new Error(`sql is error ${sql}`));
-	// 	}
-
-	// 	return queryRes.data;
-	// }
+		return rows;
+	}
 }
 
 export default MysqlMapper;

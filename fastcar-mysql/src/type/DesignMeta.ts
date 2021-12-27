@@ -7,7 +7,6 @@ export enum DesignMeta {
 	fieldMap = "db:fieldMap", //注入列名集合
 	dbType = "db:dbType", //数据类型
 	primaryKey = "db:primaryKey", //主键类型
-	defaultValue = "db:value", //默认值
 	maxLength = "db:maxLength", //最大长度
 	notNull = "db:notNull", //不为空
 	entity = "db:entity", //实例化的数据库类

@@ -4,6 +4,7 @@ import MysqlDataSource from "./MysqlDataSource";
 import { ApplicationStart, Autowired } from "fastcar-core/annotation";
 import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
 import ApplicationStop from "../../../fastcar-core/src/annotation/lifeCycle/ApplicationStop";
+import * as mysql from "mysql2/promise";
 
 @ApplicationStart(BootPriority.Base, "start")
 @ApplicationStop(BootPriority.Lowest, "stop")
@@ -82,8 +83,8 @@ class MysqlDataSourceManager {
 	//执行sql
 	async execute({ sql, args = [], ds = this.defaultSource }: SqlExecType): Promise<any[]> {
 		if (this.config.printSQL) {
-			this.sysLogger.info("print sql:", sql);
-			this.sysLogger.info("print args:", args.join(","));
+			//打印sql
+			this.sysLogger.info(mysql.format(sql, args));
 		}
 		return new Promise(async (resolve, reject) => {
 			let dataSoucre = this.sourceMap.get(ds);

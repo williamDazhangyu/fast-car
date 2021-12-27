@@ -74,3 +74,25 @@ export class TypeUtil {
 
 	static isArray(value: any): boolean;
 }
+
+export class ValidationUtil {
+	static isNotNull(param: any): boolean;
+
+	static isNull(param: any): boolean;
+
+	static isNumber(param: any): boolean;
+
+	static isString(param: any): boolean;
+
+	static isBoolean(param: any): boolean;
+
+	static isDate(param: any): boolean;
+
+	static isNotMaxSize(param: any, value: number): boolean;
+
+	static isNotMinSize(param: any, value: number): boolean;
+
+	static isArray(param: any, type: string): boolean;
+
+	static checkType(param: any, type: string): boolean;
+}

@@ -30,11 +30,15 @@ class Test {
 
 	@Field("flag")
 	@DBType("tinyint")
-	flag!: boolean;
+	flag: boolean = true;
 
 	@Field("money")
 	@DBType("decimal")
-	money!: number;
+	money: number = 1.0;
+
+	constructor(...args: any) {
+		Object.assign(this, ...args);
+	}
 }
 
 export default Test;

@@ -40,4 +40,8 @@ export default class TypeUtil {
 	static isArray(value: any) {
 		return Array.isArray(value);
 	}
+
+	static isDate(value: any) {
+		return value instanceof Date;
+	}
 }

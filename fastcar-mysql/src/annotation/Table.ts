@@ -22,7 +22,7 @@ export default function Table(name: string) {
 
 			const m: MapperType = {
 				name: c, //变量名称
-				tsType: tsName.toLowerCase(), //ts类型
+				type: tsName.toLowerCase(), //ts类型
 				field, //数据库列名
 				dbType: dbType, //数据类型
 				maxLength: maxLength, //最大长度 当为字符串或者整型时传递

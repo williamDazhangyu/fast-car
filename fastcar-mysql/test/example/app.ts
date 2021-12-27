@@ -12,6 +12,6 @@ class APP {
 
 let s = new APP();
 let service: SimpleService = s.app.getComponentByName("SimpleService");
-service.query().then((res) => {
+service.delete().then((res) => {
 	console.log(res);
 });
