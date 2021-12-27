@@ -7,6 +7,7 @@ import { MapperType } from "../type/MapperType";
 import { OperatorEnum } from "./OperationType";
 import { DataFormat, ValidationUtil } from "fastcar-core/utils";
 import SerializeUtil from "../util/SerializeUtil";
+import SqlError from "../type/SqlError";
 
 type RowType = {
 	str: string;
@@ -265,12 +266,19 @@ class MysqlMapper<T extends Object> {
 		let values: string[] = [];
 		let paramsSymbol = new Array(beforeKeys.length).fill("?");
 
-		rows.forEach((row: T) => {
-			this.mappingList.forEach((item) => {
-				args.push(this.toDBValue(row, item.name, item.type));
-			});
+		for (let row of rows) {
+			for (let item of this.mappingList) {
+				let dbValue = this.toDBValue(row, item.name, item.type);
+				if (ValidationUtil.isNull(dbValue)) {
+					if (item.notNull) {
+						return Promise.reject(new SqlError(`${item.name} value is null`));
+					}
+				}
+
+				args.push(dbValue);
+			}
 			values.push(`(${paramsSymbol.join(",")})`);
-		});
+		}
 
 		let valueStr = values.join(",");
 		let afterKeyStr = afterKeys.join(",");
@@ -288,13 +296,17 @@ class MysqlMapper<T extends Object> {
 		let params: string[] = [];
 		let args: any[] = [];
 
-		this.mappingMap.forEach((item) => {
+		for (let item of this.mappingList) {
 			let dbValue = this.toDBValue(row, item.name, item.type);
 			if (ValidationUtil.isNotNull(dbValue)) {
 				params.push(item.field);
 				args.push(dbValue);
+			} else {
+				if (item.notNull) {
+					return Promise.reject(new SqlError(`${item.name} value is null`));
+				}
 			}
-		});
+		}
 
 		let paramsSymbol = new Array(params.length).fill("?").join(",");
 		let sql = `INSERT INTO ${this.tableName} (${params.join(",")}) VALUES (${paramsSymbol})`;
