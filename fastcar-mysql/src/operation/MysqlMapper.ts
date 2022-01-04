@@ -8,6 +8,9 @@ import { OperatorEnum } from "./OperationType";
 import { DataFormat, ValidationUtil } from "fastcar-core/utils";
 import SerializeUtil from "../util/SerializeUtil";
 import SqlError from "../type/SqlError";
+import DSIndex from "../annotation/DSIndex";
+import SqlSession from "../annotation/SqlSession";
+import DSInjection from "../annotation/DSInjection";
 
 type RowType = {
 	str: string;
@@ -231,7 +234,14 @@ class MysqlMapper<T extends Object> {
 	}
 
 	//获取默认数据源 这边可以自行拓展
-	getDataSource(read: boolean = true): string {
+	getDataSource(service: string = "", read: boolean = true): string {
+		if (service) {
+			let fnDefaultDS = Reflect.getMetadata(DesignMeta.ds, service);
+			if (fnDefaultDS) {
+				return fnDefaultDS;
+			}
+		}
+
 		let classDefaultDS = Reflect.getMetadata(DesignMeta.ds, this);
 		if (classDefaultDS) {
 			return classDefaultDS;
@@ -243,7 +253,8 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 更新或者添加记录多条记录(一般用于整条记录的更新)
 	 */
-	async saveORUpdate(rows: T | T[], ds: string = this.getDataSource(false)): Promise<number> {
+	@DSInjection(false)
+	async saveORUpdate(rows: T | T[], @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<number> {
 		if (!Array.isArray(rows)) {
 			rows = [rows];
 		}
@@ -284,7 +295,7 @@ class MysqlMapper<T extends Object> {
 		let afterKeyStr = afterKeys.join(",");
 
 		let sql = `INSERT INTO ${this.tableName} (${beforeKeys.join(",")}) VALUES ${valueStr} ON DUPLICATE KEY UPDATE ${afterKeyStr}`;
-		let [okPacket] = await this.dsm.execute({ sql, args, ds });
+		let [okPacket] = await this.dsm.exec({ sql, args, ds, sessionId });
 
 		return okPacket.insertId;
 	}
@@ -292,7 +303,8 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 插入单条记录返回主键
 	 */
-	async saveOne(row: T, ds: string = this.getDataSource(false)): Promise<number> {
+	@DSInjection(false)
+	async saveOne(row: T, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<number> {
 		let params: string[] = [];
 		let args: any[] = [];
 
@@ -310,7 +322,7 @@ class MysqlMapper<T extends Object> {
 
 		let paramsSymbol = new Array(params.length).fill("?").join(",");
 		let sql = `INSERT INTO ${this.tableName} (${params.join(",")}) VALUES (${paramsSymbol})`;
-		let [res] = await this.dsm.execute({ sql, args, ds });
+		let [res] = await this.dsm.exec({ sql, args, ds, sessionId });
 
 		return res.insertId;
 	}
@@ -318,7 +330,8 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 批量插入记录
 	 */
-	async saveList(rows: T[], ds: string = this.getDataSource(false)): Promise<boolean> {
+	@DSInjection(false)
+	async saveList(rows: T[], @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
 		if (rows.length < 1) {
 			return Promise.reject(new Error("rows is empty"));
 		}
@@ -345,7 +358,7 @@ class MysqlMapper<T extends Object> {
 			});
 			i += tpmList.length;
 			let tmpSQL = sql + paramsList.join(",");
-			await this.dsm.execute({ sql: tmpSQL, args, ds });
+			await this.dsm.exec({ sql: tmpSQL, args, ds, sessionId });
 		}
 
 		return true;
@@ -355,19 +368,21 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 更新记录
 	 *
 	 */
-	async update(sqlUpdate: SqlUpdate, ds: string = this.getDataSource(false)): Promise<boolean> {
-		let rowStr = this.analysisRow(sqlUpdate.row);
+	@DSInjection(false)
+	async update({ row, where, limit }: SqlUpdate, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
+		let rowStr = this.analysisRow(row);
 		if (!rowStr) {
 			return Promise.reject(new Error("row is empty"));
 		}
-		let whereC = this.analysisWhere(sqlUpdate.where);
-		let limitStr = this.analysisLimit(sqlUpdate.limit);
+		let whereC = this.analysisWhere(where);
+		let limitStr = this.analysisLimit(limit);
 		let sql = `UPDATE ${this.tableName} SET ${rowStr.str} ${whereC.str} ${limitStr}`;
 
-		let [okPacket] = await this.dsm.execute({ sql, args: [...rowStr.args, ...whereC.args], ds });
+		let [okPacket] = await this.dsm.exec({ sql, args: [...rowStr.args, ...whereC.args], ds, sessionId });
 
 		let affectedRows = okPacket.affectedRows;
 		let changedRows = okPacket.changedRows;
+
 		return affectedRows > 0 && changedRows > 0;
 	}
 
@@ -375,15 +390,17 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 更新一条数据
 	 *
 	 */
-	async updateOne(sqlUpdate: SqlUpdate, ds: string = this.getDataSource(false)) {
-		return await this.update(Object.assign({}, sqlUpdate, { limit: 1 }), ds);
+	@DSInjection(false)
+	async updateOne(sqlUpdate: SqlUpdate, @SqlSession sessionId?: string, @DSIndex ds?: string) {
+		return await this.update(Object.assign({}, sqlUpdate, { limit: 1 }), sessionId, ds);
 	}
 
 	/***
 	 * @version 1.0 根据实体类的主键来更新数据
 	 *
 	 */
-	async updateByPrimaryKey(row: T, ds: string = this.getDataSource(false)) {
+	@DSInjection(false)
+	async updateByPrimaryKey(row: T, @SqlSession sessionId?: string, @DSIndex ds?: string) {
 		let sqlUpdate: SqlUpdate = {
 			where: {}, //查询条件
 			row: {},
@@ -406,13 +423,14 @@ class MysqlMapper<T extends Object> {
 			return Promise.reject(new Error(`${this.tableName} primary key  is null`));
 		}
 
-		return await this.updateOne(sqlUpdate, ds);
+		return await this.updateOne(sqlUpdate, sessionId, ds);
 	}
 
 	/***
 	 * @version 1.0 根据条件进行查找
 	 */
-	async select(conditions: SqlQuery = {}, ds: string = this.getDataSource()): Promise<T[]> {
+	@DSInjection()
+	async select(conditions: SqlQuery, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<T[]> {
 		let fields = this.analysisFields(conditions.fields);
 		let whereC = this.analysisWhere(conditions.where);
 		let groupStr = this.analysisGroups(conditions.groups);
@@ -422,7 +440,7 @@ class MysqlMapper<T extends Object> {
 		let args = whereC.args;
 		let sql = `SELECT ${fields} FROM ${this.tableName} ${whereC.str} ${groupStr} ${orderStr} ${limitStr}`;
 
-		let [rows] = await this.dsm.execute({ sql, args, ds });
+		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
 
 		if (!Array.isArray(rows)) {
 			return [];
@@ -435,10 +453,11 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 查询单个对象
 	 *
 	 */
-	async selectOne(conditions: SqlQuery = {}, ds: string = this.getDataSource()): Promise<T | null> {
+	@DSInjection()
+	async selectOne(conditions?: SqlQuery, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<T | null> {
 		let queryInfo = Object.assign({}, conditions, { limit: 1 });
 
-		let res = await this.select(queryInfo, ds);
+		let res = await this.select(queryInfo, sessionId, ds);
 		let o = res.length > 0 ? res[0] : null;
 
 		return o;
@@ -448,7 +467,8 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 通过主键查找对象
 	 *
 	 */
-	async selectByPrimaryKey(row: T, ds: string = this.getDataSource()): Promise<T | null> {
+	@DSInjection()
+	async selectByPrimaryKey(row: T, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<T | null> {
 		let sqlQuery: SqlQuery = {
 			where: {}, //查询条件
 			limit: 1,
@@ -468,19 +488,20 @@ class MysqlMapper<T extends Object> {
 			return Promise.reject(new Error(`${this.tableName} primary key  is null`));
 		}
 
-		return await this.selectOne(sqlQuery, ds);
+		return await this.selectOne(sqlQuery, sessionId, ds);
 	}
 
 	/***
 	 * @version 1.0 判定是否存在
 	 *
 	 */
-	async exist(sqlWhere: SqlWhere, ds: string = this.getDataSource()): Promise<boolean> {
-		let whereC = this.analysisWhere(sqlWhere);
+	@DSInjection()
+	async exist(where: SqlWhere, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
+		let whereC = this.analysisWhere(where);
 		let args = whereC.args;
 
 		let sql = `SELECT 1 FROM ${this.tableName} ${whereC.str} LIMIT 1`;
-		let [rows] = await this.dsm.execute({ sql, args, ds });
+		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
 
 		return rows.length > 0;
 	}
@@ -488,12 +509,13 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 统计符合条件的记录
 	 */
-	async count(sqlWhere: SqlWhere, ds: string = this.getDataSource()): Promise<number> {
-		let whereC = this.analysisWhere(sqlWhere);
+	@DSInjection()
+	async count(where: SqlWhere, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<number> {
+		let whereC = this.analysisWhere(where);
 		let args = whereC.args;
 		let sql = `SELECT COUNT(1) as num FROM ${this.tableName} ${whereC.str}`;
 
-		let [rows] = await this.dsm.execute({ sql, args, ds });
+		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
 
 		return rows[0].num;
 	}
@@ -501,13 +523,14 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 按照条件删除记录
 	 */
-	async delete(sqlDelete: SqlDelete, ds: string = this.getDataSource(false)): Promise<boolean> {
-		let whereC = this.analysisWhere(sqlDelete.where);
-		let limitStr = this.analysisLimit(sqlDelete.limit);
+	@DSInjection(false)
+	async delete(conditions: SqlDelete, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
+		let whereC = this.analysisWhere(conditions.where);
+		let limitStr = this.analysisLimit(conditions.limit);
 
 		let sql = `DELETE FROM ${this.tableName} ${whereC.str} ${limitStr}`;
 
-		let [okPacket] = await this.dsm.execute({ sql, args: whereC.args, ds });
+		let [okPacket] = await this.dsm.exec({ sql, args: whereC.args, ds, sessionId });
 
 		let affectedRows = okPacket.affectedRows;
 		return affectedRows > 0;
@@ -516,12 +539,14 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 删除某条记录
 	 */
-	async deleteOne(sqlWhere: SqlWhere, ds: string = this.getDataSource(false)): Promise<boolean> {
+	@DSInjection(false)
+	async deleteOne(where: SqlWhere, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
 		return await this.delete(
 			{
-				where: sqlWhere,
+				where,
 				limit: 1,
 			},
+			sessionId,
 			ds
 		);
 	}
@@ -529,8 +554,9 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 自定义sql执行
 	 */
-	async execute(sql: string, args: any[] = [], ds: string = this.getDataSource()): Promise<any> {
-		let [rows] = await this.dsm.execute({ sql, args, ds });
+	@DSInjection()
+	async execute(sql: string, args: any[] = [], @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<any> {
+		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
 
 		return rows;
 	}

@@ -34,7 +34,7 @@ export enum TimeUnitNum {
 }
 
 //作用于类上用于是否开启定时状态任务
-export function EnableScheduling(target: any): Ret;
+export function EnableScheduling(target: any): any;
 
 //开启定时任务按照间隔方式
 export function ScheduledInterval(s: ScheduledConfigInterval): RetProperty;

@@ -18,6 +18,7 @@ import Service from "./annotation/stereotype/Service";
 import Log from "./annotation/Log";
 import Repository from "./annotation/stereotype/Repository";
 import SpecifyCompent from "./annotation/stereotype/SpecifyCompent";
+import AddRequireModule from "./annotation/AddRequireModule";
 
 //注解暴露出去
 export {
@@ -41,4 +42,5 @@ export {
 	Readonly,
 	Log,
 	SpecifyCompent,
+	AddRequireModule,
 };

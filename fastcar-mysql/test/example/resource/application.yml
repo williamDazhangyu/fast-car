@@ -4,5 +4,6 @@ application:
 settings:
     mysql:
         printSQL: true
+        sessionTimeOut: 10000
         dataSoucreConfig:
             - { source: "test", database: "test", host: "localhost", user: "root", password: "123456", connectionLimit: 10 }

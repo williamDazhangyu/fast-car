@@ -247,7 +247,7 @@ class FastCarApplication extends Events {
 				let func = this.componentMap.get(name);
 
 				//如果等于自身则进行注入
-				if (name === FastCarApplication.name) {
+				if (name === FastCarApplication.name || name === FastCarMetaData.APP) {
 					func = this;
 				} else {
 					if (!this.componentMap.has(name)) {

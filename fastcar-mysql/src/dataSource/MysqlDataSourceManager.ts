@@ -4,9 +4,12 @@ import MysqlDataSource from "./MysqlDataSource";
 import { ApplicationStart, ApplicationStop, Autowired } from "fastcar-core/annotation";
 import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
 import * as mysql from "mysql2/promise";
+import * as uuid from "uuid";
+import { EnableScheduling, ScheduledInterval, TimeUnit } from "fastcar-timer";
 
 @ApplicationStart(BootPriority.Base, "start")
 @ApplicationStop(BootPriority.Lowest, "stop")
+@EnableScheduling
 class MysqlDataSourceManager {
 	@Autowired
 	private app!: FastCarApplication;
@@ -19,10 +22,12 @@ class MysqlDataSourceManager {
 	private defaultSource!: string; //默认数据源
 	private writeDefaultSource!: string; //默认写数据源
 	private readDefaultSource!: string; //默认读数据源
+	private sessionList: Map<string, number>; //session会话管理 如果超时或者释放时间过长则进行释放
 
 	constructor() {
 		//进行数据库初始化
 		this.sourceMap = new Map();
+		this.sessionList = new Map();
 	}
 
 	start(): void {
@@ -77,6 +82,65 @@ class MysqlDataSourceManager {
 
 	getDataSoucreByName(name: string): MysqlDataSource | undefined {
 		return this.sourceMap.get(name);
+	}
+
+	//创建session会话 用于事务的管理
+	createSession(): string {
+		let sessionId = "SQL:" + uuid.v4().replace(/-/g, "");
+		let connMap = new Map<string, mysql.PoolConnection[]>();
+		Reflect.set(this, sessionId, connMap);
+		this.sessionList.set(sessionId, Date.now());
+		return sessionId;
+	}
+
+	getSession(sessionId: string): Map<string, mysql.PoolConnection[]> {
+		let connMap = Reflect.get(this, sessionId);
+		return connMap;
+	}
+
+	async destorySession(sessionId: string, status: boolean): Promise<void> {
+		let connMap = this.getSession(sessionId);
+		if (connMap) {
+			for (let [ds, conns] of connMap) {
+				let db = this.getDataSoucreByName(ds);
+				conns.forEach(async (conn) => {
+					status ? await db?.rollback(conn) : await db?.commit(conn);
+					db?.releaseConnection(conn);
+				});
+			}
+			connMap.clear();
+		}
+		Reflect.deleteProperty(this, sessionId);
+
+		if (this.sessionList.has(sessionId)) {
+			this.sessionList.delete(sessionId);
+		}
+	}
+
+	//执行会话语句
+	async exec({ sql, args = [], ds = this.defaultSource, sessionId }: SqlExecType): Promise<any[]> {
+		if (sessionId) {
+			let connMap: Map<string, mysql.PoolConnection[]> = Reflect.get(this, sessionId);
+			if (connMap) {
+				let conns = connMap.get(ds) || [];
+				if (conns.length == 0) {
+					connMap.set(ds, conns);
+					let db = this.sourceMap.get(ds);
+					if (!db) {
+						throw new Error(`this datasoucre ${ds} cannot be found `);
+					}
+					let conn = await db.getBeginConnection();
+					conns.push(conn);
+				}
+				if (conns.length > 0) {
+					let result = await conns[0].execute(sql, args);
+					return result;
+				}
+			}
+			throw new Error(`session ${sessionId} cannot be found `);
+		}
+
+		return await this.execute({ sql, args, ds });
 	}
 
 	//执行sql
@@ -135,7 +199,7 @@ class MysqlDataSourceManager {
 		} finally {
 			for (let [ds, conn] of connMap) {
 				let db = this.sourceMap.get(ds);
-				errFlag ? db?.rollback(conn) : db?.commit(conn);
+				errFlag ? await db?.rollback(conn) : await db?.commit(conn);
 				db?.releaseConnection(conn);
 			}
 			connMap.clear();
@@ -160,6 +224,29 @@ class MysqlDataSourceManager {
 		}
 
 		return defaultName;
+	}
+
+	@ScheduledInterval({ fixedRate: 1, fixedRateString: TimeUnit.second })
+	checkSession() {
+		if (this.sessionList.size > 0) {
+			let cleanSessions: string[] = Array.of();
+			let sessionTimeOut = this.config.sessionTimeOut;
+			let nowTime = Date.now();
+
+			for (let [id, time] of this.sessionList) {
+				let diff = nowTime - time;
+				if (diff >= sessionTimeOut) {
+					cleanSessions.push(id);
+				}
+			}
+
+			if (cleanSessions.length > 0) {
+				cleanSessions.forEach(async (sessionId) => {
+					this.sysLogger.error(`${sessionId}: The session was longer than ${sessionTimeOut} milliseconds`);
+					this.destorySession(sessionId, true);
+				});
+			}
+		}
 	}
 }
 

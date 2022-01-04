@@ -19,6 +19,8 @@ export default function Application(target: any) {
 
 						if (Reflect.has(app, key) && TypeUtil.isFunction(afterFun) && TypeUtil.isFunction(beforeFun)) {
 							desc.value = async (...args: any[]) => {
+								if (beforeFun) {
+								}
 								Reflect.apply(beforeFun, app, args);
 								Reflect.apply(afterFun, appProxy, args);
 							};

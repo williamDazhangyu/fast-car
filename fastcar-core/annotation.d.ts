@@ -43,6 +43,9 @@ export function Injection(target: any, name: string): void;
 //应用注解类
 export function Application(target: any): any;
 
+//用于自身手动包装注入方法
+export function AddRequireModule(target: any, m: string, alias: string): void;
+
 //自动注入类
 export function Autowired(target: any, propertyKey: string): void;
 

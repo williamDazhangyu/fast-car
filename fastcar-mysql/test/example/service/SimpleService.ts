@@ -30,7 +30,7 @@ class SimpleService {
 
 	//添加
 	async saveOne() {
-		let test = new Test({ name: "aaa", caseTime: new Date() });
+		let test = new Test({ name: "aaa", caseTime: new Date(), money: 100000000 });
 		let res = await this.myMapper.saveOne(test);
 		return res;
 	}

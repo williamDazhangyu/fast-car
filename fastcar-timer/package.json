@@ -5,6 +5,13 @@
 	"types": "index.d.ts",
 	"author": "william_zhong",
 	"license": "MIT",
+	"exports": {
+		".": "./target/index.js"
+	},
+	"files": [
+		"target",
+		"index.d.ts"
+	],
 	"dependencies": {
 		"node-cron": "^3.0.0",
 		"reflect-metadata": "^0.1.13",

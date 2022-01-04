@@ -9,6 +9,7 @@ export default function ExceptionMonitor(target: any) {
 	});
 
 	process.on("unhandledRejection", (reason, promise) => {
-		console.error("Unhandled Rejection at:", promise, "reason:", reason);
+		console.error("Unhandled Rejection at:", promise);
+		console.error("reason:", reason);
 	});
 }
