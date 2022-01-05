@@ -3,32 +3,43 @@ import * as prettier from "prettier";
 import * as fs from "fs";
 import * as path from "path";
 import * as mysql from "mysql2/promise";
-import { DataTypeEnum } from "../type/DataTypeEnum";
+import { DataTypeEnum } from "fastcar-mysql";
+import { FiledType } from "./FiledType";
 
-type FiledType = {
-	COLUMN_NAME: string;
-	DATA_TYPE: string;
-	COLUMN_KEY: string;
-	COLUMN_COMMENT: string;
-	COLUMN_DEFAULT: string;
-};
-
-const DESCSQL = "SELECT COLUMN_NAME,DATA_TYPE, COLUMN_KEY, COLUMN_COMMENT, COLUMN_DEFAULT from information_schema.COLUMNS where table_name = ?";
+const DESCSQL = "SELECT * from information_schema.COLUMNS where table_name = ?";
 
 //从数据库表逆向生成类
-class ReverseGen {
+class ReverseGenerate {
 	//根据数据库名称生成
-	static formatType(dbtype: string) {
+	static formatType(dbtype: string): string {
 		return Reflect.get(DataTypeEnum, dbtype);
 	}
 
-	static genClass(dir: string, taleName: string, fieldInfo: FiledType[], style: prettier.Options) {
-		//进行写入
-		let importHead = `import "reflect-metadata";\n\n`;
-		let className = camelcase(taleName);
+	static formatClassName(name: string): string {
+		let className = camelcase(name);
+		return className.charAt(0).toUpperCase() + className.substring(1);
+	}
 
-		//第一个字母大写 类型
-		className = className.charAt(0).toUpperCase() + className.substring(1);
+	//创建文件夹
+	static createDir(dir: string): void {
+		if (!fs.existsSync(dir)) {
+			fs.mkdirSync(dir);
+		}
+
+		let tmpStats = fs.statSync(dir);
+		if (!tmpStats.isDirectory()) {
+			console.error("dir is not Directory", dir);
+			throw new Error("dir is not Directory" + dir);
+		}
+	}
+
+	//生成model
+	static genModel(taleName: string, dir: string, fieldInfo: FiledType[], style: prettier.Options): void {
+		//进行写入
+		let importHead = `import "reflect-metadata";\n`;
+		let importAnnotation: string[] = ["Table", "DBType"];
+
+		let className = ReverseGenerate.formatClassName(taleName);
 
 		let body = Array.of();
 		fieldInfo.forEach((field) => {
@@ -38,36 +49,112 @@ class ReverseGen {
 			if (field.COLUMN_COMMENT) {
 				tmpFieldList.push(`/**\n* ${field.COLUMN_COMMENT}\n*/`);
 			}
+
 			let formatName = camelcase(dbName);
 			if (formatName != dbName) {
-				tmpFieldList.push(`@Reflect.metadata("column", '${dbName}')`);
+				tmpFieldList.push(`@Field('${dbName}')`);
+				if (!importAnnotation.includes("Field")) {
+					importAnnotation.push("Field");
+				}
 			}
-			tmpFieldList.push(`@Reflect.metadata("type", '${field.DATA_TYPE}')`);
+			tmpFieldList.push(`@DBType('${field.DATA_TYPE}')`);
+
 			if (field.COLUMN_KEY) {
-				tmpFieldList.push(`@Reflect.metadata("key", '${field.COLUMN_KEY}')`);
+				tmpFieldList.push("@PrimaryKey");
+				if (!importAnnotation.includes("PrimaryKey")) {
+					importAnnotation.push("PrimaryKey");
+				}
 			}
-			tmpFieldList.push(`@Reflect.metadata("default", '${field.COLUMN_DEFAULT}')`);
+
+			if (field.IS_NULLABLE == "YES") {
+				tmpFieldList.push("@NotNull");
+				if (!importAnnotation.includes("NotNull")) {
+					importAnnotation.push("NotNull");
+				}
+			}
+
+			let length = field.CHARACTER_MAXIMUM_LENGTH || field.NUMERIC_PRECISION;
+			if (length) {
+				if (field.NUMERIC_SCALE) {
+					tmpFieldList.push(`@MaxLength(${length},${field.NUMERIC_SCALE})`);
+				} else {
+					tmpFieldList.push(`@MaxLength(${length})`);
+				}
+
+				if (!importAnnotation.includes("MaxLength")) {
+					importAnnotation.push("MaxLength");
+				}
+			}
 
 			//这边要做一个db 至 属性名的转换
-			tmpFieldList.push(`${formatName}!:${ReverseGen.formatType(field.DATA_TYPE)}`);
+			//判断是否有默认值
+			let tsType = ReverseGenerate.formatType(field.DATA_TYPE);
+			let tsValue = "";
+			if (field.COLUMN_DEFAULT != null) {
+				switch (tsType) {
+					case "number": {
+						tsValue = `${formatName}:${tsType}=${parseFloat(field.COLUMN_DEFAULT)};`;
+						break;
+					}
+					case "boolean": {
+						tsValue = `${formatName}:${tsType}=${!!field.COLUMN_DEFAULT};`;
+						break;
+					}
+					default: {
+						tsValue = `${formatName}:${tsType}='${field.COLUMN_DEFAULT}';`;
+						break;
+					}
+				}
+			} else {
+				tsValue = `${formatName}!:${tsType};`;
+			}
+			tmpFieldList.push(tsValue);
 			body.push(tmpFieldList.join("\n"));
 		});
 
-		let content = `${importHead} class ${className} \{ ${body.join("\n\n")} \}\n export default ${className}`;
+		//补全导入的头
+		importHead += `import { ${importAnnotation.join(",")} } from "fastcar-mysql/annotation";\n`;
+
+		let content = `${importHead}\n @Table('${taleName}')\n class ${className} \{\n ${body.join("\n\n")} \n\}\n\n export default ${className}`;
 		//进行格式化
 		const formatText = prettier.format(content, style);
 		let fp = path.join(dir, `${className}.ts`);
 		fs.writeFileSync(fp, formatText);
 	}
 
+	//生成mapper层
+	static async genMapper(taleName: string, mapperDir: string, rp: string, style: prettier.Options): Promise<void> {
+		let modelName = ReverseGenerate.formatClassName(taleName);
+		let importHeadList = [
+			`import \{ Repository \} from "fastcar-core/annotation";`,
+			`import \{ Entity \} from "fastcar-mysql/annotation";`,
+			`import \{ MysqlMapper \} from "fastcar-mysql";`,
+			`import ${modelName} from "${rp}/${modelName}";`,
+		];
+		let className = `${modelName}Mapper`;
+		let importHead = `${importHeadList.join("\n")}`;
+		let body = `@Entity(${modelName})\n\n@Repository\n\nclass ${className} extends MysqlMapper<${modelName}> \{ \}`;
+		let end = `export default ${className};`;
+
+		let content = `${importHead}\n\n${body}\n\n${end}`;
+
+		const formatText = prettier.format(content, style);
+		let fp = path.join(mapperDir, `${className}.ts`);
+		fs.writeFileSync(fp, formatText);
+	}
+
 	/***
 	 * @version 1.0 根据数据库文件 逆向生成model
 	 * @param tables 表名
+	 * @param modelDir model类生成的绝对路径
+	 * @param
 	 * @param dbConfig 数据库配置
 	 * @param style 基于prettier的格式
 	 */
 	static async generator(
-		tables: { [key: string]: string },
+		tables: string[],
+		modelDir: string, //绝对路径
+		mapperDir: string, //mapper绝对路径文件夹
 		dbConfig: mysql.ConnectionOptions,
 		style: prettier.Options = {
 			tabWidth: 4,
@@ -76,24 +163,25 @@ class ReverseGen {
 			useTabs: true,
 			parser: "typescript",
 		}
-	) {
+	): Promise<void> {
+		//生成路径
+		ReverseGenerate.createDir(modelDir);
+		ReverseGenerate.createDir(mapperDir);
+
 		let dbres = await mysql.createConnection(dbConfig);
-		for (let name in tables) {
+
+		//求相对路径
+		let rp = path.relative(mapperDir, modelDir);
+
+		for (let name of tables) {
 			let res = await dbres.query(DESCSQL, [name]);
-			let rows: any = res[0];
-			ReverseGen.genClass(tables[name], name, rows, style);
+			let row: any = res[0];
+			ReverseGenerate.genModel(name, modelDir, row, style);
+			ReverseGenerate.genMapper(name, mapperDir, rp, style);
 		}
+
 		dbres.destroy();
 	}
 }
 
-ReverseGen.generator(
-	{ test: __dirname },
-	{
-		database: "test",
-		user: "root",
-		password: "123456",
-	}
-);
-
-export default ReverseGen;
+export default ReverseGenerate;

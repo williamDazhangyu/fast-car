@@ -1,15 +1,23 @@
 {
 	"name": "fastcar-mysql-tool",
 	"version": "1.0.0",
-	"main": "index.js",
+	"main": "target/index.js",
 	"license": "MIT",
+	"exports": {
+		".": "./target/index.js"
+	},
+	"files": [
+		"target",
+		"index.d.ts"
+	],
 	"devDependencies": {
 		"@types/camelcase": "^5.2.0",
 		"@types/prettier": "^2.4.2"
 	},
 	"dependencies": {
 		"camelcase": "^6.2.1",
-		"prettier": "^2.5.1",
-		"mysql2": "^2.3.3"
+		"fastcar-mysql": "file:../fastcar-mysql",
+		"mysql2": "^2.3.3",
+		"prettier": "^2.5.1"
 	}
 }

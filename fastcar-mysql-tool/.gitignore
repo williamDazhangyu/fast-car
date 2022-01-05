@@ -3,5 +3,4 @@ yarn.lock
 **/*.map
 **/*.out
 logs/*
-target/*
 *.log

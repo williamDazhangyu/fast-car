@@ -8,7 +8,7 @@ export function DBType(name: string): PRet; //标记数据库类型
 
 export function Field(name: string): PRet; //标记数据列名
 
-export function MaxLength(length: number): PRet; //描述字段长度最大为多少
+export function MaxLength(length: number, scale?: number): PRet; //描述字段长度最大为多少
 
 export function NotNull(target: any, propertyKey: string): void; //非空字段
 
