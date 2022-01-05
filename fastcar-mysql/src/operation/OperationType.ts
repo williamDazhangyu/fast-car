@@ -58,3 +58,8 @@ export type SqlUpdate = {
 	row: RowData;
 	limit?: number; //限制行数
 };
+
+export type RowType = {
+	str: string;
+	args: Array<any>;
+};

@@ -8,13 +8,13 @@ class MysqlDataSource {
 		this.check();
 	}
 
-	async check() {
+	async check(): Promise<void> {
 		//获取一个连接进行验证
 		let conn = await this.getConnection();
 		this.releaseConnection(conn);
 	}
 
-	format(sql: string, values: any[] = []) {
+	format(sql: string, values: any[] = []): string {
 		//防止sql注入
 		return mysql.format(sql, JSON.parse(JSON.stringify(values)));
 	}
@@ -31,29 +31,29 @@ class MysqlDataSource {
 		return conn;
 	}
 
-	releaseConnection(conn: mysql.PoolConnection) {
+	releaseConnection(conn: mysql.PoolConnection): void {
 		conn.release();
 	}
 
 	//关于事务的操作
-	async beginTransaction(conn: mysql.PoolConnection) {
+	async beginTransaction(conn: mysql.PoolConnection): Promise<void> {
 		await conn.beginTransaction();
 	}
 
-	async commit(conn: mysql.PoolConnection) {
+	async commit(conn: mysql.PoolConnection): Promise<void> {
 		await conn.commit();
 	}
 
-	async rollback(conn: mysql.PoolConnection) {
+	async rollback(conn: mysql.PoolConnection): Promise<void> {
 		await conn.rollback();
 	}
 
 	//关闭连接池
-	async close() {
+	async close(): Promise<void> {
 		await this._pool.end();
 	}
 
-	getPool() {
+	getPool(): mysql.Pool {
 		return this._pool;
 	}
 }

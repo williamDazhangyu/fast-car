@@ -12,17 +12,17 @@ import { EnableScheduling, ScheduledInterval, TimeUnit } from "fastcar-timer";
 @EnableScheduling
 class MysqlDataSourceManager {
 	@Autowired
-	private app!: FastCarApplication;
+	protected app!: FastCarApplication;
 
 	@Autowired
-	private sysLogger!: Logger;
+	protected sysLogger!: Logger;
 
-	private sourceMap: Map<string, MysqlDataSource>;
-	private config!: MySqlConfig;
-	private defaultSource!: string; //默认数据源
-	private writeDefaultSource!: string; //默认写数据源
-	private readDefaultSource!: string; //默认读数据源
-	private sessionList: Map<string, number>; //session会话管理 如果超时或者释放时间过长则进行释放
+	protected sourceMap: Map<string, MysqlDataSource>;
+	protected config!: MySqlConfig;
+	protected defaultSource!: string; //默认数据源
+	protected writeDefaultSource!: string; //默认写数据源
+	protected readDefaultSource!: string; //默认读数据源
+	protected sessionList: Map<string, number>; //session会话管理 如果超时或者释放时间过长则进行释放
 
 	constructor() {
 		//进行数据库初始化
@@ -227,7 +227,7 @@ class MysqlDataSourceManager {
 	}
 
 	@ScheduledInterval({ fixedRate: 1, fixedRateString: TimeUnit.second })
-	checkSession() {
+	checkSession(): void {
 		if (this.sessionList.size > 0) {
 			let cleanSessions: string[] = Array.of();
 			let sessionTimeOut = this.config.sessionTimeOut;

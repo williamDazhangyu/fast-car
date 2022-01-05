@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { DesignMeta } from "../type/DesignMeta";
 import { Autowired } from "fastcar-core/annotation";
 import MysqlDataSourceManager from "../dataSource/MysqlDataSourceManager";
-import { OrderType, RowData, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "./OperationType";
+import { OrderType, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "./OperationType";
 import { MapperType } from "../type/MapperType";
 import { OperatorEnum } from "./OperationType";
 import { DataFormat, ValidationUtil } from "fastcar-core/utils";
@@ -12,23 +12,18 @@ import DSIndex from "../annotation/DSIndex";
 import SqlSession from "../annotation/SqlSession";
 import DSInjection from "../annotation/DSInjection";
 
-type RowType = {
-	str: string;
-	args: Array<any>;
-};
-
 /****
  * @version 1.0 采用crud方式进行数据操作
  */
 class MysqlMapper<T extends Object> {
-	@Autowired
-	protected dsm!: MysqlDataSourceManager;
-
 	protected tableName: string;
 	protected classZ: any; //映射的原型类
 	protected mappingMap: Map<string, MapperType>; //代码别名-映射关系
 	protected mappingList: MapperType[];
 	protected dbFields: Map<string, string>; //数据库别名-代码别名
+
+	@Autowired
+	protected dsm!: MysqlDataSourceManager;
 
 	constructor() {
 		let tClass = Reflect.getMetadata(DesignMeta.entity, this);
@@ -49,13 +44,13 @@ class MysqlMapper<T extends Object> {
 	}
 
 	//获取数据库别名通过代码内的名称
-	protected getFieldName(name: string) {
+	protected getFieldName(name: string): string {
 		let info = this.mappingMap.get(name);
 		return info ? info.field : name;
 	}
 
 	//自动映射数据库字段
-	protected toDBValue(v: any, key: string, type: string) {
+	protected toDBValue(v: any, key: string, type: string): any {
 		let value = Reflect.get(v, key);
 		let tmpValue = SerializeUtil.serialize(value, type);
 
@@ -391,7 +386,7 @@ class MysqlMapper<T extends Object> {
 	 *
 	 */
 	@DSInjection(false)
-	async updateOne(sqlUpdate: SqlUpdate, @SqlSession sessionId?: string, @DSIndex ds?: string) {
+	async updateOne(sqlUpdate: SqlUpdate, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
 		return await this.update(Object.assign({}, sqlUpdate, { limit: 1 }), sessionId, ds);
 	}
 
@@ -400,7 +395,7 @@ class MysqlMapper<T extends Object> {
 	 *
 	 */
 	@DSInjection(false)
-	async updateByPrimaryKey(row: T, @SqlSession sessionId?: string, @DSIndex ds?: string) {
+	async updateByPrimaryKey(row: T, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
 		let sqlUpdate: SqlUpdate = {
 			where: {}, //查询条件
 			row: {},

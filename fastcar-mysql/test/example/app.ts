@@ -15,12 +15,15 @@ const appInstance = new APP();
 
 console.log("crud测试");
 let service: SimpleService = appInstance.app.getComponentByName("SimpleService");
+//详情看更多的内部测试
 service.saveOne().then((res) => {
 	console.log(res);
 });
 
 let service2: TestTransactional = appInstance.app.getComponentByName("TestTransactional");
+console.log("纯sql测试");
 service2.exec();
+
 console.log("事务执行测试");
 service2
 	.work()
@@ -33,7 +36,6 @@ service2
 	});
 
 console.log("事务嵌套测试");
-
 service2
 	.firstWork()
 	.then((res) => {
