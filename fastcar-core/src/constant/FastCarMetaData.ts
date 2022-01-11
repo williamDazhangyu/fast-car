@@ -7,4 +7,6 @@ export enum FastCarMetaData {
 	RouterMap = "RouterMap", //路由集合模块
 	SpecifyMap = "SpecifyMap", //特定的组件集合
 	APP = "APP", //用于指定名称
+	DS = "dynamicDataSource",
+	DSIndex = "dynamicDataSourceIndex", //数据源索引位置
 }

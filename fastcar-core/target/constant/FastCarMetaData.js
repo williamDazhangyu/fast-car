@@ -11,4 +11,6 @@ var FastCarMetaData;
     FastCarMetaData["RouterMap"] = "RouterMap";
     FastCarMetaData["SpecifyMap"] = "SpecifyMap";
     FastCarMetaData["APP"] = "APP";
+    FastCarMetaData["DS"] = "dynamicDataSource";
+    FastCarMetaData["DSIndex"] = "dynamicDataSourceIndex";
 })(FastCarMetaData = exports.FastCarMetaData || (exports.FastCarMetaData = {}));

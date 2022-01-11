@@ -12,7 +12,5 @@ export enum DesignMeta {
 	entity = "db:entity", //实例化的数据库类
 	mapping = "db:mapping", //映射描述
 	dbFields = "db:fields", //数据库名-ts名
-	ds = "dynamicDataSource",
 	sqlSession = "SqlSession", //sql会话
-	dsIndex = "dynamicDataSourceIndex", //数据源索引位置
 }

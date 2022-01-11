@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddRequireModule = exports.SpecifyCompent = exports.Log = exports.Readonly = exports.Override = exports.NotImplemented = exports.Deprecate = exports.ExceptionMonitor = exports.Autowired = exports.Application = exports.Injection = exports.Repository = exports.Service = exports.Controller = exports.Configure = exports.Component = exports.ComponentScanExclusion = exports.ComponentScan = exports.ApplicationStop = exports.ApplicationStart = exports.ENV = void 0;
+exports.DSIndex = exports.DS = exports.AddRequireModule = exports.SpecifyCompent = exports.Log = exports.Readonly = exports.Override = exports.NotImplemented = exports.Deprecate = exports.ExceptionMonitor = exports.Autowired = exports.Application = exports.Injection = exports.Repository = exports.Service = exports.Controller = exports.Configure = exports.Component = exports.ComponentScanExclusion = exports.ComponentScan = exports.ApplicationStop = exports.ApplicationStart = exports.ENV = void 0;
 const Application_1 = require("./annotation/Application");
 exports.Application = Application_1.default;
 const Autowired_1 = require("./annotation/Autowired");
@@ -43,3 +43,7 @@ const SpecifyCompent_1 = require("./annotation/stereotype/SpecifyCompent");
 exports.SpecifyCompent = SpecifyCompent_1.default;
 const AddRequireModule_1 = require("./annotation/AddRequireModule");
 exports.AddRequireModule = AddRequireModule_1.default;
+const DS_1 = require("./annotation/data/DS");
+exports.DS = DS_1.default;
+const DSIndex_1 = require("./annotation/data/DSIndex");
+exports.DSIndex = DSIndex_1.default;

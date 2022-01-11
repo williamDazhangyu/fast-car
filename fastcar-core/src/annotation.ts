@@ -19,6 +19,8 @@ import Log from "./annotation/Log";
 import Repository from "./annotation/stereotype/Repository";
 import SpecifyCompent from "./annotation/stereotype/SpecifyCompent";
 import AddRequireModule from "./annotation/AddRequireModule";
+import DS from "./annotation/data/DS";
+import DSIndex from "./annotation/data/DSIndex";
 
 //注解暴露出去
 export {
@@ -43,4 +45,6 @@ export {
 	Log,
 	SpecifyCompent,
 	AddRequireModule,
+	DS,
+	DSIndex,
 };

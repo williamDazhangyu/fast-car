@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { DesignMeta } from "../type/DesignMeta";
-import { Autowired } from "fastcar-core/annotation";
+import { Autowired, DSIndex } from "fastcar-core/annotation";
 import MysqlDataSourceManager from "../dataSource/MysqlDataSourceManager";
 import { OrderType, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "./OperationType";
 import { MapperType } from "../type/MapperType";
@@ -8,9 +8,7 @@ import { OperatorEnum } from "./OperationType";
 import { DataFormat, ValidationUtil } from "fastcar-core/utils";
 import SerializeUtil from "../util/SerializeUtil";
 import SqlError from "../type/SqlError";
-import DSIndex from "../annotation/DSIndex";
 import SqlSession from "../annotation/SqlSession";
-import DSInjection from "../annotation/DSInjection";
 
 /****
  * @version 1.0 采用crud方式进行数据操作
@@ -228,27 +226,9 @@ class MysqlMapper<T extends Object> {
 		return list;
 	}
 
-	//获取默认数据源 这边可以自行拓展
-	getDataSource(service: string = "", read: boolean = true): string {
-		if (service) {
-			let fnDefaultDS = Reflect.getMetadata(DesignMeta.ds, service);
-			if (fnDefaultDS) {
-				return fnDefaultDS;
-			}
-		}
-
-		let classDefaultDS = Reflect.getMetadata(DesignMeta.ds, this);
-		if (classDefaultDS) {
-			return classDefaultDS;
-		}
-
-		return this.dsm.getDefaultSoucre(read);
-	}
-
 	/***
 	 * @version 1.0 更新或者添加记录多条记录(一般用于整条记录的更新)
 	 */
-	@DSInjection(false)
 	async saveORUpdate(rows: T | T[], @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<number> {
 		if (!Array.isArray(rows)) {
 			rows = [rows];
@@ -298,7 +278,6 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 插入单条记录返回主键
 	 */
-	@DSInjection(false)
 	async saveOne(row: T, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<number> {
 		let params: string[] = [];
 		let args: any[] = [];
@@ -325,7 +304,6 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 批量插入记录
 	 */
-	@DSInjection(false)
 	async saveList(rows: T[], @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
 		if (rows.length < 1) {
 			return Promise.reject(new Error("rows is empty"));
@@ -363,7 +341,6 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 更新记录
 	 *
 	 */
-	@DSInjection(false)
 	async update({ row, where, limit }: SqlUpdate, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
 		let rowStr = this.analysisRow(row);
 		if (!rowStr) {
@@ -385,7 +362,6 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 更新一条数据
 	 *
 	 */
-	@DSInjection(false)
 	async updateOne(sqlUpdate: SqlUpdate, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
 		return await this.update(Object.assign({}, sqlUpdate, { limit: 1 }), sessionId, ds);
 	}
@@ -394,7 +370,6 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 根据实体类的主键来更新数据
 	 *
 	 */
-	@DSInjection(false)
 	async updateByPrimaryKey(row: T, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
 		let sqlUpdate: SqlUpdate = {
 			where: {}, //查询条件
@@ -424,7 +399,6 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 根据条件进行查找
 	 */
-	@DSInjection()
 	async select(conditions: SqlQuery, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<T[]> {
 		let fields = this.analysisFields(conditions.fields);
 		let whereC = this.analysisWhere(conditions.where);
@@ -448,7 +422,6 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 查询单个对象
 	 *
 	 */
-	@DSInjection()
 	async selectOne(conditions?: SqlQuery, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<T | null> {
 		let queryInfo = Object.assign({}, conditions, { limit: 1 });
 
@@ -462,7 +435,6 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 通过主键查找对象
 	 *
 	 */
-	@DSInjection()
 	async selectByPrimaryKey(row: T, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<T | null> {
 		let sqlQuery: SqlQuery = {
 			where: {}, //查询条件
@@ -490,7 +462,6 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 判定是否存在
 	 *
 	 */
-	@DSInjection()
 	async exist(where: SqlWhere, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
 		let whereC = this.analysisWhere(where);
 		let args = whereC.args;
@@ -504,7 +475,6 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 统计符合条件的记录
 	 */
-	@DSInjection()
 	async count(where: SqlWhere, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<number> {
 		let whereC = this.analysisWhere(where);
 		let args = whereC.args;
@@ -518,7 +488,6 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 按照条件删除记录
 	 */
-	@DSInjection(false)
 	async delete(conditions: SqlDelete, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
 		let whereC = this.analysisWhere(conditions.where);
 		let limitStr = this.analysisLimit(conditions.limit);
@@ -534,7 +503,6 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 删除某条记录
 	 */
-	@DSInjection(false)
 	async deleteOne(where: SqlWhere, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
 		return await this.delete(
 			{
@@ -549,7 +517,6 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 自定义sql执行
 	 */
-	@DSInjection()
 	async execute(sql: string, args: any[] = [], @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<any> {
 		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
 

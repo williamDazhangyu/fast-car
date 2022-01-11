@@ -7,7 +7,7 @@ import { DesignMeta } from "../type/DesignMeta";
 import { FastCarApplication } from "fastcar-core";
 
 /**
- * @version 1.0 事务管理 不支持事务的嵌套(避免长事务) 尽量做到一个方法一个事务
+ * @version 1.0 事务管理 不建议多个事务的嵌套(避免长事务) 尽量做到一个方法一个事务
  * */
 export default function Transactional(target: any, methodName: string, descriptor: PropertyDescriptor) {
 	const orignFunction = descriptor.value;

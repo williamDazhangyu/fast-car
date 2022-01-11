@@ -1,10 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EnableMysql = exports.Transactional = exports.SqlSession = exports.DSInjection = exports.DSIndex = exports.DS = exports.Entity = exports.Table = exports.PrimaryKey = exports.NotNull = exports.MaxLength = exports.Field = exports.DBType = void 0;
-const DS_1 = require("./annotation/DS");
-exports.DS = DS_1.default;
-const DSIndex_1 = require("./annotation/DSIndex");
-exports.DSIndex = DSIndex_1.default;
+exports.EnableMysql = exports.Transactional = exports.SqlSession = exports.DSInjection = exports.Entity = exports.Table = exports.PrimaryKey = exports.NotNull = exports.MaxLength = exports.Field = exports.DBType = void 0;
 const DSInjection_1 = require("./annotation/DSInjection");
 exports.DSInjection = DSInjection_1.default;
 const EnableMysql_1 = require("./annotation/EnableMysql");

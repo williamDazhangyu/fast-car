@@ -18,6 +18,8 @@ function Application(target) {
                         let afterFun = desc.value;
                         if (Reflect.has(app, key) && TypeUtil_1.default.isFunction(afterFun) && TypeUtil_1.default.isFunction(beforeFun)) {
                             desc.value = async (...args) => {
+                                if (beforeFun) {
+                                }
                                 Reflect.apply(beforeFun, app, args);
                                 Reflect.apply(afterFun, appProxy, args);
                             };

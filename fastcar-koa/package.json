@@ -13,6 +13,7 @@
     "@types/koa-static": "^4.0.2"
   },
   "dependencies": {
+    "fastcar-core": "file:../fastcar-core",
     "koa": "^2.13.1",
     "koa-body": "^4.2.0",
     "koa-bodyparser": "^4.3.0",

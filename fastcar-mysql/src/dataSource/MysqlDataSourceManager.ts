@@ -7,6 +7,9 @@ import * as mysql from "mysql2/promise";
 import * as uuid from "uuid";
 import { EnableScheduling, ScheduledInterval, TimeUnit } from "fastcar-timer";
 
+const SELECT = "SELECT";
+const select = "select";
+
 @ApplicationStart(BootPriority.Base, "start")
 @ApplicationStop(BootPriority.Lowest, "stop")
 @EnableScheduling
@@ -98,6 +101,11 @@ class MysqlDataSourceManager {
 		return connMap;
 	}
 
+	isReadBySql(sql: string): boolean {
+		let formatSQL = sql.trim();
+		return formatSQL.startsWith(SELECT) || formatSQL.startsWith(select);
+	}
+
 	async destorySession(sessionId: string, status: boolean): Promise<void> {
 		let connMap = this.getSession(sessionId);
 		if (connMap) {
@@ -117,8 +125,17 @@ class MysqlDataSourceManager {
 		}
 	}
 
+	getDefaultSoucre(read: boolean = true): string {
+		let defaultName = read ? this.readDefaultSource : this.writeDefaultSource;
+		if (!defaultName) {
+			defaultName = this.defaultSource;
+		}
+
+		return defaultName;
+	}
+
 	//执行会话语句
-	async exec({ sql, args = [], ds = this.defaultSource, sessionId }: SqlExecType): Promise<any[]> {
+	async exec({ sql, args = [], ds = this.getDefaultSoucre(this.isReadBySql(sql)), sessionId }: SqlExecType): Promise<any[]> {
 		if (sessionId) {
 			let connMap: Map<string, mysql.PoolConnection[]> = Reflect.get(this, sessionId);
 			if (connMap) {
@@ -144,7 +161,7 @@ class MysqlDataSourceManager {
 	}
 
 	//执行sql
-	async execute({ sql, args = [], ds = this.defaultSource }: SqlExecType): Promise<any[]> {
+	async execute({ sql, args = [], ds = this.getDefaultSoucre(this.isReadBySql(sql)) }: SqlExecType): Promise<any[]> {
 		if (this.config.printSQL) {
 			this.sysLogger.info(mysql.format(sql, args));
 		}
@@ -179,7 +196,7 @@ class MysqlDataSourceManager {
 
 		try {
 			for (let task of tasks) {
-				let ds = task.ds || this.getDefaultSoucre();
+				let ds = task.ds || this.getDefaultSoucre(this.isReadBySql(task.sql));
 				let conn = connMap.get(ds);
 
 				if (!conn) {
@@ -215,15 +232,6 @@ class MysqlDataSourceManager {
 		}
 		let conn = await db.getConnection();
 		return conn;
-	}
-
-	getDefaultSoucre(read: boolean = true): string {
-		let defaultName = read ? this.readDefaultSource : this.writeDefaultSource;
-		if (!defaultName) {
-			defaultName = this.defaultSource;
-		}
-
-		return defaultName;
 	}
 
 	@ScheduledInterval({ fixedRate: 1, fixedRateString: TimeUnit.second })

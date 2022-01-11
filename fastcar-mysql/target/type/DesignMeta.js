@@ -16,7 +16,5 @@ var DesignMeta;
     DesignMeta["entity"] = "db:entity";
     DesignMeta["mapping"] = "db:mapping";
     DesignMeta["dbFields"] = "db:fields";
-    DesignMeta["ds"] = "dynamicDataSource";
     DesignMeta["sqlSession"] = "SqlSession";
-    DesignMeta["dsIndex"] = "dynamicDataSourceIndex";
 })(DesignMeta = exports.DesignMeta || (exports.DesignMeta = {}));

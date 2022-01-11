@@ -7,7 +7,7 @@ const MysqlDataSourceManager_1 = require("../dataSource/MysqlDataSourceManager")
 const SqlError_1 = require("../type/SqlError");
 const DesignMeta_1 = require("../type/DesignMeta");
 /**
- * @version 1.0 事务管理 不支持事务的嵌套(避免长事务) 尽量做到一个方法一个事务
+ * @version 1.0 事务管理 不建议多个事务的嵌套(避免长事务) 尽量做到一个方法一个事务
  * */
 function Transactional(target, methodName, descriptor) {
     const orignFunction = descriptor.value;

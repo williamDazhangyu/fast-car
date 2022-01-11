@@ -1,5 +1,3 @@
-import DS from "./annotation/DS";
-import DSIndex from "./annotation/DSIndex";
 import DSInjection from "./annotation/DSInjection";
 import EnableMysql from "./annotation/EnableMysql";
 import Entity from "./annotation/Entity";
@@ -20,8 +18,6 @@ export {
 	PrimaryKey, //是否为主键
 	Table, //表名
 	Entity, //表和对应编程内的类型映射
-	DS, //数据源
-	DSIndex, //数据源指定位置
 	DSInjection, //数据源动态注入
 	SqlSession, //连接会话 如果需要使用同一连接或者使用事务是传递
 	Transactional, //事务管理

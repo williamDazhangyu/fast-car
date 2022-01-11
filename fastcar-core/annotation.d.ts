@@ -1,5 +1,7 @@
 type Ret = (target: any) => void;
 
+type FRet = (target: any, methodName?: string, descriptor?: PropertyDescriptor) => void;
+
 declare interface Log4jsConfig {
 	appenders: { [name: string]: any };
 	categories: { [name: string]: { appenders: string[]; level: string; enableCallStack?: boolean } };
@@ -69,3 +71,9 @@ export function Log(config?: Log4jsConfig): Ret;
 
 //用于手动注入组件
 export function SpecifyCompent(m: Function): Ret;
+
+//动态数据源标记
+export function DS(name: string): FRet;
+
+//指定数据源标记位置
+export function DSIndex(target: any, name: string, index: number): void;

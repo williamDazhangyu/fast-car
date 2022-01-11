@@ -9,7 +9,8 @@ function ExceptionMonitor(target) {
         console.error(`stack: ${err.stack}`);
     });
     process.on("unhandledRejection", (reason, promise) => {
-        console.error("Unhandled Rejection at:", promise, "reason:", reason);
+        console.error("Unhandled Rejection at:", promise);
+        console.error("reason:", reason);
     });
 }
 exports.default = ExceptionMonitor;
