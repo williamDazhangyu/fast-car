@@ -159,7 +159,16 @@ export class FastCarApplication {
 	 */
 	init(): void;
 
+	/***
+	 * @version 1.0 退出事件监听
+	 *
+	 */
 	addExitEvent(): void;
+
+	/***
+	 * @version 1.0 异常事件进行监听 不至于程序异常直接退出
+	 */
+	addExecptionEvent(): void;
 
 	/**
 	 * @version 1.0 自动调用方法

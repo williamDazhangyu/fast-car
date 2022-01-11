@@ -11,13 +11,11 @@ import { LogDefaultConfig, SYSConfig, SYSDefaultConfig } from "./config/SysConfi
 import { FastCarMetaData } from "./constant/FastCarMetaData";
 import { ApplicationConfig } from "./config/ApplicationConfig";
 import { ComponentKind } from "./constant/ComponentKind";
-import ExceptionMonitor from "./annotation/ExceptionMonitor";
 import { CommonConstant, FileResSuffix } from "./constant/CommonConstant";
 import { LifeCycleModule } from "./constant/LifeCycleModule";
 import * as log4js from "log4js";
 import { Log4jsConfig } from "./config/Log4jsConfig";
 
-@ExceptionMonitor
 class FastCarApplication extends Events {
 	componentMap: Map<string, any>; //组件键值对
 	sysConfig: SYSConfig; //系统配置
@@ -239,6 +237,13 @@ class FastCarApplication extends Events {
 		let relyname = FastCarMetaData.IocModule;
 
 		this.componentMap.forEach((instance, instanceName) => {
+			//补充实例找不到时 不能被注解
+			if (!instance) {
+				let insatnceError = new Error(`instance not found by ${instanceName}`);
+				this.sysLogger.error(insatnceError.message);
+				throw insatnceError;
+			}
+
 			let moduleList: Map<string, string> = Reflect.getMetadata(relyname, instance);
 			if (!moduleList || moduleList.size == 0) {
 				return;
@@ -327,6 +332,7 @@ class FastCarApplication extends Events {
 		this.beforeStartServer();
 		this.startServer();
 		this.addExitEvent();
+		this.addExecptionEvent();
 	}
 
 	addExitEvent() {
@@ -337,6 +343,19 @@ class FastCarApplication extends Events {
 
 		process.on("exit", () => {
 			this.stopServer();
+		});
+	}
+
+	addExecptionEvent() {
+		process.on("uncaughtException", (err: any, origin: any) => {
+			this.sysLogger.error(`Caught exception: ${err.message}`);
+			this.sysLogger.error(`Exception origin: ${origin}`);
+			this.sysLogger.error(`stack: ${err.stack}`);
+		});
+
+		process.on("unhandledRejection", (reason, promise) => {
+			this.sysLogger.error("Unhandled Rejection at:", promise);
+			this.sysLogger.error("reason:", reason);
 		});
 	}
 
