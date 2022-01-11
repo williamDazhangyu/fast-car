@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 const FastCarMetaData_1 = require("../../constant/FastCarMetaData");
+const ClassUtils_1 = require("../../utils/ClassUtils");
 const TypeUtil_1 = require("../../utils/TypeUtil");
 const ValidationUtil_1 = require("../../utils/ValidationUtil");
 //动态数据源获取 根据就近原则 传入参数-函数-类名
@@ -28,7 +29,7 @@ function DS(name) {
             Reflect.defineMetadata(FastCarMetaData_1.FastCarMetaData.DS, name, target.prototype);
             //找所有的方法 将符合要求的进行注入定义
             let targetProto = target.prototype;
-            let keys = Reflect.ownKeys(targetProto);
+            let keys = ClassUtils_1.default.getProtoType(target);
             for (let key of keys) {
                 let dsIndex = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.DSIndex, targetProto, key);
                 if (ValidationUtil_1.default.isNumber(dsIndex)) {

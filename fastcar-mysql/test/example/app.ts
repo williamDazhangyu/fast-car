@@ -2,6 +2,7 @@ import { FastCarApplication } from "fastcar-core";
 import { Application, ComponentScan, Log } from "fastcar-core/annotation";
 import EnableMysql from "../../src/annotation/EnableMysql";
 import SimpleService from "./service/SimpleService";
+import TestDS from "./service/TestDS";
 import TestTransactional from "./service/TestTransactional";
 
 @Application
@@ -15,7 +16,7 @@ const appInstance = new APP();
 
 console.log("crud测试");
 let service: SimpleService = appInstance.app.getComponentByName("SimpleService");
-//详情看更多的内部测试
+// 详情看更多的内部测试;
 service.saveOne().then((res) => {
 	console.log(res);
 });
@@ -44,3 +45,9 @@ service2
 	.catch((e) => {
 		console.error(e);
 	});
+
+console.log("多数据源测试");
+let testTestDSService: TestDS = appInstance.app.getComponentByName("TestDS");
+testTestDSService.switchDS().then((res) => {
+	console.log(res[0]?.caseName, res[1]?.caseName);
+});

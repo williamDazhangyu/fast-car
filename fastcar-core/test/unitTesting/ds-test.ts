@@ -14,4 +14,20 @@ describe("数据源测试", () => {
 		let testA = new A();
 		testA.test();
 	});
+
+	it("数据源继承加载影响", () => {
+		class A {
+			test(@DSIndex zs?: string) {
+				console.log(zs);
+			}
+		}
+
+		@DS("cc")
+		class B extends A {
+			test2() {}
+		}
+
+		let testB = new B();
+		testB.test();
+	});
 });

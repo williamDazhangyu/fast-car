@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { FastCarMetaData } from "../../constant/FastCarMetaData";
+import ClassUtils from "../../utils/ClassUtils";
 import TypeUtil from "../../utils/TypeUtil";
 import ValidationUtil from "../../utils/ValidationUtil";
 
@@ -31,7 +32,8 @@ export default function DS(name: string) {
 
 			//找所有的方法 将符合要求的进行注入定义
 			let targetProto = target.prototype;
-			let keys = Reflect.ownKeys(targetProto);
+			let keys = ClassUtils.getProtoType(target);
+
 			for (let key of keys) {
 				let dsIndex = Reflect.getMetadata(FastCarMetaData.DSIndex, targetProto, key);
 				if (ValidationUtil.isNumber(dsIndex)) {

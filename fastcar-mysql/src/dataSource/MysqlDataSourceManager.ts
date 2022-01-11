@@ -33,6 +33,21 @@ class MysqlDataSourceManager {
 		this.sessionList = new Map();
 	}
 
+	async connExecute(conn: mysql.PoolConnection, sql: string, args: any[] = []) {
+		//检查sql执行时间
+		let beforeTime = Date.now();
+		let res = await conn.execute(sql, args);
+		let afterTime = Date.now();
+		let diff = afterTime - beforeTime;
+
+		if (diff >= this.config.slowSQLInterval) {
+			this.sysLogger.warn(`The SQL execution time took ${diff} ms, more than ${this.config.slowSQLInterval} ms`);
+			this.sysLogger.warn(mysql.format(sql, args));
+		}
+
+		return res;
+	}
+
 	start(): void {
 		let config: MySqlConfig = this.app.getSetting("mysql");
 		if (config) {
@@ -150,7 +165,7 @@ class MysqlDataSourceManager {
 					conns.push(conn);
 				}
 				if (conns.length > 0) {
-					let result = await conns[0].execute(sql, args);
+					let result = await this.connExecute(conns[0], sql, args);
 					return result;
 				}
 			}
@@ -174,7 +189,7 @@ class MysqlDataSourceManager {
 			let conn;
 			try {
 				let conn = await dataSoucre.getConnection();
-				let result = await conn.execute(sql, args);
+				let result = await this.connExecute(conn, sql, args);
 				dataSoucre.releaseConnection(conn);
 				return resolve(result);
 			} catch (e: any) {
@@ -208,7 +223,7 @@ class MysqlDataSourceManager {
 					connMap.set(ds, conn);
 				}
 
-				await conn.execute(task.sql, task.args);
+				await this.connExecute(conn, task.sql, task.args);
 			}
 		} catch (e) {
 			this.sysLogger.error(e);

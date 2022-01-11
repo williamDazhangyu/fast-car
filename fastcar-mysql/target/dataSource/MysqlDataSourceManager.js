@@ -16,11 +16,25 @@ const fastcar_core_1 = require("fastcar-core");
 const mysql = require("mysql2/promise");
 const uuid = require("uuid");
 const fastcar_timer_1 = require("fastcar-timer");
+const SELECT = "SELECT";
+const select = "select";
 let MysqlDataSourceManager = class MysqlDataSourceManager {
     constructor() {
         //进行数据库初始化
         this.sourceMap = new Map();
         this.sessionList = new Map();
+    }
+    async connExecute(conn, sql, args = []) {
+        //检查sql执行时间
+        let beforeTime = Date.now();
+        let res = await conn.execute(sql, args);
+        let afterTime = Date.now();
+        let diff = afterTime - beforeTime;
+        if (diff >= this.config.slowSQLInterval) {
+            this.sysLogger.warn(`The SQL execution time took ${diff} ms, more than ${this.config.slowSQLInterval} ms`);
+            this.sysLogger.warn(mysql.format(sql, args));
+        }
+        return res;
     }
     start() {
         let config = this.app.getSetting("mysql");
@@ -78,6 +92,10 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
         let connMap = Reflect.get(this, sessionId);
         return connMap;
     }
+    isReadBySql(sql) {
+        let formatSQL = sql.trim();
+        return formatSQL.startsWith(SELECT) || formatSQL.startsWith(select);
+    }
     async destorySession(sessionId, status) {
         let connMap = this.getSession(sessionId);
         if (connMap) {
@@ -95,8 +113,15 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
             this.sessionList.delete(sessionId);
         }
     }
+    getDefaultSoucre(read = true) {
+        let defaultName = read ? this.readDefaultSource : this.writeDefaultSource;
+        if (!defaultName) {
+            defaultName = this.defaultSource;
+        }
+        return defaultName;
+    }
     //执行会话语句
-    async exec({ sql, args = [], ds = this.defaultSource, sessionId }) {
+    async exec({ sql, args = [], ds = this.getDefaultSoucre(this.isReadBySql(sql)), sessionId }) {
         if (sessionId) {
             let connMap = Reflect.get(this, sessionId);
             if (connMap) {
@@ -111,7 +136,7 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
                     conns.push(conn);
                 }
                 if (conns.length > 0) {
-                    let result = await conns[0].execute(sql, args);
+                    let result = await this.connExecute(conns[0], sql, args);
                     return result;
                 }
             }
@@ -120,7 +145,7 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
         return await this.execute({ sql, args, ds });
     }
     //执行sql
-    async execute({ sql, args = [], ds = this.defaultSource }) {
+    async execute({ sql, args = [], ds = this.getDefaultSoucre(this.isReadBySql(sql)) }) {
         if (this.config.printSQL) {
             this.sysLogger.info(mysql.format(sql, args));
         }
@@ -132,7 +157,7 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
             let conn;
             try {
                 let conn = await dataSoucre.getConnection();
-                let result = await conn.execute(sql, args);
+                let result = await this.connExecute(conn, sql, args);
                 dataSoucre.releaseConnection(conn);
                 return resolve(result);
             }
@@ -153,7 +178,7 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
         let errFlag = false;
         try {
             for (let task of tasks) {
-                let ds = task.ds || this.getDefaultSoucre();
+                let ds = task.ds || this.getDefaultSoucre(this.isReadBySql(task.sql));
                 let conn = connMap.get(ds);
                 if (!conn) {
                     let db = this.sourceMap.get(ds);
@@ -163,7 +188,7 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
                     conn = await db.getBeginConnection();
                     connMap.set(ds, conn);
                 }
-                await conn.execute(task.sql, task.args);
+                await this.connExecute(conn, task.sql, task.args);
             }
         }
         catch (e) {
@@ -188,13 +213,6 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
         }
         let conn = await db.getConnection();
         return conn;
-    }
-    getDefaultSoucre(read = true) {
-        let defaultName = read ? this.readDefaultSource : this.writeDefaultSource;
-        if (!defaultName) {
-            defaultName = this.defaultSource;
-        }
-        return defaultName;
     }
     checkSession() {
         if (this.sessionList.size > 0) {

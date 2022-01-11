@@ -91,6 +91,11 @@ class SimpleService {
 		});
 		return res;
 	}
+
+	//操作一个错误的
+	async opeatorError() {
+		return await this.myMapper.execute("select * from noExistTable");
+	}
 }
 
 export default SimpleService;

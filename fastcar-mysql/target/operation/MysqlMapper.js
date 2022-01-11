@@ -21,8 +21,6 @@ const utils_1 = require("fastcar-core/utils");
 const SerializeUtil_1 = require("../util/SerializeUtil");
 const SqlError_1 = require("../type/SqlError");
 const SqlSession_1 = require("../annotation/SqlSession");
-const DSInjection_1 = require("../annotation/DSInjection");
-const index_1 = require("../../../fastcar-core/index");
 /****
  * @version 1.0 采用crud方式进行数据操作
  */
@@ -197,20 +195,6 @@ class MysqlMapper {
             list.push(this.setRow(item));
         });
         return list;
-    }
-    //获取默认数据源 这边可以自行拓展
-    getDataSource(service = "", read = true) {
-        if (service) {
-            let fnDefaultDS = Reflect.getMetadata(index_1.FastCarMetaData.DS, service);
-            if (fnDefaultDS) {
-                return fnDefaultDS;
-            }
-        }
-        let classDefaultDS = Reflect.getMetadata(index_1.FastCarMetaData.DS, this);
-        if (classDefaultDS) {
-            return classDefaultDS;
-        }
-        return this.dsm.getDefaultSoucre(read);
     }
     /***
      * @version 1.0 更新或者添加记录多条记录(一般用于整条记录的更新)
@@ -459,98 +443,84 @@ __decorate([
     __metadata("design:type", MysqlDataSourceManager_1.default)
 ], MysqlMapper.prototype, "dsm", void 0);
 __decorate([
-    DSInjection_1.default(false),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "saveORUpdate", null);
 __decorate([
-    DSInjection_1.default(false),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "saveOne", null);
 __decorate([
-    DSInjection_1.default(false),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Array, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "saveList", null);
 __decorate([
-    DSInjection_1.default(false),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "update", null);
 __decorate([
-    DSInjection_1.default(false),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "updateOne", null);
 __decorate([
-    DSInjection_1.default(false),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "updateByPrimaryKey", null);
 __decorate([
-    DSInjection_1.default(),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "select", null);
 __decorate([
-    DSInjection_1.default(),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "selectOne", null);
 __decorate([
-    DSInjection_1.default(),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "selectByPrimaryKey", null);
 __decorate([
-    DSInjection_1.default(),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "exist", null);
 __decorate([
-    DSInjection_1.default(),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "count", null);
 __decorate([
-    DSInjection_1.default(false),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "delete", null);
 __decorate([
-    DSInjection_1.default(false),
     __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "deleteOne", null);
 __decorate([
-    DSInjection_1.default(),
     __param(2, SqlSession_1.default), __param(3, annotation_1.DSIndex),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Array, String, String]),
