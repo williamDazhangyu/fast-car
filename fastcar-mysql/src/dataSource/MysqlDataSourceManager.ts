@@ -34,6 +34,13 @@ class MysqlDataSourceManager {
 	}
 
 	async connExecute(conn: mysql.PoolConnection, sql: string, args: any[] = []) {
+		//打印sql
+		let finalSQL = mysql.format(sql, args);
+
+		if (this.config.printSQL) {
+			this.sysLogger.info("printSQL", finalSQL);
+		}
+
 		//检查sql执行时间
 		let beforeTime = Date.now();
 		let res = await conn.execute(sql, args);
@@ -42,7 +49,7 @@ class MysqlDataSourceManager {
 
 		if (diff >= this.config.slowSQLInterval) {
 			this.sysLogger.warn(`The SQL execution time took ${diff} ms, more than ${this.config.slowSQLInterval} ms`);
-			this.sysLogger.warn(mysql.format(sql, args));
+			this.sysLogger.warn(finalSQL);
 		}
 
 		return res;
@@ -177,9 +184,6 @@ class MysqlDataSourceManager {
 
 	//执行sql
 	async execute({ sql, args = [], ds = this.getDefaultSoucre(this.isReadBySql(sql)) }: SqlExecType): Promise<any[]> {
-		if (this.config.printSQL) {
-			this.sysLogger.info(mysql.format(sql, args));
-		}
 		return new Promise(async (resolve, reject) => {
 			let dataSoucre = this.sourceMap.get(ds);
 			if (!dataSoucre) {
