@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const mysql = require("mysql2/promise");
 const fastcar_mysql_1 = require("fastcar-mysql");
-const DESCSQL = "SELECT * from information_schema.COLUMNS where table_name = ?";
+const DESCSQL = "SELECT * from information_schema.COLUMNS where table_name = ? AND TABLE_SCHEMA = ? ";
 //从数据库表逆向生成类
 class ReverseGenerate {
     //根据数据库名称生成
@@ -100,6 +100,7 @@ class ReverseGenerate {
             tmpFieldList.push(tsValue);
             body.push(tmpFieldList.join("\n"));
         });
+        body.push("constructor(...args: any[]) {\nObject.assign(this, ...args);\n}");
         //补全导入的头
         importHead += `import { ${importAnnotation.join(",")} } from "fastcar-mysql/annotation";\n`;
         let content = `${importHead}\n @Table('${taleName}')\n class ${className} \{\n ${body.join("\n\n")} \n\}\n\n export default ${className}`;
@@ -150,7 +151,7 @@ class ReverseGenerate {
         //求相对路径
         let rp = path.relative(mapperDir, modelDir);
         for (let name of tables) {
-            let res = await dbres.query(DESCSQL, [name]);
+            let res = await dbres.query(DESCSQL, [name, dbConfig.database]);
             let row = res[0];
             ReverseGenerate.genModel(name, modelDir, row, style);
             ReverseGenerate.genMapper(name, mapperDir, rp, style);

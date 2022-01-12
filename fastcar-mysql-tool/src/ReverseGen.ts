@@ -6,7 +6,7 @@ import * as mysql from "mysql2/promise";
 import { DataTypeEnum } from "fastcar-mysql";
 import { FiledType } from "./FiledType";
 
-const DESCSQL = "SELECT * from information_schema.COLUMNS where table_name = ?";
+const DESCSQL = "SELECT * from information_schema.COLUMNS where table_name = ? AND TABLE_SCHEMA = ? ";
 
 //从数据库表逆向生成类
 class ReverseGenerate {
@@ -112,6 +112,8 @@ class ReverseGenerate {
 			body.push(tmpFieldList.join("\n"));
 		});
 
+		body.push("constructor(...args: any[]) {\nObject.assign(this, ...args);\n}");
+
 		//补全导入的头
 		importHead += `import { ${importAnnotation.join(",")} } from "fastcar-mysql/annotation";\n`;
 
@@ -174,7 +176,7 @@ class ReverseGenerate {
 		let rp = path.relative(mapperDir, modelDir);
 
 		for (let name of tables) {
-			let res = await dbres.query(DESCSQL, [name]);
+			let res = await dbres.query(DESCSQL, [name, dbConfig.database]);
 			let row: any = res[0];
 			ReverseGenerate.genModel(name, modelDir, row, style);
 			ReverseGenerate.genMapper(name, mapperDir, rp, style);

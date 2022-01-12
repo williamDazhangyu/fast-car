@@ -41,6 +41,10 @@ class Test {
 	@NotNull
 	@MaxLength(10, 2)
 	money: number = 1;
+
+	constructor(...args: any[]) {
+		Object.assign(this, ...args);
+	}
 }
 
 export default Test;
