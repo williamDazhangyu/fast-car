@@ -11,6 +11,8 @@ export enum OperatorEnum {
 	isNotNull = "IS NOT NULL",
 }
 
+export const JoinKeys = ["AND", "OR"];
+
 export enum JoinEnum {
 	and = "AND",
 	or = "OR",
@@ -23,15 +25,14 @@ export enum OrderEnum {
 
 export type SqlValue = number | string | number[] | string[] | null;
 
-export type SqlWhere = {
-	[key: string]:
-		| {
-				value: number | string | number[] | string[] | null;
-				operator?: OperatorEnum | string; //内部连接
-				join?: JoinEnum | string; //各个条件拼凑
-		  }
-		| SqlValue;
-};
+//where表达式
+type SqlExpression =
+	| {
+			[key: string]: { [key: string]: SqlValue };
+	  }
+	| SqlValue;
+
+export type SqlWhere = { [key: string]: SqlExpression | SqlWhere };
 
 export type RowData = {
 	[key: string]: any;
@@ -60,6 +61,6 @@ export type SqlUpdate = {
 };
 
 export type RowType = {
-	str: string;
-	args: Array<any>;
+	sql: string;
+	args: any[];
 };

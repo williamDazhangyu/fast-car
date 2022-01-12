@@ -14,7 +14,7 @@ class ValidationUtil {
                 if (TypeUtil_1.default.isDate(param)) {
                     return true;
                 }
-                return Reflect.ownKeys(param.name).length > 0;
+                return Reflect.ownKeys(param).length > 0;
             }
             return true;
         }

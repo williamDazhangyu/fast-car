@@ -1,21 +1,7 @@
 import { FastCarApplication, Logger } from "fastcar-core";
 import * as mysql from "mysql2";
 import { OrderType, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "./src/operation/OperationType";
-
-declare type SqlConfig = mysql.PoolOptions & {
-	source: string;
-	readDefault?: boolean; //是否读默认
-	writeDefault?: boolean; //是否写默认
-	default?: boolean; //找不到数据源或者不指定数据源时进行选用
-};
-
-declare type MySqlConfig = {
-	dataSoucreConfig: SqlConfig[];
-	slowSQLInterval?: number; //单位毫秒默认500毫秒会输出
-	maximumConnectionReleaseTime?: number; //连接可用最大时长，防止因为忘记释放而被占用 单位毫秒
-	printSQL?: boolean; //是否打印sql
-	sessionTimeOut: number;
-};
+import { MySqlConfig } from "./src/type/SqlConfig";
 
 export enum DataTypeEnum {
 	tinyint = "boolean", //这边做一个约定为tinyint的时候为boolean类型

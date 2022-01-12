@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrderEnum = exports.JoinEnum = exports.OperatorEnum = void 0;
+exports.OrderEnum = exports.JoinEnum = exports.JoinKeys = exports.OperatorEnum = void 0;
 var OperatorEnum;
 (function (OperatorEnum) {
     OperatorEnum["eq"] = "=";
@@ -14,6 +14,7 @@ var OperatorEnum;
     OperatorEnum["isNUll"] = "ISNULL";
     OperatorEnum["isNotNull"] = "IS NOT NULL";
 })(OperatorEnum = exports.OperatorEnum || (exports.OperatorEnum = {}));
+exports.JoinKeys = ["AND", "OR"];
 var JoinEnum;
 (function (JoinEnum) {
     JoinEnum["and"] = "AND";

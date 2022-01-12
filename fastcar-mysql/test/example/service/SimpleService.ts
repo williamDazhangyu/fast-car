@@ -65,7 +65,10 @@ class SimpleService {
 	async selectOne() {
 		let res = await this.myMapper.selectOne({
 			where: {
-				name: "1234",
+				// AND: {
+				name: "aaa",
+				caseTime: { ">=": "2022-01-11", "<=": "2022-02-12" },
+				// },
 			},
 		});
 		return res;

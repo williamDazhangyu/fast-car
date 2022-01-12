@@ -2,6 +2,7 @@ import RedisDataSource from "./RedisDataSource";
 import * as redis from "redis";
 import { ApplicationStart, ApplicationStop, Autowired } from "fastcar-core/annotation";
 import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
+import { DSIndex } from "fastcar-core/annotation";
 
 interface RedisConfig extends redis.ClientOpts {
 	source: string;
@@ -44,26 +45,27 @@ class RedisDataSourceManager {
 		this.sourceMap.clear();
 	}
 
-	getClient(source: string = "default") {
-		let dbSource = this.sourceMap.get(source);
-		return dbSource;
+	getClient(source: string = "default"): redis.RedisClient | null {
+		let client = this.sourceMap.get(source);
+		if (!client) {
+			return null;
+		}
+		return client.getClient();
 	}
 
-	set(key: string, value: string | Object, source?: string): Promise<string> {
+	set(key: string, value: string | Object, @DSIndex source?: string): Promise<string> {
 		return new Promise((resolve, reject) => {
-			let dbSource = this.getClient(source);
-			if (!dbSource) {
+			let client = this.getClient(source);
+			if (!client) {
 				reject(new Error("redis source not found"));
 				return;
 			}
 
-			let client = dbSource.getClient();
 			let s = typeof value == "object" ? JSON.stringify(value) : value;
-
 			client.set(key, s, (err, res) => {
 				if (err) {
-					console.error("redis errors set");
-					console.error(err);
+					this.sysLogger.error("redis errors set");
+					this.sysLogger.error(err);
 					reject(err);
 					return;
 				}
@@ -73,41 +75,38 @@ class RedisDataSourceManager {
 		});
 	}
 
-	setExpire(key: string, value: string | Object, seconds: number, source?: string): Promise<number> {
+	setExpire(key: string, value: string | Object, seconds: number, @DSIndex source?: string): Promise<number> {
 		return new Promise((resolve, reject) => {
-			let dbSource = this.getClient(source);
-			if (!dbSource) {
+			let client = this.getClient(source);
+			if (!client) {
 				reject(new Error("redis source not found"));
 				return;
 			}
 
-			let client = dbSource.getClient();
 			let s = typeof value == "object" ? JSON.stringify(value) : value;
-
 			client.set(key, s, (err, res) => {
 				if (err) {
-					console.error("redis errors set");
-					console.error(err);
+					this.sysLogger.error("redis errors set");
+					this.sysLogger.error(err);
 					reject(err);
 					return;
 				}
 
-				client.expire(key, seconds, (err2, res2) => {
+				client?.expire(key, seconds, (err2, res2) => {
 					resolve(res2);
 				});
 			});
 		});
 	}
 
-	get(key: string, source?: string): Promise<string | null> {
+	get(key: string, @DSIndex source?: string): Promise<string | null> {
 		return new Promise((resolve, reject) => {
-			let dbSource = this.getClient(source);
-			if (!dbSource) {
+			let client = this.getClient(source);
+			if (!client) {
 				reject(new Error("redis source not found"));
 				return;
 			}
 
-			let client = dbSource.getClient();
 			client.get(key, (err, res) => {
 				if (err) {
 					reject(err);
@@ -119,15 +118,14 @@ class RedisDataSourceManager {
 	}
 
 	//自增key键
-	incrKey(key: string, source?: string): Promise<number> {
+	incrKey(key: string, @DSIndex source?: string): Promise<number> {
 		return new Promise((resolve, reject) => {
-			let dbSource = this.getClient(source);
-			if (!dbSource) {
+			let client = this.getClient(source);
+			if (!client) {
 				reject(new Error("redis source not found"));
 				return;
 			}
 
-			let client = dbSource.getClient();
 			client.incr(key, (err, data) => {
 				if (err) {
 					reject(err);
@@ -139,15 +137,14 @@ class RedisDataSourceManager {
 	}
 
 	//自减key键
-	decrKey(key: string, source?: string): Promise<number> {
+	decrKey(key: string, @DSIndex source?: string): Promise<number> {
 		return new Promise((resolve, reject) => {
-			let dbSource = this.getClient(source);
-			if (!dbSource) {
+			let client = this.getClient(source);
+			if (!client) {
 				reject(new Error("redis source not found"));
 				return;
 			}
 
-			let client = dbSource.getClient();
 			client.decr(key, (err, data) => {
 				if (err) {
 					reject(err);
@@ -159,15 +156,14 @@ class RedisDataSourceManager {
 	}
 
 	//是否存在key
-	existKey(key: string, source?: string): Promise<boolean> {
+	existKey(key: string, @DSIndex source?: string): Promise<boolean> {
 		return new Promise((resolve, reject) => {
-			let dbSource = this.getClient(source);
-			if (!dbSource) {
+			let client = this.getClient(source);
+			if (!client) {
 				reject(new Error("redis source not found"));
 				return;
 			}
 
-			let client = dbSource.getClient();
 			client.exists(key, (err, data) => {
 				if (err) {
 					reject(err);
@@ -179,15 +175,14 @@ class RedisDataSourceManager {
 	}
 
 	//获取批量键值对
-	getBulkKey(key: string, source?: string): Promise<string[]> {
+	getBulkKey(key: string, @DSIndex source?: string): Promise<string[]> {
 		return new Promise((resolve, reject) => {
-			let dbSource = this.getClient(source);
-			if (!dbSource) {
+			let client = this.getClient(source);
+			if (!client) {
 				reject(new Error("redis source not found"));
 				return;
 			}
 
-			let client = dbSource.getClient();
 			client.keys(key, (err, res) => {
 				if (err) {
 					reject(err);
@@ -198,15 +193,14 @@ class RedisDataSourceManager {
 		});
 	}
 
-	delKey(key: string, source?: string): Promise<boolean> {
+	delKey(key: string, @DSIndex source?: string): Promise<boolean> {
 		return new Promise((resolve, reject) => {
-			let dbSource = this.getClient(source);
-			if (!dbSource) {
+			let client = this.getClient(source);
+			if (!client) {
 				reject(new Error("redis source not found"));
 				return;
 			}
 
-			let client = dbSource.getClient();
 			client.del(key, (err, res) => {
 				if (err) {
 					reject(err);
@@ -217,15 +211,14 @@ class RedisDataSourceManager {
 		});
 	}
 
-	delKeys(key: string, source?: string): Promise<boolean> {
+	delKeys(key: string, @DSIndex source?: string): Promise<boolean> {
 		return new Promise((resolve, reject) => {
-			let dbSource = this.getClient(source);
-			if (!dbSource) {
+			let client = this.getClient(source);
+			if (!client) {
 				reject(new Error("redis source not found"));
 				return;
 			}
 
-			let client = dbSource.getClient();
 			client.evalsha(key, (err, res) => {
 				if (err) {
 					reject(err);
@@ -237,15 +230,14 @@ class RedisDataSourceManager {
 	}
 
 	//执行lua脚本
-	execLua(luaStr: string, keysLength: number, param: string, source?: string): Promise<any> {
+	execLua(luaStr: string, keysLength: number, param: string, @DSIndex source?: string): Promise<any> {
 		return new Promise((resolve, reject) => {
-			let dbSource = this.getClient(source);
-			if (!dbSource) {
+			let client = this.getClient(source);
+			if (!client) {
 				reject(new Error("redis source not found"));
 				return;
 			}
 
-			let client = dbSource.getClient();
 			client.eval(luaStr, keysLength, param, (err, res) => {
 				if (err) {
 					reject(err);

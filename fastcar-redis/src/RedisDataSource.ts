@@ -14,6 +14,10 @@ class RedisDataSource {
 		this.client = client;
 	}
 
+	checkClient() {
+		// this.client.auth();
+	}
+
 	getClient() {
 		return this.client;
 	}

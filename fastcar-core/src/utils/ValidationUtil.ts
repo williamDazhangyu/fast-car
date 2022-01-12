@@ -13,7 +13,7 @@ export default class ValidationUtil {
 				if (TypeUtil.isDate(param)) {
 					return true;
 				}
-				return Reflect.ownKeys(param.name).length > 0;
+				return Reflect.ownKeys(param).length > 0;
 			}
 
 			return true;

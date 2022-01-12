@@ -1,14 +1,4 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var FastCarApplication_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 const process = require("process");
@@ -21,11 +11,10 @@ const Mix_1 = require("./utils/Mix");
 const TypeUtil_1 = require("./utils/TypeUtil");
 const SysConfig_1 = require("./config/SysConfig");
 const FastCarMetaData_1 = require("./constant/FastCarMetaData");
-const ExceptionMonitor_1 = require("./annotation/ExceptionMonitor");
 const CommonConstant_1 = require("./constant/CommonConstant");
 const LifeCycleModule_1 = require("./constant/LifeCycleModule");
 const log4js = require("log4js");
-let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends Events {
+class FastCarApplication extends Events {
     constructor() {
         super();
         this.sysConfig = SysConfig_1.SYSDefaultConfig;
@@ -106,19 +95,19 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
      */
     static setInjectionMap(name) {
         let loadModule = FastCarMetaData_1.FastCarMetaData.InjectionMap;
-        let names = Reflect.getMetadata(loadModule, FastCarApplication_1) || [];
+        let names = Reflect.getMetadata(loadModule, FastCarApplication) || [];
         names.push(name);
-        Reflect.defineMetadata(loadModule, names, FastCarApplication_1);
+        Reflect.defineMetadata(loadModule, names, FastCarApplication);
     }
     /***
      * @version 1.0 判断是否已经有初始化的组件了
      */
     static hasInjectionMap(name) {
         let loadModuleName = FastCarMetaData_1.FastCarMetaData.InjectionMap;
-        if (!Reflect.hasMetadata(loadModuleName, FastCarApplication_1)) {
+        if (!Reflect.hasMetadata(loadModuleName, FastCarApplication)) {
             return false;
         }
-        let names = Reflect.getMetadata(loadModuleName, FastCarApplication_1);
+        let names = Reflect.getMetadata(loadModuleName, FastCarApplication);
         return names.includes(name);
     }
     /***
@@ -127,12 +116,12 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
      */
     static setSpecifyCompent(m) {
         let loadModule = FastCarMetaData_1.FastCarMetaData.SpecifyMap;
-        let names = Reflect.getMetadata(loadModule, FastCarApplication_1) || [];
+        let names = Reflect.getMetadata(loadModule, FastCarApplication) || [];
         if (TypeUtil_1.default.isFunction(m) && names.includes(m.name)) {
             return;
         }
         names.push(m);
-        Reflect.defineMetadata(loadModule, names, FastCarApplication_1);
+        Reflect.defineMetadata(loadModule, names, FastCarApplication);
     }
     /***
      * @version 1.0 扫描组件
@@ -140,7 +129,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
      */
     loadClass() {
         //加载特殊的bean
-        let specifyCompents = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.SpecifyMap, FastCarApplication_1);
+        let specifyCompents = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.SpecifyMap, FastCarApplication);
         if (specifyCompents) {
             specifyCompents.forEach(func => {
                 if (TypeUtil_1.default.isFunction(func)) {
@@ -193,7 +182,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
                         throw repeatError;
                     }
                     //只有依赖注入的组件才能被实例化
-                    if (FastCarApplication_1.hasInjectionMap(name)) {
+                    if (FastCarApplication.hasInjectionMap(name)) {
                         if (TypeUtil_1.default.isFunction(func)) {
                             this.componentMap.set(name, new func());
                             return;
@@ -210,6 +199,12 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
     loadInjectionModule() {
         let relyname = FastCarMetaData_1.FastCarMetaData.IocModule;
         this.componentMap.forEach((instance, instanceName) => {
+            //补充实例找不到时 不能被注解
+            if (!instance) {
+                let insatnceError = new Error(`instance not found by ${instanceName}`);
+                this.sysLogger.error(insatnceError.message);
+                throw insatnceError;
+            }
             let moduleList = Reflect.getMetadata(relyname, instance);
             if (!moduleList || moduleList.size == 0) {
                 return;
@@ -217,7 +212,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
             moduleList.forEach((name, propertyKey) => {
                 let func = this.componentMap.get(name);
                 //如果等于自身则进行注入
-                if (name === FastCarApplication_1.name || name === FastCarMetaData_1.FastCarMetaData.APP) {
+                if (name === FastCarApplication.name || name === FastCarMetaData_1.FastCarMetaData.APP) {
                     func = this;
                 }
                 else {
@@ -251,7 +246,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
     getComponentList() {
         let instanceList = Array.of();
         this.componentMap.forEach((instance, name) => {
-            if (FastCarApplication_1.hasInjectionMap(name)) {
+            if (FastCarApplication.hasInjectionMap(name)) {
                 instanceList.push(instance);
             }
         });
@@ -290,6 +285,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
         this.beforeStartServer();
         this.startServer();
         this.addExitEvent();
+        this.addExecptionEvent();
     }
     addExitEvent() {
         process.on("beforeExit", async () => {
@@ -298,6 +294,17 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
         });
         process.on("exit", () => {
             this.stopServer();
+        });
+    }
+    addExecptionEvent() {
+        process.on("uncaughtException", (err, origin) => {
+            this.sysLogger.error(`Caught exception: ${err.message}`);
+            this.sysLogger.error(`Exception origin: ${origin}`);
+            this.sysLogger.error(`stack: ${err.stack}`);
+        });
+        process.on("unhandledRejection", (reason, promise) => {
+            this.sysLogger.error("Unhandled Rejection at:", promise);
+            this.sysLogger.error("reason:", reason);
         });
     }
     /***
@@ -367,9 +374,5 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
     stopServer() {
         this.sysLogger.info("application stop");
     }
-};
-FastCarApplication = FastCarApplication_1 = __decorate([
-    ExceptionMonitor_1.default,
-    __metadata("design:paramtypes", [])
-], FastCarApplication);
+}
 exports.default = FastCarApplication;
