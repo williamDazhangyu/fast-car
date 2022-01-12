@@ -49,6 +49,19 @@ export enum DesignMeta {
 	sqlSession = "SqlSession", //sql会话
 }
 
+export enum OperatorEnum {
+	eq = "=",
+	neq = "!=",
+	gt = ">",
+	gte = ">=",
+	lt = "<",
+	lte = "<=",
+	like = "LIKE",
+	in = "IN",
+	isNUll = "ISNULL",
+	isNotNull = "IS NOT NULL",
+}
+
 declare type MapperType = {
 	name: string; //变量名称
 	type: string; //类型

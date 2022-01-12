@@ -1,6 +1,7 @@
 import MysqlDataSource from "./dataSource/MysqlDataSource";
 import MysqlDataSourceManager from "./dataSource/MysqlDataSourceManager";
 import MysqlMapper from "./operation/MysqlMapper";
+import { OperatorEnum } from "./operation/OperationType";
 import { DataTypeEnum } from "./type/DataTypeEnum";
 import { DesignMeta } from "./type/DesignMeta";
 import { MapperType } from "./type/MapperType";
@@ -17,4 +18,5 @@ export {
 	MapperType, //mapper映射方法
 	SqlExecType,
 	MysqlMapper,
+	OperatorEnum,
 };
