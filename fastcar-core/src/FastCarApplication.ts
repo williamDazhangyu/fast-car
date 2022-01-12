@@ -43,7 +43,7 @@ class FastCarApplication extends Events {
 	 * @version 1.0 获取资源路径
 	 */
 	getResourcePath(): string {
-		let resourcePath = path.join(this.basePath, CommonConstant.Resource);
+		let resourcePath = path.join(this.basePath, "../", CommonConstant.Resource);
 		return resourcePath;
 	}
 

@@ -1,0 +1,4 @@
+application:
+    name: "simple"
+settings:
+    redis:

@@ -17,7 +17,7 @@ class APP {
 
 let s = new APP();
 //调用相关方法
-// let helloController: HelloController = Reflect.get(s.app, "componentMap").get("HelloController");
-// helloController.callHello();
-// helloController.print();
-// console.log("获取到的配置--", helloController.getConfig());
+let helloController: HelloController = Reflect.get(s.app, "componentMap").get("HelloController");
+helloController.callHello();
+helloController.print();
+console.log("获取到的配置--", helloController.getConfig());

@@ -2,6 +2,7 @@ import * as redis from "redis";
 
 class RedisDataSource {
 	private client: redis.RedisClient;
+	private config: redis.ClientOpts;
 
 	constructor(config: redis.ClientOpts) {
 		const client = redis.createClient(config);
@@ -12,10 +13,11 @@ class RedisDataSource {
 		});
 
 		this.client = client;
+		this.config = config;
 	}
 
 	checkClient() {
-		// this.client.auth();
+		this.client.ping();
 	}
 
 	getClient() {

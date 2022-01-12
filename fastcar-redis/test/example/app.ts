@@ -1,0 +1,14 @@
+import { FastCarApplication } from "fastcar-core";
+import { Application, Log } from "fastcar-core/annotation";
+import EnableRedis from "../../src/annotation/EnableRedis";
+
+@Application
+@EnableRedis
+@Log()
+class APP {
+	app!: FastCarApplication;
+}
+
+const appInstance = new APP();
+
+console.log("redis 测试");

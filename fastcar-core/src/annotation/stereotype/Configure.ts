@@ -9,7 +9,7 @@ export default function Configure(name: string) {
 		//配置对象也为组件
 		Component(target);
 		//当实例化时 加载默认配置并进行赋值
-		let fp = path.join(require.main?.path || module.path, "resource", name);
+		let fp = path.join(require.main?.path || module.path, "../", "resource", name);
 		let tmpConfig = FileUtil.getResource(fp);
 
 		console.log("加载配置", name);
