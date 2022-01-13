@@ -79,6 +79,23 @@
             "env": {
                 "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
             }
+        },
+        {
+            "name": "Run RedisSimple",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${workspaceRoot}/fastcar-redis/test/example/app.ts"
+            ],
+            "cwd": "${workspaceRoot}/fastcar-redis",
+            "protocol": "inspector",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
+            }
         }
     ]
 }

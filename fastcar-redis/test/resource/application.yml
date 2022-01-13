@@ -1,0 +1,5 @@
+application:
+    name: "simple"
+settings:
+    redis:
+        - { source: "default", host: "localhost", port: 6379, password: "123456" }
