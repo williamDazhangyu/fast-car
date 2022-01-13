@@ -67,6 +67,13 @@ export function Override(target: any, name?: string, descriptor?: PropertyDescri
 export function Readonly(target: any, name?: string, descriptor?: PropertyDescriptor): void;
 
 //用于打印日志
+//默认配置
+// appenders: {
+// 		sysLogger: {
+// 			type: "console",
+// 		},
+// 	},
+// categories: { default: { appenders: ["sysLogger"], level: "ALL" } },
 export function Log(config?: Log4jsConfig): Ret;
 
 //用于手动注入组件
