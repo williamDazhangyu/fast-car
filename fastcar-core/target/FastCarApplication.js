@@ -60,6 +60,9 @@ class FastCarApplication extends Events {
             if (fileContent) {
                 replaceSetting(CommonConstant_1.CommonConstant.Settings, fileContent);
                 replaceSetting(CommonConstant_1.CommonConstant.Application, fileContent);
+                //将application和sesstings进行删除
+                Reflect.deleteProperty(fileContent, CommonConstant_1.CommonConstant.Application);
+                Reflect.deleteProperty(fileContent, CommonConstant_1.CommonConstant.Settings);
                 //追加自定的属性
                 Mix_1.default.copyProperties(sysConfig, fileContent);
             }
