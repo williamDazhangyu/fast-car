@@ -8,7 +8,7 @@ function RequestMapping(url) {
         if (!url.startsWith("/")) {
             url = "/" + url;
         }
-        let routerMap = Reflect.getMetadata(DesignMeta_1.DesignMeta.ROUTER_MAP, target);
+        let routerMap = Reflect.getMetadata(DesignMeta_1.DesignMeta.ROUTER_MAP, target.prototype);
         if (!!routerMap) {
             routerMap.forEach(item => {
                 item.url = url + item.url;
