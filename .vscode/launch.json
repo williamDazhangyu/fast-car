@@ -96,6 +96,23 @@
             "env": {
                 "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
             }
+        },
+        {
+            "name": "Run KoaSimple",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${workspaceRoot}/fastcar-koa/test/simple/app.ts"
+            ],
+            "cwd": "${workspaceRoot}/fastcar-koa",
+            "protocol": "inspector",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
+            }
         }
     ]
 }

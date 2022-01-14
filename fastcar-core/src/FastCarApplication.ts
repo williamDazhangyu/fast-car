@@ -441,6 +441,21 @@ class FastCarApplication extends Events {
 	stopServer() {
 		this.sysLogger.info("application stop");
 	}
+
+	/**
+	 * @version 1.0 获取app名称
+	 */
+	getApplicationName(): string {
+		return this.sysConfig.application.name;
+	}
+
+	/***
+	 * @version 1.0 获取系统日志
+	 *
+	 */
+	getSysLogger(): log4js.Logger {
+		return this.sysLogger;
+	}
 }
 
 export default FastCarApplication;

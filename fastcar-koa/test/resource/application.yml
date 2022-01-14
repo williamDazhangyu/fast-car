@@ -1,0 +1,15 @@
+application:
+    name: "koaSimple"
+settings:
+    koa:
+        server: { port: 1234 } #服务器配置 支持 http http2和https
+        koaStatic: #静态资源访问
+            - "public"
+        extra: #额外配置支持
+            cors: #跨域支持示范
+                origin: "https://localhost:1234"
+                maxAge: 60000 #指定本次预检请求的有效期，单位为秒。
+                credentials: true #是否允许发送Cookie
+                allowMethods: ["GET", "POST"] #设置所允许的HTTP请求方法
+                allowHeaders: ["Content-Type", "Authorization", "Accept"] #设置服务器支持的所有头信息字段
+                exposeHeaders: ["WWW-Authenticate", "Server-Authorization"] #设置获取其他自定义字段

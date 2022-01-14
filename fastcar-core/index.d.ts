@@ -208,6 +208,17 @@ export class FastCarApplication {
 	 *
 	 */
 	static hasInjectionMap(name: string): boolean;
+
+	/**
+	 * @version 1.0 获取app名称
+	 */
+	getApplicationName(): string;
+
+	/***
+	 * @version 1.0 获取系统日志
+	 *
+	 */
+	getSysLogger(): Logger;
 }
 
 type Ret = (target: any) => void;
