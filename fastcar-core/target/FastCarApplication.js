@@ -14,6 +14,7 @@ const FastCarMetaData_1 = require("./constant/FastCarMetaData");
 const CommonConstant_1 = require("./constant/CommonConstant");
 const LifeCycleModule_1 = require("./constant/LifeCycleModule");
 const log4js = require("log4js");
+const fs = require("fs");
 class FastCarApplication extends Events {
     constructor() {
         super();
@@ -389,6 +390,22 @@ class FastCarApplication extends Events {
      */
     getSysLogger() {
         return this.sysLogger;
+    }
+    /***
+     * @version 1.0 获取文件内容
+     */
+    getFileContent(fp) {
+        if (!fs.existsSync(fp)) {
+            fp = path.join(this.getResourcePath(), fp);
+            if (!fs.existsSync(fp)) {
+                return null;
+            }
+        }
+        let currStats = fs.statSync(fp);
+        if (!currStats.isFile()) {
+            return null;
+        }
+        return fs.readFileSync(fp).toString();
     }
 }
 exports.default = FastCarApplication;

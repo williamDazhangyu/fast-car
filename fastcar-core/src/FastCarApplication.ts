@@ -15,6 +15,7 @@ import { CommonConstant, FileResSuffix } from "./constant/CommonConstant";
 import { LifeCycleModule } from "./constant/LifeCycleModule";
 import * as log4js from "log4js";
 import { Log4jsConfig } from "./config/Log4jsConfig";
+import * as fs from "fs";
 
 class FastCarApplication extends Events {
 	componentMap: Map<string, any>; //组件键值对
@@ -455,6 +456,25 @@ class FastCarApplication extends Events {
 	 */
 	getSysLogger(): log4js.Logger {
 		return this.sysLogger;
+	}
+
+	/***
+	 * @version 1.0 获取文件内容
+	 */
+	getFileContent(fp: string): string | null {
+		if (!fs.existsSync(fp)) {
+			fp = path.join(this.getResourcePath(), fp);
+			if (!fs.existsSync(fp)) {
+				return null;
+			}
+		}
+
+		let currStats = fs.statSync(fp);
+		if (!currStats.isFile()) {
+			return null;
+		}
+
+		return fs.readFileSync(fp).toString();
 	}
 }
 

@@ -219,6 +219,11 @@ export class FastCarApplication {
 	 *
 	 */
 	getSysLogger(): Logger;
+
+	/***
+	 * @version 1.0 获取文件内容
+	 */
+	getFileContent(fp: string): string | null;
 }
 
 type Ret = (target: any) => void;
