@@ -223,7 +223,7 @@ export class FastCarApplication {
 	/***
 	 * @version 1.0 获取文件内容
 	 */
-	getFileContent(fp: string): string | null;
+	getFileContent(fp: string): string;
 }
 
 type Ret = (target: any) => void;

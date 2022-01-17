@@ -108,8 +108,8 @@ let KoaApplication = class KoaApplication {
                     process.exit();
                 }
                 server = https.createServer({
-                    key: config.ssl?.key,
-                    cert: config.ssl?.cert,
+                    key: this.app.getFileContent(config.ssl?.key),
+                    cert: this.app.getFileContent(config.ssl?.cert),
                 }, appCallBack);
                 break;
             }
@@ -119,8 +119,8 @@ let KoaApplication = class KoaApplication {
                 }
                 else {
                     server = http2.createSecureServer({
-                        key: config.ssl?.key,
-                        cert: config.ssl?.cert,
+                        key: this.app.getFileContent(config.ssl?.key),
+                        cert: this.app.getFileContent(config.ssl?.cert),
                     }, appCallBack);
                 }
                 break;

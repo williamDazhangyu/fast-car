@@ -461,17 +461,17 @@ class FastCarApplication extends Events {
 	/***
 	 * @version 1.0 获取文件内容
 	 */
-	getFileContent(fp: string): string | null {
+	getFileContent(fp: string): string {
 		if (!fs.existsSync(fp)) {
 			fp = path.join(this.getResourcePath(), fp);
 			if (!fs.existsSync(fp)) {
-				return null;
+				return "";
 			}
 		}
 
 		let currStats = fs.statSync(fp);
 		if (!currStats.isFile()) {
-			return null;
+			return "";
 		}
 
 		return fs.readFileSync(fp).toString();
