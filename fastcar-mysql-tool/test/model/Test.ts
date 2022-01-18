@@ -1,18 +1,18 @@
 import "reflect-metadata";
-import { Table, DBType, PrimaryKey, MaxLength, Field, NotNull } from "fastcar-mysql/annotation";
-
+import { Table, DBType, PrimaryKey, Field } from "fastcar-mysql/annotation";
+import { Size, NotNull } from "fastcar-core/annotation";
 @Table("test")
 class Test {
 	@DBType("int")
 	@PrimaryKey
-	@MaxLength(10)
+	@Size({ maxSize: 9999999999 })
 	id!: number;
 
 	/**
 	 * name
 	 */
 	@DBType("varchar")
-	@MaxLength(20)
+	@Size({ maxSize: 20 })
 	name: string = "";
 
 	/**
@@ -21,7 +21,7 @@ class Test {
 	@Field("case_name")
 	@DBType("varchar")
 	@NotNull
-	@MaxLength(10)
+	@Size({ maxSize: 10 })
 	caseName: string = "haha";
 
 	/**
@@ -34,12 +34,12 @@ class Test {
 
 	@DBType("tinyint")
 	@NotNull
-	@MaxLength(3)
+	@Size({ maxSize: 3 })
 	flag: boolean = true;
 
 	@DBType("decimal")
 	@NotNull
-	@MaxLength(10, 2)
+	@Size({ maxSize: 99999999.99 })
 	money: number = 1;
 
 	constructor(...args: any[]) {

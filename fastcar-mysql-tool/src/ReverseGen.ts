@@ -6,7 +6,7 @@ import * as mysql from "mysql2/promise";
 import { DataTypeEnum } from "fastcar-mysql";
 import { FiledType } from "./FiledType";
 
-const DESCSQL = "SELECT * from information_schema.COLUMNS where table_name = ? AND TABLE_SCHEMA = ? ";
+const DESCSQL = "SELECT * from information_schema.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ? ";
 
 //从数据库表逆向生成类
 class ReverseGenerate {
@@ -38,6 +38,7 @@ class ReverseGenerate {
 		//进行写入
 		let importHead = `import "reflect-metadata";\n`;
 		let importAnnotation: string[] = ["Table", "DBType"];
+		let importCoreAnnotation: string[] = [];
 
 		let className = ReverseGenerate.formatClassName(taleName);
 
@@ -45,6 +46,7 @@ class ReverseGenerate {
 		fieldInfo.forEach((field) => {
 			//显示注释 类名称(不一致时必填) 类型(必填) 设计的key值如果有可填写 默认值
 			let tmpFieldList = Array.of();
+
 			let dbName = field.COLUMN_NAME;
 			if (field.COLUMN_COMMENT) {
 				tmpFieldList.push(`/**\n* ${field.COLUMN_COMMENT}\n*/`);
@@ -61,6 +63,7 @@ class ReverseGenerate {
 
 			if (field.COLUMN_KEY) {
 				tmpFieldList.push("@PrimaryKey");
+
 				if (!importAnnotation.includes("PrimaryKey")) {
 					importAnnotation.push("PrimaryKey");
 				}
@@ -68,27 +71,36 @@ class ReverseGenerate {
 
 			if (field.IS_NULLABLE == "YES") {
 				tmpFieldList.push("@NotNull");
-				if (!importAnnotation.includes("NotNull")) {
-					importAnnotation.push("NotNull");
+
+				if (!importCoreAnnotation.includes("NotNull")) {
+					importCoreAnnotation.push("NotNull");
 				}
 			}
 
+			let tsType = ReverseGenerate.formatType(field.DATA_TYPE);
 			let length = field.CHARACTER_MAXIMUM_LENGTH || field.NUMERIC_PRECISION;
+
 			if (length) {
-				if (field.NUMERIC_SCALE) {
-					tmpFieldList.push(`@MaxLength(${length},${field.NUMERIC_SCALE})`);
+				if (tsType == "number") {
+					let num = Math.pow(10, length);
+
+					if (field.NUMERIC_SCALE) {
+						num = Math.pow(10, length - field.NUMERIC_SCALE);
+						let scaleNum = Math.pow(10, field.NUMERIC_SCALE);
+						num += (scaleNum - 1) / scaleNum;
+					}
+					tmpFieldList.push(`@Size({ maxSize: ${num - 1} })`);
 				} else {
-					tmpFieldList.push(`@MaxLength(${length})`);
+					tmpFieldList.push(`@Size({ maxSize: ${length} })`);
 				}
 
-				if (!importAnnotation.includes("MaxLength")) {
-					importAnnotation.push("MaxLength");
+				if (!importCoreAnnotation.includes("Size")) {
+					importCoreAnnotation.push("Size");
 				}
 			}
 
 			//这边要做一个db 至 属性名的转换
 			//判断是否有默认值
-			let tsType = ReverseGenerate.formatType(field.DATA_TYPE);
 			let tsValue = "";
 			if (field.COLUMN_DEFAULT != null) {
 				switch (tsType) {
@@ -116,6 +128,10 @@ class ReverseGenerate {
 
 		//补全导入的头
 		importHead += `import { ${importAnnotation.join(",")} } from "fastcar-mysql/annotation";\n`;
+
+		if (importCoreAnnotation.length > 0) {
+			importHead += `import { ${importCoreAnnotation.join(",")} } from "fastcar-core/annotation";`;
+		}
 
 		let content = `${importHead}\n @Table('${taleName}')\n class ${className} \{\n ${body.join("\n\n")} \n\}\n\n export default ${className}`;
 		//进行格式化
