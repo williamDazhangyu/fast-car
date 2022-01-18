@@ -234,6 +234,11 @@ export class FastCarApplication {
 	getFileContent(fp: string): string;
 }
 
+//校验错误
+export class ValidError {
+	message?: string;
+}
+
 type Ret = (target: any) => void;
 
 type RetProperty = (target: any, prop?: string, descriptor?: PropertyDescriptor) => void;

@@ -1,10 +1,10 @@
-import { Controller } from "fastcar-core/annotation";
+import { Controller, ValidForm } from "fastcar-core/annotation";
 import GetMapping from "../../../src/annotation/router/GetMapping";
 import PostMapping from "../../../src/annotation/router/PostMapping";
 import RequestMapping from "../../../src/annotation/router/RequestMapping";
 
 @Controller
-@RequestMapping("/test") //允许头部追加url
+// @RequestMapping("/test") //允许头部追加url
 export default class HelloController {
 	hello: string = "hello";
 
@@ -21,5 +21,13 @@ export default class HelloController {
 	@GetMapping("/getError")
 	getError() {
 		throw new Error("test error");
+	}
+
+	@GetMapping("/checkParam")
+	@ValidForm({
+		hello: { required: true, type: "string", message: "hello为必填项" },
+	})
+	async checkParam(hello: string) {
+		return hello;
 	}
 }
