@@ -1,6 +1,9 @@
 export default class ClassUtils {
 	//获取一个类所有的proto属性 采用递归的形式
 	static getProtoType(t: any): string[] {
+		if (!t?.prototype) {
+			return [];
+		}
 		let keys = Reflect.ownKeys(t?.prototype).map(item => {
 			return item.toString();
 		});

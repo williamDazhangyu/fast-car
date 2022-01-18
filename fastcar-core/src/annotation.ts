@@ -21,6 +21,13 @@ import SpecifyCompent from "./annotation/stereotype/SpecifyCompent";
 import AddRequireModule from "./annotation/AddRequireModule";
 import DS from "./annotation/data/DS";
 import DSIndex from "./annotation/data/DSIndex";
+import AddChildValid from "./annotation/valid/AddChildValid";
+import DefaultVal from "./annotation/valid/DefaultVal";
+import NotNull from "./annotation/valid/NotNull";
+import Size from "./annotation/valid/Size";
+import Type from "./annotation/valid/Type";
+import ValidCustom from "./annotation/valid/ValidCustom";
+import ValidForm from "./annotation/valid/ValidForm";
 
 //注解暴露出去
 export {
@@ -47,4 +54,11 @@ export {
 	AddRequireModule,
 	DS,
 	DSIndex,
+	AddChildValid,
+	DefaultVal,
+	NotNull,
+	Size,
+	Type,
+	ValidCustom,
+	ValidForm,
 };

@@ -1,3 +1,4 @@
+import { DataTypes } from "../constant/DataTypes";
 import Format from "./Format";
 import TypeUtil from "./TypeUtil";
 //类型校验器
@@ -27,7 +28,7 @@ export default class ValidationUtil {
 	}
 
 	static isNumber(param: any): boolean {
-		return typeof param === "number";
+		return typeof param === "number" && !isNaN(param);
 	}
 
 	static isString(param: any): boolean {
@@ -42,23 +43,11 @@ export default class ValidationUtil {
 		return param instanceof Date;
 	}
 
-	static isNotMaxSize(param: any, value: number): boolean {
-		if (ValidationUtil.isString(param)) {
-			return param.length <= value;
-		}
-
-		if (ValidationUtil.isNumber(param)) {
-			return param <= value;
-		}
-
-		if (ValidationUtil.isBoolean(param)) {
-			return true;
-		}
-
-		let v = ValidationUtil.isNotNull(param) ? param.toString() : "";
-		return v.length <= value;
+	static isObject(param: any): boolean {
+		return typeof param == "object";
 	}
 
+	// poaram >= value
 	static isNotMinSize(param: any, value: number): boolean {
 		if (ValidationUtil.isString(param)) {
 			return param.length >= value;
@@ -76,6 +65,10 @@ export default class ValidationUtil {
 		return v.length >= value;
 	}
 
+	static isNotMaxSize(param: any, value: number): boolean {
+		return !ValidationUtil.isNotMinSize(param, value + 1);
+	}
+
 	static isArray(param: any, type: string): boolean {
 		if (!Array.isArray(param)) {
 			return false;
@@ -89,20 +82,16 @@ export default class ValidationUtil {
 			return true;
 		}
 
-		if (Reflect.has(ValidationUtil, m)) {
-			return param.every(item => {
-				return Reflect.apply(Reflect.get(ValidationUtil, m), ValidationUtil, [item]);
-			});
-		}
-
-		return false;
+		let checkFun = Reflect.get(ValidationUtil, m);
+		return param.every(item => {
+			return Reflect.apply(checkFun, ValidationUtil, [item]);
+		});
 	}
 
-	static checkType(param: any, type: string): boolean {
+	static getCheckFun(type: DataTypes | string): Function | null {
 		//判定类型
 		if (type.startsWith("array")) {
-			let ntype = type.replace(/array/, "");
-			return ValidationUtil.isArray(param, ntype);
+			return ValidationUtil.isArray;
 		}
 
 		let formatFun = null;
@@ -113,6 +102,10 @@ export default class ValidationUtil {
 			}
 			case "boolean": {
 				formatFun = ValidationUtil.isBoolean;
+				break;
+			}
+			case "object": {
+				formatFun = ValidationUtil.isObject;
 				break;
 			}
 			case "int":
@@ -126,12 +119,20 @@ export default class ValidationUtil {
 				break;
 			}
 			default: {
-				return true;
+				break;
 			}
+		}
+
+		return formatFun;
+	}
+
+	static checkType(param: any, type: string): boolean {
+		let formatFun = ValidationUtil.getCheckFun(type);
+
+		if (!formatFun) {
+			return false;
 		}
 
 		return Reflect.apply(formatFun, ValidationUtil, [param, type]);
 	}
 }
-
-ValidationUtil.isNotNull(new Date());

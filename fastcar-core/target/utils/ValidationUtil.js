@@ -26,7 +26,7 @@ class ValidationUtil {
         return !ValidationUtil.isNotNull(param);
     }
     static isNumber(param) {
-        return typeof param === "number";
+        return typeof param === "number" && !isNaN(param);
     }
     static isString(param) {
         return typeof param === "string";
@@ -37,19 +37,10 @@ class ValidationUtil {
     static isDate(param) {
         return param instanceof Date;
     }
-    static isNotMaxSize(param, value) {
-        if (ValidationUtil.isString(param)) {
-            return param.length <= value;
-        }
-        if (ValidationUtil.isNumber(param)) {
-            return param <= value;
-        }
-        if (ValidationUtil.isBoolean(param)) {
-            return true;
-        }
-        let v = ValidationUtil.isNotNull(param) ? param.toString() : "";
-        return v.length <= value;
+    static isObject(param) {
+        return typeof param == "object";
     }
+    // poaram >= value
     static isNotMinSize(param, value) {
         if (ValidationUtil.isString(param)) {
             return param.length >= value;
@@ -63,6 +54,9 @@ class ValidationUtil {
         let v = ValidationUtil.isNotNull(param) ? param.toString() : "";
         return v.length >= value;
     }
+    static isNotMaxSize(param, value) {
+        return !ValidationUtil.isNotMinSize(param, value + 1);
+    }
     static isArray(param, type) {
         if (!Array.isArray(param)) {
             return false;
@@ -73,18 +67,15 @@ class ValidationUtil {
         if (!Reflect.has(ValidationUtil, m)) {
             return true;
         }
-        if (Reflect.has(ValidationUtil, m)) {
-            return param.every(item => {
-                return Reflect.apply(Reflect.get(ValidationUtil, m), ValidationUtil, [item]);
-            });
-        }
-        return false;
+        let checkFun = Reflect.get(ValidationUtil, m);
+        return param.every(item => {
+            return Reflect.apply(checkFun, ValidationUtil, [item]);
+        });
     }
-    static checkType(param, type) {
+    static getCheckFun(type) {
         //判定类型
         if (type.startsWith("array")) {
-            let ntype = type.replace(/array/, "");
-            return ValidationUtil.isArray(param, ntype);
+            return ValidationUtil.isArray;
         }
         let formatFun = null;
         switch (type) {
@@ -94,6 +85,10 @@ class ValidationUtil {
             }
             case "boolean": {
                 formatFun = ValidationUtil.isBoolean;
+                break;
+            }
+            case "object": {
+                formatFun = ValidationUtil.isObject;
                 break;
             }
             case "int":
@@ -107,11 +102,17 @@ class ValidationUtil {
                 break;
             }
             default: {
-                return true;
+                break;
             }
+        }
+        return formatFun;
+    }
+    static checkType(param, type) {
+        let formatFun = ValidationUtil.getCheckFun(type);
+        if (!formatFun) {
+            return false;
         }
         return Reflect.apply(formatFun, ValidationUtil, [param, type]);
     }
 }
 exports.default = ValidationUtil;
-ValidationUtil.isNotNull(new Date());

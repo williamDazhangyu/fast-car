@@ -6,8 +6,10 @@ export enum DataTypes {
 	INT = "int",
 	FLOAT = "float",
 	DATE = "date",
+	Object = "object",
 	ARRAYNUMBER = "arraynumber",
 	ARRAYINT = "arrayint",
 	ARRAYFLOAT = "arrayfloat",
 	ARRAYSTRING = "arraystring",
+	ARRAYOBJECT = "arrayobject",
 }

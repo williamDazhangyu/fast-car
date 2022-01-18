@@ -1,5 +1,7 @@
 import FileUtil from "./FileUtil";
 
+const BasicTypes = ["boolean", "number", "string"];
+
 export default class TypeUtil {
 	static isFunction(f: any): boolean {
 		let typeName = typeof f;
@@ -15,7 +17,7 @@ export default class TypeUtil {
 			return false;
 		}
 
-		return true;
+		return TypeUtil.isFunction(f);
 	}
 
 	static isString(str: any): boolean {
@@ -43,5 +45,11 @@ export default class TypeUtil {
 
 	static isDate(value: any) {
 		return value instanceof Date;
+	}
+
+	//是否为基本类型
+	static isBasic(name: string): boolean {
+		let fname = name.toLowerCase();
+		return BasicTypes.includes(fname);
 	}
 }
