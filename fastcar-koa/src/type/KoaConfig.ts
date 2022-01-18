@@ -16,6 +16,7 @@ export type ServerConfig = {
 	port?: number; //默认80 https默认443
 	protocol?: HttpProtocol; //http  http2 或者 https 默认http
 	ssl?: SSLConfig;
+	hostname?: string; //当填写0.0.0.0时则不开启ipv6了
 };
 
 //和koa的约定配置

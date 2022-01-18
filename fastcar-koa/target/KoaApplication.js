@@ -129,9 +129,15 @@ let KoaApplication = class KoaApplication {
                 return;
             }
         }
-        server.listen(config.port, () => {
+        let listentCallBack = () => {
             this.sysLogger.info(`server ${appName} is running in ${config.port}`);
-        });
+        };
+        if (!!config.hostname) {
+            server.listen(config.port, config.hostname, listentCallBack);
+        }
+        else {
+            server.listen(config.port, listentCallBack);
+        }
         this.serverList.push(server);
     }
     start() {
