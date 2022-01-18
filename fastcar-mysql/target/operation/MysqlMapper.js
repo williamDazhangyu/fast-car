@@ -20,7 +20,6 @@ const OperationType_1 = require("./OperationType");
 const OperationType_2 = require("./OperationType");
 const utils_1 = require("fastcar-core/utils");
 const SerializeUtil_1 = require("../util/SerializeUtil");
-const SqlError_1 = require("../type/SqlError");
 const SqlSession_1 = require("../annotation/SqlSession");
 /****
  * @version 1.0 采用crud方式进行数据操作
@@ -242,11 +241,6 @@ class MysqlMapper {
         for (let row of rows) {
             for (let item of this.mappingList) {
                 let dbValue = this.toDBValue(row, item.name, item.type);
-                if (utils_1.ValidationUtil.isNull(dbValue)) {
-                    if (item.notNull) {
-                        return Promise.reject(new SqlError_1.default(`${item.name} value is null`));
-                    }
-                }
                 args.push(dbValue);
             }
             values.push(`(${paramsSymbol.join(",")})`);
@@ -268,11 +262,6 @@ class MysqlMapper {
             if (utils_1.ValidationUtil.isNotNull(dbValue)) {
                 params.push(item.field);
                 args.push(dbValue);
-            }
-            else {
-                if (item.notNull) {
-                    return Promise.reject(new SqlError_1.default(`${item.name} value is null`));
-                }
             }
         }
         let paramsSymbol = new Array(params.length).fill("?").join(",");

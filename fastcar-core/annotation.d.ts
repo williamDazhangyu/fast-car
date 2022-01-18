@@ -105,7 +105,7 @@ export function AddChildValid(target: any, name: string, value: { [key: string]:
 export function DefaultVal(val: any): PRet;
 
 //非空字段校验
-export function NotNull(target: any, propertyKey: string): PRet;
+export function NotNull(target: any, propertyKey: string): void;
 
 export function Size(m: SizeModel): PRet;
 

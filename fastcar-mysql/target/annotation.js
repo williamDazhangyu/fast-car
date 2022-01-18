@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EnableMysql = exports.Transactional = exports.SqlSession = exports.Entity = exports.Table = exports.PrimaryKey = exports.NotNull = exports.MaxLength = exports.Field = exports.DBType = void 0;
+exports.EnableMysql = exports.Transactional = exports.SqlSession = exports.Entity = exports.Table = exports.PrimaryKey = exports.Field = exports.DBType = void 0;
 const EnableMysql_1 = require("./annotation/EnableMysql");
 exports.EnableMysql = EnableMysql_1.default;
 const Entity_1 = require("./annotation/Entity");
@@ -9,10 +9,6 @@ const DBType_1 = require("./annotation/mapper/DBType");
 exports.DBType = DBType_1.default;
 const Field_1 = require("./annotation/mapper/Field");
 exports.Field = Field_1.default;
-const MaxLength_1 = require("./annotation/mapper/MaxLength");
-exports.MaxLength = MaxLength_1.default;
-const NotNull_1 = require("./annotation/mapper/NotNull");
-exports.NotNull = NotNull_1.default;
 const PrimaryKey_1 = require("./annotation/mapper/PrimaryKey");
 exports.PrimaryKey = PrimaryKey_1.default;
 const SqlSession_1 = require("./annotation/SqlSession");

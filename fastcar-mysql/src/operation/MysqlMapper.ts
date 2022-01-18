@@ -7,7 +7,6 @@ import { MapperType } from "../type/MapperType";
 import { OperatorEnum } from "./OperationType";
 import { DataFormat, TypeUtil, ValidationUtil } from "fastcar-core/utils";
 import SerializeUtil from "../util/SerializeUtil";
-import SqlError from "../type/SqlError";
 import SqlSession from "../annotation/SqlSession";
 
 /****
@@ -278,12 +277,6 @@ class MysqlMapper<T extends Object> {
 		for (let row of rows) {
 			for (let item of this.mappingList) {
 				let dbValue = this.toDBValue(row, item.name, item.type);
-				if (ValidationUtil.isNull(dbValue)) {
-					if (item.notNull) {
-						return Promise.reject(new SqlError(`${item.name} value is null`));
-					}
-				}
-
 				args.push(dbValue);
 			}
 			values.push(`(${paramsSymbol.join(",")})`);
@@ -310,10 +303,6 @@ class MysqlMapper<T extends Object> {
 			if (ValidationUtil.isNotNull(dbValue)) {
 				params.push(item.field);
 				args.push(dbValue);
-			} else {
-				if (item.notNull) {
-					return Promise.reject(new SqlError(`${item.name} value is null`));
-				}
 			}
 		}
 
