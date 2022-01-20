@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-koa",
-	"version": "1.0",
+	"version": "1.0.0",
 	"description": "fastcar框架下对koa的包装",
 	"main": "target/index.js",
 	"author": "william_zhong",

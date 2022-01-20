@@ -4,6 +4,10 @@ import * as http from "http";
 import * as https from "https";
 import * as http2 from "http2";
 import { ServerConfig } from "./src/type/KoaConfig";
+import * as koaBody from "koa-body";
+import * as bodyParser from "koa-bodyparser";
+
+type MiddleWareType = (...args: any) => Koa.Middleware | Koa.Middleware[];
 
 export class KoaApplication {
 	protected app: FastCarApplication;
@@ -38,3 +42,26 @@ export class KoaApplication {
 	 */
 	stop(): void;
 }
+
+export type KoaConfig = {
+	server: ServerConfig[] | ServerConfig; //监听的端口号
+	koaStatic?: string[]; //相对路径为resource下的 或者绝对文件路径
+	koaBodyOptions?: koaBody.IKoaBodyOptions; //文件上传的解析
+	koaBodyParser?: bodyParser.Options; //解析请求
+	extra?: { [key: string]: any }; //拓展设置
+};
+
+//全局异常捕捉 可以用自定义的替换这个函数
+export function ExceptionGlobalHandler(app: FastCarApplication): MiddleWareType;
+
+//解析body参数
+export function KoaBody(app: FastCarApplication): MiddleWareType;
+
+//解析Body参数 这个更好用
+export function KoaBodyParser(app: FastCarApplication): MiddleWareType;
+
+//支持跨域
+export function KoaCors(app: FastCarApplication): MiddleWareType;
+
+//解析静态文件
+export function KoaStatic(app: FastCarApplication): MiddleWareType;
