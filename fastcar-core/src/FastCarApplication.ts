@@ -61,12 +61,13 @@ class FastCarApplication extends Events {
 				Reflect.deleteProperty(fileContent, property);
 				if (CommonConstant.Settings == property) {
 					Object.keys(addConfig).forEach(key => {
+						let afterConfig = addConfig[key];
 						let beforeConfig = this.sysConfig.settings.get(key);
 						if (beforeConfig) {
 							//对settings的属性进行覆盖
-							Object.assign(beforeConfig, addConfig[key]);
+							afterConfig = Object.assign(beforeConfig, afterConfig);
 						}
-						this.sysConfig.settings.set(key, addConfig[key]);
+						this.sysConfig.settings.set(key, afterConfig);
 					});
 				} else {
 					Object.assign(currConfig, addConfig);
