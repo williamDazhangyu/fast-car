@@ -16,7 +16,7 @@ import { TypeUtil } from "fastcar-core/utils";
  *
  */
 @ApplicationStart(BootPriority.Lowest, "start")
-@ApplicationStop(BootPriority.Base, "start")
+@ApplicationStop(BootPriority.Base, "stop")
 export default class KoaApplication {
 	@Autowired
 	protected app!: FastCarApplication;

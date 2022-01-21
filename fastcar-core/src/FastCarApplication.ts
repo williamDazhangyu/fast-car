@@ -16,6 +16,7 @@ import { LifeCycleModule } from "./constant/LifeCycleModule";
 import * as log4js from "log4js";
 import { Log4jsConfig } from "./config/Log4jsConfig";
 import * as fs from "fs";
+import { AppStatusEnum } from "./constant/AppStatusEnum";
 
 class FastCarApplication extends Events {
 	componentMap: Map<string, any>; //组件键值对
@@ -23,6 +24,7 @@ class FastCarApplication extends Events {
 	basePath: string; //入口文件夹路径
 	baseFileName: string; //入口文件路径
 	sysLogger: log4js.Logger;
+	applicationStatus: AppStatusEnum;
 
 	constructor() {
 		super();
@@ -38,6 +40,7 @@ class FastCarApplication extends Events {
 		}
 		this.sysLogger = log4js.getLogger();
 		this.componentMap.set("SysLogger", this.sysLogger);
+		this.applicationStatus = AppStatusEnum.READY;
 	}
 
 	/***
@@ -359,10 +362,29 @@ class FastCarApplication extends Events {
 		this.addExecptionEvent();
 	}
 
-	addExitEvent() {
-		process.on("beforeExit", async () => {
+	async exitEvent(msg: string) {
+		//防止多次停止 原则上不会发生
+		if (this.applicationStatus == AppStatusEnum.RUN) {
+			this.applicationStatus = AppStatusEnum.STOP;
+			this.sysLogger.info("exit reason", msg);
 			await this.beforeStopServer();
 			process.exit();
+		}
+	}
+
+	addExitEvent() {
+		process.on("beforeExit", () => {
+			this.exitEvent("beforeExit exit");
+		});
+
+		process.on("SIGINT", () => {
+			this.exitEvent("sigint exit");
+		});
+
+		process.on("message", async msg => {
+			if (msg == "shutdown") {
+				this.exitEvent("shutdown");
+			}
 		});
 
 		process.on("exit", () => {
@@ -445,6 +467,7 @@ class FastCarApplication extends Events {
 
 		this.sysLogger.info(`start server ${this.sysConfig.application.name} is run`);
 		this.sysLogger.info(`version ${this.sysConfig.application.version}`);
+		this.applicationStatus = AppStatusEnum.RUN;
 	}
 
 	/***

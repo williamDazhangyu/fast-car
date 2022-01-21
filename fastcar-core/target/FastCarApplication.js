@@ -15,6 +15,7 @@ const CommonConstant_1 = require("./constant/CommonConstant");
 const LifeCycleModule_1 = require("./constant/LifeCycleModule");
 const log4js = require("log4js");
 const fs = require("fs");
+const AppStatusEnum_1 = require("./constant/AppStatusEnum");
 class FastCarApplication extends Events {
     constructor() {
         super();
@@ -28,6 +29,7 @@ class FastCarApplication extends Events {
         }
         this.sysLogger = log4js.getLogger();
         this.componentMap.set("SysLogger", this.sysLogger);
+        this.applicationStatus = AppStatusEnum_1.AppStatusEnum.READY;
     }
     /***
      * @version 1.0 获取资源路径
@@ -308,10 +310,26 @@ class FastCarApplication extends Events {
         this.addExitEvent();
         this.addExecptionEvent();
     }
-    addExitEvent() {
-        process.on("beforeExit", async () => {
+    async exitEvent(msg) {
+        //防止多次停止 原则上不会发生
+        if (this.applicationStatus == AppStatusEnum_1.AppStatusEnum.RUN) {
+            this.applicationStatus = AppStatusEnum_1.AppStatusEnum.STOP;
+            this.sysLogger.info("exit reason", msg);
             await this.beforeStopServer();
             process.exit();
+        }
+    }
+    addExitEvent() {
+        process.on("beforeExit", () => {
+            this.exitEvent("beforeExit exit");
+        });
+        process.on("SIGINT", () => {
+            this.exitEvent("sigint exit");
+        });
+        process.on("message", async (msg) => {
+            if (msg == "shutdown") {
+                this.exitEvent("shutdown");
+            }
         });
         process.on("exit", () => {
             this.stopServer();
@@ -382,6 +400,7 @@ class FastCarApplication extends Events {
         await this.automaticRun(LifeCycleModule_1.LifeCycleModule.ApplicationStart);
         this.sysLogger.info(`start server ${this.sysConfig.application.name} is run`);
         this.sysLogger.info(`version ${this.sysConfig.application.version}`);
+        this.applicationStatus = AppStatusEnum_1.AppStatusEnum.RUN;
     }
     /***
      * @version 1.0 停止服务前自动调用服务

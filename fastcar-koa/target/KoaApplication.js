@@ -190,7 +190,7 @@ __decorate([
 ], KoaApplication.prototype, "sysLogger", void 0);
 KoaApplication = __decorate([
     annotation_1.ApplicationStart(fastcar_core_1.BootPriority.Lowest, "start"),
-    annotation_1.ApplicationStop(fastcar_core_1.BootPriority.Base, "start"),
+    annotation_1.ApplicationStop(fastcar_core_1.BootPriority.Base, "stop"),
     __metadata("design:paramtypes", [])
 ], KoaApplication);
 exports.default = KoaApplication;
