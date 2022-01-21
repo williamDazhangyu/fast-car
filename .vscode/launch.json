@@ -55,9 +55,7 @@
             "protocol": "inspector",
             "runtimeArgs": [
                 "-r",
-                "ts-node/register",
-                "-r",
-                "esm"
+                "ts-node/register"
             ],
             "env": {
                 "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"

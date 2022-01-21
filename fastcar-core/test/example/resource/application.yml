@@ -1,5 +1,3 @@
-application:
-    name: "simple"
 settings:
     log4js:
         appenders:

@@ -11,8 +11,9 @@ export type SYSConfig = {
 
 export const SYSDefaultConfig: SYSConfig = {
 	application: {
-		name: "FAST_CAR",
+		name: "app",
 		env: "development",
+		version: "1.0.0",
 	},
 	settings: new Map<string, Object>(), //自定义配置
 };

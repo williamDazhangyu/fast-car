@@ -100,6 +100,18 @@ class FastCarApplication extends Events {
 		this.updateSysConfig(this.sysConfig, CommonConstant.Application);
 		let env = Reflect.get(this, CommonConstant.ENV) || this.sysConfig.application.env;
 		this.updateSysConfig(this.sysConfig, `${CommonConstant.Application}-${env}`);
+
+		//读取app的必要信息 name和版本号 根据 package.json
+		let packagePath = path.join(this.basePath, "../", "package.json");
+		if (fs.existsSync(packagePath)) {
+			let packageInfo = require(packagePath);
+			if (packageInfo.name) {
+				this.sysConfig.application.name = packageInfo.name;
+			}
+			if (packageInfo.version) {
+				this.sysConfig.application.version = packageInfo.version;
+			}
+		}
 	}
 
 	setSetting(key: string, value: any) {
@@ -431,7 +443,8 @@ class FastCarApplication extends Events {
 		this.sysLogger.info("Call application initialization method");
 		await this.automaticRun(LifeCycleModule.ApplicationStart);
 
-		this.sysLogger.info("start server is run");
+		this.sysLogger.info(`start server ${this.sysConfig.application.name} is run`);
+		this.sysLogger.info(`version ${this.sysConfig.application.version}`);
 	}
 
 	/***
