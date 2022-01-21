@@ -468,6 +468,10 @@ class FastCarApplication extends Events {
 		this.sysLogger.info(`start server ${this.sysConfig.application.name} is run`);
 		this.sysLogger.info(`version ${this.sysConfig.application.version}`);
 		this.applicationStatus = AppStatusEnum.RUN;
+
+		if (process.send && TypeUtil.isFunction(process.send)) {
+			process.send("ready");
+		}
 	}
 
 	/***
