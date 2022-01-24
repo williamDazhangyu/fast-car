@@ -23,6 +23,7 @@ export enum BootPriority {
 	Lowest = 10000, //默认优先级1万最低
 }
 
+//元数据加载模块
 export enum FastCarMetaData {
 	paramTypes = "design:paramtypes", //传参类型
 	returnType = "design:returntype", //返回类型
@@ -41,6 +42,7 @@ export enum FastCarMetaData {
 	ValidSize = "valid:size", //校验长度
 	NotNull = "valid:notNull", //不为空
 	ValidCustom = "valid:custom", //自定义校验方式
+	Hotter = "hotter", //是否支持热更
 }
 
 declare type SYSConfig = {
@@ -96,6 +98,11 @@ export class Logger {
 }
 
 export class FastCarApplication {
+	/***
+	 * @version 1.0 热更新组件
+	 */
+	addHot(): void;
+
 	/**
 	 * @version 1.0 获取资源路径
 	 */
@@ -138,6 +145,12 @@ export class FastCarApplication {
 	 * @version 1.0 扫描组件
 	 */
 	loadClass(): void;
+
+	/***
+	 * @version 1.0 装配单个模块
+	 *
+	 */
+	injectionModule(instanceName: string, instance: any): void;
 
 	/**
 	 * @version 1.0 加载需要注入的类
@@ -238,6 +251,18 @@ export class FastCarApplication {
 	 * @version 1.0 获取文件内容
 	 */
 	getFileContent(fp: string): string;
+
+	/***
+	 * @version 1.0 是否支持热更
+	 *
+	 */
+	isHotter(): boolean;
+
+	/**
+	 * @version 1.0 指定热更新文件
+	 *
+	 */
+	specifyHotUpdate(fp: string): void;
 }
 
 //校验错误

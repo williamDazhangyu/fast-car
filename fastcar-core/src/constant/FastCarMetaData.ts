@@ -17,4 +17,5 @@ export enum FastCarMetaData {
 	ValidSize = "valid:size", //校验长度
 	NotNull = "valid:notNull", //不为空
 	ValidCustom = "valid:custom", //自定义校验方式
+	Hotter = "hotter", //是否支持热更
 }

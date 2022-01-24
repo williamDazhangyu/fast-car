@@ -1,3 +1,5 @@
+import ClassUtils from "./ClassUtils";
+
 const BASETYPE = ["constructor", "prototype", "name"];
 
 /***
@@ -49,5 +51,21 @@ export default class MixTool {
 				}
 			}
 		}
+	}
+
+	//多个对象赋值
+	static assign(target: any, source: any) {
+		Object.assign(target, source);
+		let keys = ClassUtils.getProtoType(source);
+
+		keys.forEach(key => {
+			let keyStr = key.toString();
+			if (!BASETYPE.includes(keyStr)) {
+				let desc = Object.getOwnPropertyDescriptor(source?.prototype, key);
+				if (desc) {
+					Reflect.defineProperty(target, key, desc);
+				}
+			}
+		});
 	}
 }

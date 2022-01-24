@@ -1,5 +1,6 @@
 import TypeUtil from "./TypeUtil";
 import FileUtil from "./FileUtil";
+import * as fs from "fs";
 
 export default class ClassLoader {
 	/***
@@ -41,5 +42,21 @@ export default class ClassLoader {
 		});
 
 		return modulesMap;
+	}
+
+	static watchServices(fp: string, context: any) {
+		if (typeof context.emit != "function") {
+			return false;
+		}
+
+		//添加热更方法
+		fs.watch(fp, function(event, filename) {
+			if (event === "change") {
+				console.log("热更加载----", filename);
+				context.emit("reload", fp);
+			}
+		});
+
+		return true;
 	}
 }

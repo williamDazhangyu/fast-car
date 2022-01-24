@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const TypeUtil_1 = require("./TypeUtil");
 const FileUtil_1 = require("./FileUtil");
+const fs = require("fs");
 class ClassLoader {
     /***
      * @version 1.0 加载模块
@@ -36,6 +37,19 @@ class ClassLoader {
             }
         });
         return modulesMap;
+    }
+    static watchServices(fp, context) {
+        if (typeof context.emit != "function") {
+            return false;
+        }
+        //添加热更方法
+        fs.watch(fp, function (event, filename) {
+            if (event === "change") {
+                console.log("热更加载----", filename);
+                context.emit("reload", fp);
+            }
+        });
+        return true;
     }
 }
 exports.default = ClassLoader;

@@ -21,4 +21,5 @@ var FastCarMetaData;
     FastCarMetaData["ValidSize"] = "valid:size";
     FastCarMetaData["NotNull"] = "valid:notNull";
     FastCarMetaData["ValidCustom"] = "valid:custom";
+    FastCarMetaData["Hotter"] = "hotter";
 })(FastCarMetaData = exports.FastCarMetaData || (exports.FastCarMetaData = {}));

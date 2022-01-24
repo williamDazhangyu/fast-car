@@ -16,6 +16,7 @@ const LifeCycleModule_1 = require("./constant/LifeCycleModule");
 const log4js = require("log4js");
 const fs = require("fs");
 const AppStatusEnum_1 = require("./constant/AppStatusEnum");
+const ValidationUtil_1 = require("./utils/ValidationUtil");
 class FastCarApplication extends Events {
     constructor() {
         super();
@@ -30,6 +31,38 @@ class FastCarApplication extends Events {
         this.sysLogger = log4js.getLogger();
         this.componentMap.set("SysLogger", this.sysLogger);
         this.applicationStatus = AppStatusEnum_1.AppStatusEnum.READY;
+        this.addHot();
+    }
+    /***
+     * @version 1.0 热更新组件
+     */
+    addHot() {
+        this.on("reload", (fp) => {
+            if (this.applicationStatus != AppStatusEnum_1.AppStatusEnum.RUN) {
+                return;
+            }
+            let moduleClass = classLoader_1.default.loadModule(fp, true);
+            if (moduleClass != null) {
+                moduleClass.forEach((func, name) => {
+                    //只有依赖注入的组件才能被实例化
+                    if (FastCarApplication.hasInjectionMap(name)) {
+                        let beforeInstance = this.componentMap.get(name);
+                        let instance = TypeUtil_1.default.isFunction(func) ? new func() : func;
+                        if (!beforeInstance) {
+                            this.componentMap.set(name, instance);
+                            //装配
+                            this.injectionModule(name, instance);
+                            if (this.isHotter() || Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.Hotter, instance)) {
+                                classLoader_1.default.watchServices(fp, this);
+                            }
+                        }
+                        else {
+                            Mix_1.default.assign(beforeInstance, func);
+                        }
+                    }
+                });
+            }
+        });
     }
     /***
      * @version 1.0 获取资源路径
@@ -105,7 +138,15 @@ class FastCarApplication extends Events {
      *
      */
     getSetting(key) {
-        return this.sysConfig.settings.get(key) || Reflect.get(this.sysConfig, key) || Reflect.get(this, key);
+        let res = this.sysConfig.settings.get(key);
+        if (ValidationUtil_1.default.isNotNull(res)) {
+            return res;
+        }
+        res = Reflect.get(this.sysConfig, key);
+        if (ValidationUtil_1.default.isNotNull(res)) {
+            res;
+        }
+        return Reflect.get(this, key);
     }
     /***
      * @version 1.0 获取应用配置
@@ -206,21 +247,49 @@ class FastCarApplication extends Events {
                     }
                     //只有依赖注入的组件才能被实例化
                     if (FastCarApplication.hasInjectionMap(name)) {
-                        if (TypeUtil_1.default.isFunction(func)) {
-                            this.componentMap.set(name, new func());
-                            return;
+                        let instance = TypeUtil_1.default.isFunction(func) ? new func() : func;
+                        this.componentMap.set(name, instance);
+                        console.info(Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.Hotter, instance));
+                        //判断是否需要热更加载
+                        if (this.isHotter() || Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.Hotter, instance)) {
+                            classLoader_1.default.watchServices(f, this);
                         }
-                        this.componentMap.set(name, func);
                     }
                 });
             }
         }
     }
+    /***
+     * @version 1.0 装配模块
+     *
+     */
+    injectionModule(instanceName, instance) {
+        let relyname = FastCarMetaData_1.FastCarMetaData.IocModule;
+        let moduleList = Reflect.getMetadata(relyname, instance);
+        if (!moduleList || moduleList.size == 0) {
+            return;
+        }
+        moduleList.forEach((name, propertyKey) => {
+            let func = this.componentMap.get(name);
+            //如果等于自身则进行注入
+            if (name === FastCarApplication.name || name === FastCarMetaData_1.FastCarMetaData.APP) {
+                func = this;
+            }
+            else {
+                if (!this.componentMap.has(name)) {
+                    //找不到依赖项
+                    let injectionError = new Error(`Unsatisfied dependency expressed through ${name} in ${instanceName} `);
+                    this.sysLogger.error(injectionError.message);
+                    throw injectionError;
+                }
+            }
+            Reflect.set(instance, propertyKey, func);
+        });
+    }
     /**
      * @version 1.0 加载需要注入的类
      */
     loadInjectionModule() {
-        let relyname = FastCarMetaData_1.FastCarMetaData.IocModule;
         this.componentMap.forEach((instance, instanceName) => {
             //补充实例找不到时 不能被注解
             if (!instance) {
@@ -228,26 +297,7 @@ class FastCarApplication extends Events {
                 this.sysLogger.error(insatnceError.message);
                 throw insatnceError;
             }
-            let moduleList = Reflect.getMetadata(relyname, instance);
-            if (!moduleList || moduleList.size == 0) {
-                return;
-            }
-            moduleList.forEach((name, propertyKey) => {
-                let func = this.componentMap.get(name);
-                //如果等于自身则进行注入
-                if (name === FastCarApplication.name || name === FastCarMetaData_1.FastCarMetaData.APP) {
-                    func = this;
-                }
-                else {
-                    if (!this.componentMap.has(name)) {
-                        //找不到依赖项
-                        let injectionError = new Error(`Unsatisfied dependency expressed through ${name} in ${instanceName} `);
-                        this.sysLogger.error(injectionError.message);
-                        throw injectionError;
-                    }
-                }
-                Reflect.set(instance, propertyKey, func);
-            });
+            this.injectionModule(instanceName, instance);
         });
     }
     /***
@@ -446,6 +496,22 @@ class FastCarApplication extends Events {
             return "";
         }
         return fs.readFileSync(fp).toString();
+    }
+    /***
+     * @version 1.0 是否支持热更
+     *
+     */
+    isHotter() {
+        return !!this.getSetting("hotter");
+    }
+    /***
+     * @version 1.0 指定热更新文件
+     *
+     */
+    specifyHotUpdate(fp) {
+        if (fs.existsSync(fp)) {
+            this.emit("reload", fp);
+        }
     }
 }
 exports.default = FastCarApplication;

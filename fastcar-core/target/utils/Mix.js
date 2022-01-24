@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const ClassUtils_1 = require("./ClassUtils");
 const BASETYPE = ["constructor", "prototype", "name"];
 /***
  * @version 1.0 混合多个类
@@ -44,6 +45,20 @@ class MixTool {
                 }
             }
         }
+    }
+    //多个对象赋值
+    static assign(target, source) {
+        Object.assign(target, source);
+        let keys = ClassUtils_1.default.getProtoType(source);
+        keys.forEach(key => {
+            let keyStr = key.toString();
+            if (!BASETYPE.includes(keyStr)) {
+                let desc = Object.getOwnPropertyDescriptor(source?.prototype, key);
+                if (desc) {
+                    Reflect.defineProperty(target, key, desc);
+                }
+            }
+        });
     }
 }
 exports.default = MixTool;
