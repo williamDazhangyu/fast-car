@@ -6,6 +6,7 @@ exports.SYSDefaultConfig = {
         name: "app",
         env: "development",
         version: "1.0.0",
+        hotter: false,
     },
     settings: new Map(), //自定义配置
 };

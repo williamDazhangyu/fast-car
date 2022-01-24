@@ -53,6 +53,8 @@ declare type SYSConfig = {
 declare type ApplicationConfig = {
 	name: string;
 	env: string;
+	version: string;
+	hotter?: boolean;
 };
 
 export class Logger {
