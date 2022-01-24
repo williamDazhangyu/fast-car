@@ -1,4 +1,4 @@
-type FIELDTYPE = {
+export type FIELDTYPE = {
 	field: string;
 	order?: boolean; //是否为倒序 order true为倒序
 	compare?: Function;
@@ -53,8 +53,20 @@ export default class DataMap<K, V extends Object> extends Map {
 		return list;
 	}
 
-	//查找属性名称
-	findByAtt() {}
-}
+	/***
+	 * @version 1.0 查找属性名称
+	 * @params atts代表属性键值对匹配
+	 *
+	 */
+	findByAtts(atts: { [key: string]: any }): V[] {
+		let list = this.toValues();
+		return list.filter(item => {
+			return Object.keys(atts).every(key => {
+				let v = Reflect.get(atts, key);
+				let itemV = Reflect.get(item, key);
 
-let a = new DataMap<number, string>();
+				return itemV == v;
+			});
+		});
+	}
+}

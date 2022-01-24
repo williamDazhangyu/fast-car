@@ -1,3 +1,9 @@
+declare type FIELDTYPE = {
+	field: string;
+	order?: boolean; //是否为倒序 order true为倒序
+	compare?: Function;
+};
+
 export enum LifeCycleModule {
 	ApplicationStart = "applicationStart", //应用初始化完全完成后运行
 	ApplicationStop = "applicationStop", //应用结束之前进行执行
@@ -239,6 +245,18 @@ export class ValidError {
 	message?: string;
 }
 
-type Ret = (target: any) => void;
+export class DataMap<K, V extends Object> extends Map {
+	toValues(): V[];
 
-type RetProperty = (target: any, prop?: string, descriptor?: PropertyDescriptor) => void;
+	toKeys(): K[];
+
+	//自定义排序 支持多个排序
+	sort(sorts?: FIELDTYPE[], list?: V[]): V[];
+
+	/***
+	 * @version 1.0 查找属性名称
+	 * @params atts代表属性键值对匹配
+	 *
+	 */
+	findByAtts(atts: { [key: string]: any }): V[];
+}

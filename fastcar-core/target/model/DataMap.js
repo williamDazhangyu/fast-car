@@ -38,8 +38,20 @@ class DataMap extends Map {
         });
         return list;
     }
-    //查找属性名称
-    findByAtt() { }
+    /***
+     * @version 1.0 查找属性名称
+     * @params atts代表属性键值对匹配
+     *
+     */
+    findByAtts(atts) {
+        let list = this.toValues();
+        return list.filter(item => {
+            return Object.keys(atts).every(key => {
+                let v = Reflect.get(atts, key);
+                let itemV = Reflect.get(item, key);
+                return itemV == v;
+            });
+        });
+    }
 }
 exports.default = DataMap;
-let a = new DataMap();
