@@ -28,6 +28,7 @@ import Size from "./annotation/valid/Size";
 import Type from "./annotation/valid/Type";
 import ValidCustom from "./annotation/valid/ValidCustom";
 import ValidForm from "./annotation/valid/ValidForm";
+import { Rule } from "./annotation/valid/Rule";
 
 //注解暴露出去
 export {
@@ -61,4 +62,5 @@ export {
 	Type,
 	ValidCustom,
 	ValidForm,
+	Rule,
 };

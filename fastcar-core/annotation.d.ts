@@ -2,9 +2,11 @@ type Ret = (target: any) => void;
 
 type FRet = (target: any, methodName?: string, descriptor?: PropertyDescriptor) => void;
 
-type PRet = (target: any, propertyKey: string) => void;
+type PRet = (target: any, propertyKey: string, index?: number) => void;
 
 type MRet = (target: any, methodName: string, descriptor: PropertyDescriptor) => void;
+
+type PPRet = (target: any, method: string, index: number) => void;
 
 declare interface Log4jsConfig {
 	appenders: { [name: string]: any };
@@ -99,13 +101,13 @@ export function DS(name: string): FRet;
 export function DSIndex(target: any, name: string, index: number): void;
 
 //添加子表单校验数据
-export function AddChildValid(target: any, name: string, value: { [key: string]: any }): void;
+export function AddChildValid(target: any, name: string, value: { [key: string]: any }, index?: number): void;
 
 //默认值放入
 export function DefaultVal(val: any): PRet;
 
 //非空字段校验
-export function NotNull(target: any, propertyKey: string): void;
+export function NotNull(target: any, propertyKey: string, index?: number): void;
 
 export function Size(m: SizeModel): PRet;
 
@@ -116,8 +118,11 @@ export function ValidCustom(fn: checkfun, message?: string): PRet;
 
 /***
  * @version 1.0 校验表单 支持校验大小 类型 和自定义方法
- * @param rules key - value的形式 通常一个参数一个校验方式
- * @param paramIndex 位于第几个参数的校验表单 默认为0
+ */
+export function ValidForm(target: any, methodName: string, descriptor: PropertyDescriptor): void;
+
+/***
+ *@version 1.0 添加校验规则 type如果不填选择为增强型的类型 若获取不到则为string校验
  *
  */
-export function ValidForm(rules: { [prop: string]: FormRuleModel }, paramIndex?: number): MRet;
+export function Rule(rules?: { [prop: string]: FormRuleModel }): PPRet;

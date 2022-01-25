@@ -56,103 +56,72 @@ function delFormValue(value, prop) {
  * @param paramIndex 位于第几个参数的校验表单
  *
  */
-function ValidForm(rules, paramIndex = 0) {
-    //完善表单错误信息
-    Object.keys(rules).forEach(prop => {
-        let r = rules[prop];
-        if (r.message) {
-            r.nullMessage = r.nullMessage ? r.nullMessage : r.message;
-            r.sizeMessgae = r.sizeMessgae ? r.sizeMessgae : r.message;
-            r.typeMessage = r.typeMessage ? r.typeMessage : r.message;
-        }
-        else {
-            r.nullMessage = `${prop} is required`;
-            r.typeMessage = `${prop} type is ${r.type}`;
-        }
-    });
-    return function (target, methodName, descriptor) {
-        let next = descriptor.value;
-        //获取增强类型的增加严格校验
-        let paramsTypes = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.paramTypes, target, methodName);
-        //对rules进行进一步的补充
-        let designObj = paramsTypes[paramIndex];
-        let basicFlag = false;
-        if (!designObj) {
-            console.warn(`Design type not found by ${methodName} in ${paramIndex}`);
-        }
-        else {
-            basicFlag = utils_1.TypeUtil.isBasic(designObj.name);
-            //获取表单类型
-            if (utils_1.TypeUtil.isClass(designObj)) {
-                let childMap = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.ValidChildFormRules, designObj);
-                if (childMap && childMap.size > 0) {
-                    //补充表单
-                    childMap.forEach((citem, prop) => {
-                        if (Reflect.has(rules, prop)) {
-                            //优先取表单里的
-                            rules[prop] = Object.assign(citem, rules[prop]);
+function ValidForm(target, methodName, descriptor) {
+    let next = descriptor.value;
+    descriptor.value = function (...args) {
+        let rulesMap = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.ValidFormRules, target, methodName);
+        if (rulesMap && rulesMap.size > 0) {
+            rulesMap.forEach((item, paramIndex) => {
+                let { rules, basicFlag } = item;
+                let currObj = args[paramIndex];
+                if (ValidationUtil_1.default.isNull(currObj)) {
+                    currObj = basicFlag ? "" : {};
+                }
+                for (let prop in rules) {
+                    let rule = rules[prop];
+                    //进行取值
+                    let val = getFormValue(currObj, prop, rule.defaultVal);
+                    //判断关键字是否相同
+                    if (`${methodName}-${paramIndex}` == prop) {
+                        val = currObj || rule.defaultVal;
+                    }
+                    //优先判断是否为必填项
+                    if (ValidationUtil_1.default.isNull(val)) {
+                        if (rule.required) {
+                            throwErrMsg(rule, prop, rule.nullMessage);
                         }
                         else {
-                            Reflect.set(rules, prop, citem);
+                            delFormValue(currObj, prop);
                         }
-                    });
-                }
-            }
-        }
-        descriptor.value = function (...args) {
-            let currObj = args[paramIndex];
-            if (ValidationUtil_1.default.isNull(currObj)) {
-                currObj = basicFlag ? "" : {};
-            }
-            for (let prop in rules) {
-                let rule = rules[prop];
-                //进行取值
-                let val = getFormValue(currObj, prop, rule.defaultVal);
-                //优先判断是否为必填项
-                if (ValidationUtil_1.default.isNull(val)) {
-                    if (rule.required) {
-                        throwErrMsg(rule, prop, rule.nullMessage);
                     }
                     else {
-                        delFormValue(currObj, prop);
-                    }
-                }
-                else {
-                    //进行类型判断并赋值
-                    val = DataFormat_1.default.formatValue(val, rule.type);
-                    //调用check的方法
-                    if (!ValidationUtil_1.default.checkType(val, rule.type)) {
-                        throwErrMsg(rule, prop, rule.typeMessage);
-                    }
-                    //判断长度
-                    if (rule?.minSize) {
-                        if (!ValidationUtil_1.default.isNotMinSize(val, rule.minSize)) {
-                            throwErrMsg(rule, prop, rule.sizeMessgae ? rule.sizeMessgae : `${prop} should be greater than ${rule.minSize} `);
+                        //进行类型判断并赋值
+                        let checkType = rule.type || "string";
+                        val = DataFormat_1.default.formatValue(val, checkType);
+                        //调用check的方法
+                        if (!ValidationUtil_1.default.checkType(val, checkType)) {
+                            throwErrMsg(rule, prop, rule.typeMessage);
                         }
-                    }
-                    if (rule?.maxSize) {
-                        if (!ValidationUtil_1.default.isNotMaxSize(val, rule.maxSize)) {
-                            throwErrMsg(rule, prop, rule.sizeMessgae ? rule.sizeMessgae : `${prop} should be less than ${rule.maxSize} `);
-                        }
-                    }
-                    //自定义方法校验
-                    if (Array.isArray(rule.filters)) {
-                        for (let fnItem of rule.filters) {
-                            let fn = fnItem.fn;
-                            let flag = Reflect.apply(fn, this, [val]);
-                            if (!flag) {
-                                //抛出错误提示
-                                throwErrMsg(rule, prop, fnItem.message || rule.message);
+                        //判断长度
+                        if (rule?.minSize) {
+                            if (!ValidationUtil_1.default.isNotMinSize(val, rule.minSize)) {
+                                throwErrMsg(rule, prop, rule.sizeMessgae ? rule.sizeMessgae : `${prop} should be greater than ${rule.minSize} `);
                             }
                         }
+                        if (rule?.maxSize) {
+                            if (!ValidationUtil_1.default.isNotMaxSize(val, rule.maxSize)) {
+                                throwErrMsg(rule, prop, rule.sizeMessgae ? rule.sizeMessgae : `${prop} should be less than ${rule.maxSize} `);
+                            }
+                        }
+                        //自定义方法校验
+                        if (Array.isArray(rule.filters)) {
+                            for (let fnItem of rule.filters) {
+                                let fn = fnItem.fn;
+                                let flag = Reflect.apply(fn, this, [val]);
+                                if (!flag) {
+                                    //抛出错误提示
+                                    throwErrMsg(rule, prop, fnItem.message || rule.message);
+                                }
+                            }
+                        }
+                        //进行赋值
+                        currObj = setFormValue(currObj, prop, val);
                     }
-                    //进行赋值
-                    currObj = setFormValue(currObj, prop, val);
                 }
-            }
-            args[paramIndex] = currObj;
-            return Reflect.apply(next, this, args);
-        };
+                args[paramIndex] = currObj;
+            });
+        }
+        return Reflect.apply(next, this, args);
     };
 }
 exports.default = ValidForm;

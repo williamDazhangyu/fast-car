@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ValidForm = exports.ValidCustom = exports.Type = exports.Size = exports.NotNull = exports.DefaultVal = exports.AddChildValid = exports.DSIndex = exports.DS = exports.AddRequireModule = exports.SpecifyCompent = exports.Log = exports.Readonly = exports.Override = exports.NotImplemented = exports.Deprecate = exports.ExceptionMonitor = exports.Autowired = exports.Application = exports.Injection = exports.Repository = exports.Service = exports.Controller = exports.Configure = exports.Component = exports.ComponentScanExclusion = exports.ComponentScan = exports.ApplicationStop = exports.ApplicationStart = exports.ENV = void 0;
+exports.Rule = exports.ValidForm = exports.ValidCustom = exports.Type = exports.Size = exports.NotNull = exports.DefaultVal = exports.AddChildValid = exports.DSIndex = exports.DS = exports.AddRequireModule = exports.SpecifyCompent = exports.Log = exports.Readonly = exports.Override = exports.NotImplemented = exports.Deprecate = exports.ExceptionMonitor = exports.Autowired = exports.Application = exports.Injection = exports.Repository = exports.Service = exports.Controller = exports.Configure = exports.Component = exports.ComponentScanExclusion = exports.ComponentScan = exports.ApplicationStop = exports.ApplicationStart = exports.ENV = void 0;
 const Application_1 = require("./annotation/Application");
 exports.Application = Application_1.default;
 const Autowired_1 = require("./annotation/Autowired");
@@ -61,3 +61,5 @@ const ValidCustom_1 = require("./annotation/valid/ValidCustom");
 exports.ValidCustom = ValidCustom_1.default;
 const ValidForm_1 = require("./annotation/valid/ValidForm");
 exports.ValidForm = ValidForm_1.default;
+const Rule_1 = require("./annotation/valid/Rule");
+Object.defineProperty(exports, "Rule", { enumerable: true, get: function () { return Rule_1.Rule; } });

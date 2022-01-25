@@ -2,18 +2,41 @@ import "reflect-metadata";
 import { FastCarMetaData } from "../../constant/FastCarMetaData";
 import { FormRuleModel } from "../../model/FormRuleModel";
 import TypeUtil from "../../utils/TypeUtil";
+import ValidationUtil from "../../utils/ValidationUtil";
 
 //添加子元素的校验规则
-export default function AddChildValid(target: any, name: string, value: { [key: string]: any }) {
-	let childMap: Map<string, FormRuleModel> = Reflect.getMetadata(FastCarMetaData.ValidChildFormRules, target);
-	if (!childMap) {
-		childMap = new Map();
+export default function AddChildValid(target: any, name: string, value: { [key: string]: any }, index?: number) {
+	let childMap: Map<string, FormRuleModel>;
+
+	let alias = `${name}-${index}`;
+	let paramsFlag = ValidationUtil.isNumber(index);
+	if (paramsFlag) {
+		childMap = Reflect.getMetadata(FastCarMetaData.ValidChildFormRules, target, alias);
+		if (!childMap) {
+			childMap = new Map();
+			Reflect.defineMetadata(FastCarMetaData.ValidChildFormRules, childMap, target, alias);
+		}
+	} else {
+		childMap = Reflect.getMetadata(FastCarMetaData.ValidChildFormRules, target);
+		if (!childMap) {
+			childMap = new Map();
+			Reflect.defineMetadata(FastCarMetaData.ValidChildFormRules, childMap, target);
+		}
 	}
-	let item = childMap.get(name);
+
+	let item = childMap.get(alias);
 	if (!item) {
 		let proto = Reflect.getMetadata(FastCarMetaData.designType, target, name);
-		let typeName = proto.name.toLowerCase();
 
+		if (paramsFlag) {
+			//修改为方法获取原型
+			let paramsTypes = Reflect.getMetadata(FastCarMetaData.paramTypes, target, name);
+			if (typeof index == "number") {
+				proto = paramsTypes[index];
+			}
+		}
+
+		let typeName = proto.name.toLowerCase();
 		if (!TypeUtil.isBasic(typeName)) {
 			typeName = typeName == "array" ? "array" : "object";
 		}
@@ -26,11 +49,13 @@ export default function AddChildValid(target: any, name: string, value: { [key: 
 	//自定义方法合并
 	if (Reflect.has(value, "filters")) {
 		if (Array.isArray(item.filters)) {
-			value["filters"] = [...item.filters, ...value.filters];
+			item.filters.forEach(f => {
+				value.filters.push(f);
+			});
 		}
 	}
 
 	//合并所有属性
 	Object.assign(item, value);
-	childMap.set(name, item);
+	childMap.set(alias, item);
 }

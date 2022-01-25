@@ -7,7 +7,7 @@ type SizeModel = {
 
 //校验长度
 export default function Size(m: SizeModel = { minSize: 0, maxSize: 0 }) {
-	return function(target: any, propertyKey: string) {
-		AddChildValid(target, propertyKey, m);
+	return function(target: any, propertyKey: string, index?: number) {
+		AddChildValid(target, propertyKey, m, index);
 	};
 }

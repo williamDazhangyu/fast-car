@@ -5,7 +5,7 @@ export type CheckTool = {
 
 export interface FormRuleModel {
 	message?: string; //错误信息
-	type: string; // 类型
+	type?: string; // 类型
 	minSize?: number; //最小值
 	maxSize?: number; //最大值
 	required?: boolean; //是否为必填项
@@ -15,3 +15,9 @@ export interface FormRuleModel {
 	sizeMessgae?: string; //长度错误提示
 	typeMessage?: string; //类型错误提示
 }
+
+export type FormRuleType = {
+	rules: { [prop: string]: FormRuleModel };
+	index: number;
+	basicFlag: boolean;
+};
