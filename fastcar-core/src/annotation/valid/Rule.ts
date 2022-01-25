@@ -70,6 +70,16 @@ export function Rule(rules: { [prop: string]: FormRuleModel } = {}) {
 		//补全消息
 		Object.keys(rules).forEach(prop => {
 			let r = rules[prop];
+
+			//根据增强型补全type
+			if (basicFlag && !Reflect.has(r, "type")) {
+				if (designObj) {
+					r.type = designObj.name.toLowerCase();
+				} else {
+					r.type = "string";
+				}
+			}
+
 			if (r.message) {
 				if (r.required) {
 					r.nullMessage = r.nullMessage ? r.nullMessage : r.message;
@@ -86,12 +96,6 @@ export function Rule(rules: { [prop: string]: FormRuleModel } = {}) {
 				}
 
 				r.typeMessage = `${prop} type is ${r.type}`;
-			}
-
-			if (basicFlag && !Reflect.has(r, "type")) {
-				if (designObj) {
-					r.type = designObj.name.toLowerCase();
-				}
 			}
 		});
 
