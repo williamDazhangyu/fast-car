@@ -1,4 +1,4 @@
-import { Controller, ValidForm } from "fastcar-core/annotation";
+import { Controller, Rule, ValidForm } from "fastcar-core/annotation";
 import GetMapping from "../../../src/annotation/router/GetMapping";
 import PostMapping from "../../../src/annotation/router/PostMapping";
 import RequestMapping from "../../../src/annotation/router/RequestMapping";
@@ -24,10 +24,8 @@ export default class HelloController {
 	}
 
 	@GetMapping("/checkParam")
-	@ValidForm({
-		hello: { required: true, type: "string", message: "hello为必填项" },
-	})
-	async checkParam(hello: string) {
+	@ValidForm
+	async checkParam(@Rule({ hello: { required: true, maxSize: 10, type: "string" } }) { hello }: any) {
 		return hello;
 	}
 }
