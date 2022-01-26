@@ -12,13 +12,16 @@ const SpecWords = ["Boolean", "Number", "String", "Object"];
 function Autowired(target, propertyKey) {
     //反向找设计类型
     const designType = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.designType, target, propertyKey);
+    let key = "";
     let name = "";
     if (designType) {
         name = designType.name;
+        key = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.InjectionUniqueKey, designType); //放入至原型中
     }
+    //获取不到注入的值时默认为别名的值
     if (!name || SpecWords.includes(name)) {
-        name = Format_1.default.formatFirstToUp(propertyKey);
+        key = Format_1.default.formatFirstToUp(propertyKey);
     }
-    AddRequireModule_1.default(target, propertyKey, name);
+    AddRequireModule_1.default(target, propertyKey, key);
 }
 exports.default = Autowired;

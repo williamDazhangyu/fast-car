@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const fastcar_core_1 = require("fastcar-core");
-const KoaApplication_1 = require("../KoaApplication");
+const annotation_1 = require("fastcar-core/annotation");
 //开启koa应用
 function EnableKoa(target) {
-    fastcar_core_1.FastCarApplication.setSpecifyCompent(KoaApplication_1.default);
+    let fp = require.resolve("../KoaApplication");
+    annotation_1.ComponentInjection(target, fp);
 }
 exports.default = EnableKoa;

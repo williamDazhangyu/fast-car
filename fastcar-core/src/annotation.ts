@@ -17,7 +17,6 @@ import Injection from "./annotation/stereotype/Injection";
 import Service from "./annotation/stereotype/Service";
 import Log from "./annotation/Log";
 import Repository from "./annotation/stereotype/Repository";
-import SpecifyCompent from "./annotation/stereotype/SpecifyCompent";
 import AddRequireModule from "./annotation/AddRequireModule";
 import DS from "./annotation/data/DS";
 import DSIndex from "./annotation/data/DSIndex";
@@ -29,6 +28,8 @@ import Type from "./annotation/valid/Type";
 import ValidCustom from "./annotation/valid/ValidCustom";
 import ValidForm from "./annotation/valid/ValidForm";
 import { Rule } from "./annotation/valid/Rule";
+import BeanName from "./annotation/stereotype/BeanName";
+import ComponentInjection from "./annotation/scan/ComponentInjection";
 
 //注解暴露出去
 export {
@@ -38,6 +39,8 @@ export {
 	ComponentScan,
 	ComponentScanExclusion,
 	Component,
+	ComponentInjection,
+	BeanName,
 	Configure,
 	Controller,
 	Service,
@@ -51,7 +54,6 @@ export {
 	Override,
 	Readonly,
 	Log,
-	SpecifyCompent,
 	AddRequireModule,
 	DS,
 	DSIndex,

@@ -22,10 +22,10 @@ function Transactional(target, methodName, descriptor) {
         //创建会话id
         let app = Reflect.get(this, fastcar_core_1.FastCarMetaData.APP);
         let sysLogger = app.getComponentByName("SysLogger");
-        let dsm = app.getComponentByName("MysqlDataSourceManager");
+        let dsm = app.getComponentByTarget(MysqlDataSourceManager_1.default);
         if (!dsm) {
-            sysLogger.error(`${MysqlDataSourceManager_1.default} not found`);
-            return Promise.reject(new SqlError_1.default(`${MysqlDataSourceManager_1.default} not found`));
+            sysLogger.error(`MysqlDataSourceManager not found`);
+            return Promise.reject(new SqlError_1.default(`MysqlDataSourceManager not found`));
         }
         let sessionId = args[paramsIndex];
         if (sessionId) {

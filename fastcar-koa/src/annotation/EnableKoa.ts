@@ -1,7 +1,7 @@
-import { FastCarApplication } from "fastcar-core";
-import KoaApplication from "../KoaApplication";
+import { ComponentInjection } from "fastcar-core/annotation";
 
 //开启koa应用
 export default function EnableKoa(target: any) {
-	FastCarApplication.setSpecifyCompent(KoaApplication);
+	let fp = require.resolve("../KoaApplication");
+	ComponentInjection(target, fp);
 }

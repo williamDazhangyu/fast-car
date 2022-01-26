@@ -43,6 +43,8 @@ export enum FastCarMetaData {
 	NotNull = "valid:notNull", //不为空
 	ValidCustom = "valid:custom", //自定义校验方式
 	Hotter = "hotter", //是否支持热更
+	InjectionUniqueKey = "injection_uniqueKey",
+	Alias = "alias", //别名
 }
 
 declare type SYSConfig = {
@@ -101,6 +103,17 @@ export class Logger {
 
 export class FastCarApplication {
 	/***
+	 * @version 1.0 根据原型加载注入的方法
+	 *
+	 */
+	getInjectionUniqueKey(target: Object): string;
+
+	/**
+	 * @version 1.0 自身作为一个组件注入进去
+	 */
+	loadSelf(): void;
+
+	/***
 	 * @version 1.0 热更新组件
 	 */
 	addHot(): void;
@@ -137,12 +150,6 @@ export class FastCarApplication {
 	 */
 	getapplicationConfig(): /* !this.sysConfig.application */ any;
 
-	/***
-	 * @version 1.0 指定加载的组件
-	 *
-	 */
-	static setSpecifyCompent(m: any): void;
-
 	/**
 	 * @version 1.0 扫描组件
 	 */
@@ -177,6 +184,11 @@ export class FastCarApplication {
 	 * @param name
 	 */
 	getComponentByName(name: string): any;
+
+	/***
+	 * @version 1.0 根据原型获取实例
+	 */
+	getComponentByTarget(target: Object): any;
 
 	/**
 	 * @version 1.0 开启日志系统
@@ -224,19 +236,6 @@ export class FastCarApplication {
 	 * @version 1.0 停止服务
 	 */
 	stopServer(): void;
-
-	/**
-	 *
-	 * @version 1.0 注入需要初始化的组件
-	 */
-	static setInjectionMap(name: string): void;
-
-	/**
-	 *
-	 * @version 1.0 判断是否已经有初始化的组件了
-	 *
-	 */
-	static hasInjectionMap(name: string): boolean;
 
 	/**
 	 * @version 1.0 获取app名称

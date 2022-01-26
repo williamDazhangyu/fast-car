@@ -13,7 +13,7 @@ class APP {
 const appInstance = new APP();
 
 console.log("redis 测试");
-let simpleService: SimpleService = appInstance.app.getComponentByName("SimpleService");
+let simpleService: SimpleService = appInstance.app.getComponentByTarget(SimpleService);
 
 simpleService.setHello().then(async () => {
 	let res = await simpleService.getHello();

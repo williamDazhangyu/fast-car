@@ -22,4 +22,6 @@ var FastCarMetaData;
     FastCarMetaData["NotNull"] = "valid:notNull";
     FastCarMetaData["ValidCustom"] = "valid:custom";
     FastCarMetaData["Hotter"] = "hotter";
+    FastCarMetaData["InjectionUniqueKey"] = "injection_uniqueKey";
+    FastCarMetaData["Alias"] = "alias";
 })(FastCarMetaData = exports.FastCarMetaData || (exports.FastCarMetaData = {}));

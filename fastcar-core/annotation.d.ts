@@ -44,6 +44,7 @@ export function ApplicationStop(order?: number, exec?: string): Ret;
  */
 export function ComponentScan(...names: string[]): Ret;
 export function ComponentScanExclusion(...names: string[]): Ret;
+export function ComponentInjection(target: any, ...names: string[]): void;
 
 /***
  * 用于描述不同组件的作用类
@@ -53,6 +54,9 @@ export function Configure(target: any): void;
 export function Controller(target: any): void;
 export function Service(target: any): void;
 export function Repository(target: any): void;
+
+//实例自定义名称 并会将改名称作为逻辑名注入到实例内
+export function BeanName(name: string): Ret;
 
 //此方法用来构造不同的注入，不建议直接用于注解上
 export function Injection(target: any, name: string): void;
@@ -90,9 +94,6 @@ export function Readonly(target: any, name?: string, descriptor?: PropertyDescri
 // 	},
 // categories: { default: { appenders: ["sysLogger"], level: "ALL" } },
 export function Log(config?: Log4jsConfig): Ret;
-
-//用于手动注入组件
-export function SpecifyCompent(m: Function): Ret;
 
 //动态数据源标记
 export function DS(name: string): FRet;

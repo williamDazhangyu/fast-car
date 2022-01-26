@@ -1,8 +1,8 @@
-import MysqlDataSourceManager from "../dataSource/MysqlDataSourceManager";
-import { FastCarApplication } from "fastcar-core";
+import { ComponentInjection } from "fastcar-core/annotation";
 
 //开启数据库功能
 export default function EnableMysql(target: any) {
 	//手动注入实例
-	FastCarApplication.setSpecifyCompent(MysqlDataSourceManager);
+	let fp = require.resolve("../dataSource/MysqlDataSourceManager");
+	ComponentInjection(target, fp);
 }

@@ -18,13 +18,15 @@ import { Log4jsConfig } from "./config/Log4jsConfig";
 import * as fs from "fs";
 import { AppStatusEnum } from "./constant/AppStatusEnum";
 import ValidationUtil from "./utils/ValidationUtil";
+import Component from "./annotation/stereotype/Component";
 
+@Component
 class FastCarApplication extends Events {
 	componentMap: Map<string, any>; //组件键值对
 	sysConfig: SYSConfig; //系统配置
 	basePath: string; //入口文件夹路径
 	baseFileName: string; //入口文件路径
-	sysLogger: log4js.Logger;
+	sysLogger!: log4js.Logger;
 	applicationStatus: AppStatusEnum;
 
 	constructor() {
@@ -34,16 +36,24 @@ class FastCarApplication extends Events {
 		this.componentMap = new Map();
 		this.basePath = require.main?.path || module.path;
 		this.baseFileName = require.main?.filename || module.filename;
-
-		if (!Reflect.has(this, "log4js")) {
-			Reflect.set(this, "log4js", LogDefaultConfig);
-			log4js.configure(LogDefaultConfig);
-		}
-		this.sysLogger = log4js.getLogger();
-		this.componentMap.set("SysLogger", this.sysLogger);
 		this.applicationStatus = AppStatusEnum.READY;
 
+		this.loadSelf();
 		this.addHot();
+	}
+
+	/***
+	 * @version 1.0 根据原型加载注入的方法
+	 *
+	 */
+	getInjectionUniqueKey(target: Object): string {
+		let key = Reflect.getMetadata(FastCarMetaData.InjectionUniqueKey, target);
+		return key;
+	}
+
+	loadSelf(): void {
+		let key = this.getInjectionUniqueKey(FastCarApplication);
+		this.componentMap.set(key, this);
 	}
 
 	/***
@@ -58,22 +68,7 @@ class FastCarApplication extends Events {
 			let moduleClass = ClassLoader.loadModule(fp, true);
 			if (moduleClass != null) {
 				moduleClass.forEach((func, name) => {
-					//只有依赖注入的组件才能被实例化
-					if (FastCarApplication.hasInjectionMap(name)) {
-						let beforeInstance = this.componentMap.get(name);
-						let instance = TypeUtil.isFunction(func) ? new func() : func;
-
-						if (!beforeInstance) {
-							this.componentMap.set(name, instance);
-							//装配
-							this.injectionModule(name, instance);
-							if (this.isHotter() || Reflect.getMetadata(FastCarMetaData.Hotter, instance)) {
-								ClassLoader.watchServices(fp, this);
-							}
-						} else {
-							MixTool.assign(beforeInstance, func);
-						}
-					}
+					this.convertInstance(func, name);
 				});
 			}
 		});
@@ -183,64 +178,11 @@ class FastCarApplication extends Events {
 	}
 
 	/***
-	 * @version 1.0 注入需要初始化的组件
-	 */
-	static setInjectionMap(name: string): void {
-		let loadModule = FastCarMetaData.InjectionMap;
-		let names: string[] = Reflect.getMetadata(loadModule, FastCarApplication) || [];
-		names.push(name);
-
-		Reflect.defineMetadata(loadModule, names, FastCarApplication);
-	}
-
-	/***
-	 * @version 1.0 判断是否已经有初始化的组件了
-	 */
-	static hasInjectionMap(name: string): boolean {
-		let loadModuleName = FastCarMetaData.InjectionMap;
-		if (!Reflect.hasMetadata(loadModuleName, FastCarApplication)) {
-			return false;
-		}
-
-		let names = Reflect.getMetadata(loadModuleName, FastCarApplication);
-		return names.includes(name);
-	}
-
-	/***
-	 * @version 1.0 指定加载的组件
-	 *
-	 */
-	static setSpecifyCompent(m: any) {
-		let loadModule = FastCarMetaData.SpecifyMap;
-		let names: string[] = Reflect.getMetadata(loadModule, FastCarApplication) || [];
-		if (TypeUtil.isFunction(m) && names.includes(m.name)) {
-			return;
-		}
-
-		names.push(m);
-		Reflect.defineMetadata(loadModule, names, FastCarApplication);
-	}
-
-	/***
 	 * @version 1.0 扫描组件
 	 * @version 1.1 新增手动注入组件
+	 * @version 1.2 改成统一入口
 	 */
 	loadClass() {
-		//加载特殊的bean
-		let specifyCompents: any[] = Reflect.getMetadata(FastCarMetaData.SpecifyMap, FastCarApplication);
-		if (specifyCompents) {
-			specifyCompents.forEach(func => {
-				if (TypeUtil.isFunction(func)) {
-					this.componentMap.set(func.name, new func());
-					return;
-				}
-
-				if (func.name) {
-					this.componentMap.set(func.name, func);
-				}
-			});
-		}
-
 		//加载文件扫描下的bean
 		let tmpFilePath: string[] = Array.of();
 		let includeList: string[] = Reflect.get(this, FastCarMetaData.ComponentScan);
@@ -289,17 +231,38 @@ class FastCarApplication extends Events {
 						throw repeatError;
 					}
 
-					//只有依赖注入的组件才能被实例化
-					if (FastCarApplication.hasInjectionMap(name)) {
-						let instance = TypeUtil.isFunction(func) ? new func() : func;
-						this.componentMap.set(name, instance);
-						console.info(Reflect.getMetadata(FastCarMetaData.Hotter, instance));
-						//判断是否需要热更加载
-						if (this.isHotter() || Reflect.getMetadata(FastCarMetaData.Hotter, instance)) {
-							ClassLoader.watchServices(f, this);
-						}
-					}
+					this.convertInstance(func, f);
 				});
+			}
+		}
+	}
+
+	/***
+	 * @version 1.0 转成实例对象
+	 *
+	 */
+	convertInstance(classZ: any, fp: string) {
+		//只有依赖注入的组件才能被实例化
+		let instanceKey = Reflect.getMetadata(FastCarMetaData.InjectionUniqueKey, classZ);
+		if (!!instanceKey) {
+			let beforeInstance = this.componentMap.get(instanceKey);
+			if (!!beforeInstance) {
+				MixTool.assign(beforeInstance, classZ);
+				return;
+			}
+
+			let instance = TypeUtil.isFunction(classZ) ? new classZ() : classZ;
+			this.componentMap.set(instanceKey, instance);
+
+			//判断是否有别名
+			let aliasName = Reflect.getMetadata(FastCarMetaData.Alias, classZ);
+			if (aliasName) {
+				this.componentMap.set(aliasName, instance);
+			}
+
+			//判断是否需要热更加载
+			if (this.isHotter() || Reflect.getMetadata(FastCarMetaData.Hotter, instance)) {
+				ClassLoader.watchServices(fp, this);
 			}
 		}
 	}
@@ -308,7 +271,7 @@ class FastCarApplication extends Events {
 	 * @version 1.0 装配模块
 	 *
 	 */
-	injectionModule(instanceName: string, instance: any): void {
+	injectionModule(instance: any): void {
 		let relyname = FastCarMetaData.IocModule;
 		let moduleList: Map<string, string> = Reflect.getMetadata(relyname, instance);
 		if (!moduleList || moduleList.size == 0) {
@@ -323,7 +286,7 @@ class FastCarApplication extends Events {
 			} else {
 				if (!this.componentMap.has(name)) {
 					//找不到依赖项
-					let injectionError = new Error(`Unsatisfied dependency expressed through ${name} in ${instanceName} `);
+					let injectionError = new Error(`Unsatisfied dependency expressed through ${propertyKey} in ${instance.name} `);
 					this.sysLogger.error(injectionError.message);
 					throw injectionError;
 				}
@@ -345,7 +308,7 @@ class FastCarApplication extends Events {
 				throw insatnceError;
 			}
 
-			this.injectionModule(instanceName, instance);
+			this.injectionModule(instance);
 		});
 	}
 
@@ -368,14 +331,7 @@ class FastCarApplication extends Events {
 	 * @version 1.0 获取全部的组件列表
 	 */
 	getComponentList(): any[] {
-		let instanceList: any[] = Array.of();
-		this.componentMap.forEach((instance, name) => {
-			if (FastCarApplication.hasInjectionMap(name)) {
-				instanceList.push(instance);
-			}
-		});
-
-		return instanceList;
+		return [...this.componentMap.values()];
 	}
 
 	/***
@@ -385,10 +341,23 @@ class FastCarApplication extends Events {
 		return this.componentMap.get(name);
 	}
 
+	/***
+	 * @version 1.0 根据原型获取实例
+	 */
+	getComponentByTarget(target: Object): any {
+		let key = this.getInjectionUniqueKey(target);
+		return this.componentMap.get(key);
+	}
+
 	/**
 	 * @version 1.0 开启日志系统
 	 */
 	startLog() {
+		if (!Reflect.has(this, "log4js")) {
+			Reflect.set(this, "log4js", LogDefaultConfig);
+			log4js.configure(LogDefaultConfig);
+		}
+
 		let logconfig: Log4jsConfig = this.getSetting("log4js");
 		if (logconfig) {
 			let existConfig: Log4jsConfig = Reflect.get(this, "log4js");
@@ -404,6 +373,10 @@ class FastCarApplication extends Events {
 				this.componentMap.set(Format.formatFirstToUp(key), log4js.getLogger(key));
 			});
 		}
+
+		//默认追加一个系统日志
+		this.sysLogger = log4js.getLogger();
+		this.componentMap.set("SysLogger", this.sysLogger);
 	}
 
 	/***
@@ -497,10 +470,10 @@ class FastCarApplication extends Events {
 	 * @version 1.0 开启应用前执行的操作 加载配置,扫描组件，注入依赖组件
 	 */
 	beforeStartServer() {
-		this.sysLogger.info("Start loading system configuration");
+		//加载日志
 		this.loadSysConfig();
-		this.sysLogger.info("Complete loading system configuration");
 
+		//开启日志
 		this.startLog();
 
 		this.sysLogger.info("Start scanning component");

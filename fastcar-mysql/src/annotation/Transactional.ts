@@ -24,11 +24,11 @@ export default function Transactional(target: any, methodName: string, descripto
 		//创建会话id
 		let app: FastCarApplication = Reflect.get(this, FastCarMetaData.APP);
 		let sysLogger: Logger = app.getComponentByName("SysLogger");
-		let dsm: MysqlDataSourceManager = app.getComponentByName("MysqlDataSourceManager");
+		let dsm: MysqlDataSourceManager = app.getComponentByTarget(MysqlDataSourceManager);
 
 		if (!dsm) {
-			sysLogger.error(`${MysqlDataSourceManager} not found`);
-			return Promise.reject(new SqlError(`${MysqlDataSourceManager} not found`));
+			sysLogger.error(`MysqlDataSourceManager not found`);
+			return Promise.reject(new SqlError(`MysqlDataSourceManager not found`));
 		}
 
 		let sessionId = args[paramsIndex];

@@ -18,4 +18,6 @@ export enum FastCarMetaData {
 	NotNull = "valid:notNull", //不为空
 	ValidCustom = "valid:custom", //自定义校验方式
 	Hotter = "hotter", //是否支持热更
+	InjectionUniqueKey = "injection_uniqueKey",
+	Alias = "alias", //别名
 }
