@@ -22,12 +22,12 @@ import Component from "./annotation/stereotype/Component";
 
 @Component
 class FastCarApplication extends Events {
-	componentMap: Map<string, any>; //组件键值对
-	sysConfig: SYSConfig; //系统配置
-	basePath: string; //入口文件夹路径
-	baseFileName: string; //入口文件路径
-	sysLogger!: log4js.Logger;
-	applicationStatus: AppStatusEnum;
+	protected componentMap: Map<string, any>; //组件键值对
+	protected sysConfig: SYSConfig; //系统配置
+	protected basePath: string; //入口文件夹路径
+	protected baseFileName: string; //入口文件路径
+	protected sysLogger!: log4js.Logger;
+	protected applicationStatus: AppStatusEnum;
 
 	constructor() {
 		super();
