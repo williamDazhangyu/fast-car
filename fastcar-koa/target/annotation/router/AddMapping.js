@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 const DesignMeta_1 = require("../../type/DesignMeta");
 function AddMapping(target, info) {
+    if (!info.url) {
+        info.url = info.method;
+    }
     //格式化url 以/开头
     if (!info.url.startsWith("/")) {
         info.url = "/" + info.url;

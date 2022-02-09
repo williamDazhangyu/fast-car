@@ -9,6 +9,15 @@ import PostMapping from "./annotation/router/PostMapping";
 import PutMapping from "./annotation/router/PutMapping";
 import RequestMapping from "./annotation/router/RequestMapping";
 
+//声明简化的方式
+const GET = GetMapping;
+const POST = PostMapping;
+const DELETE = DeleteMapping;
+const PUT = PutMapping;
+const PATCH = PatchMapping;
+const ALL = AllMapping;
+const REQUEST = RequestMapping;
+
 export {
 	//关于请求方式注解
 	AddMapping,
@@ -23,4 +32,12 @@ export {
 	EnableKoa,
 	//追加koa中间件
 	KoaMiddleware,
+	//简化声明方式
+	GET,
+	POST,
+	DELETE,
+	PUT,
+	PATCH,
+	ALL,
+	REQUEST,
 };

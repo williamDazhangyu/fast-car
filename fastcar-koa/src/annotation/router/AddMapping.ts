@@ -3,6 +3,11 @@ import { MethodType } from "../../type/MethodType";
 import { DesignMeta } from "../../type/DesignMeta";
 
 export default function AddMapping(target: any, info: MethodType) {
+
+	if(!info.url) {
+		info.url = info.method;
+	}
+
 	//格式化url 以/开头
 	if (!info.url.startsWith("/")) {
 		info.url = "/" + info.url;

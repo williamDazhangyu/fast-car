@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.KoaMiddleware = exports.EnableKoa = exports.RequestMapping = exports.PutMapping = exports.PostMapping = exports.PatchMapping = exports.GetMapping = exports.DeleteMapping = exports.AllMapping = exports.AddMapping = void 0;
+exports.REQUEST = exports.ALL = exports.PATCH = exports.PUT = exports.DELETE = exports.POST = exports.GET = exports.KoaMiddleware = exports.EnableKoa = exports.RequestMapping = exports.PutMapping = exports.PostMapping = exports.PatchMapping = exports.GetMapping = exports.DeleteMapping = exports.AllMapping = exports.AddMapping = void 0;
 const EnableKoa_1 = require("./annotation/EnableKoa");
 exports.EnableKoa = EnableKoa_1.default;
 const KoaMiddleware_1 = require("./annotation/KoaMiddleware");
@@ -21,3 +21,18 @@ const PutMapping_1 = require("./annotation/router/PutMapping");
 exports.PutMapping = PutMapping_1.default;
 const RequestMapping_1 = require("./annotation/router/RequestMapping");
 exports.RequestMapping = RequestMapping_1.default;
+//声明简化的方式
+const GET = GetMapping_1.default;
+exports.GET = GET;
+const POST = PostMapping_1.default;
+exports.POST = POST;
+const DELETE = DeleteMapping_1.default;
+exports.DELETE = DELETE;
+const PUT = PutMapping_1.default;
+exports.PUT = PUT;
+const PATCH = PatchMapping_1.default;
+exports.PATCH = PATCH;
+const ALL = AllMapping_1.default;
+exports.ALL = ALL;
+const REQUEST = RequestMapping_1.default;
+exports.REQUEST = REQUEST;
