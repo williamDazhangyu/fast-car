@@ -1,5 +1,5 @@
 import { FastCarMetaData } from "../constant/FastCarMetaData";
-import Format from "../utils/Format";
+import FormatStr from "../utils/FormatStr";
 import AddRequireModule from "./AddRequireModule";
 
 const SpecWords = ["Boolean", "Number", "String", "Object"];
@@ -22,7 +22,7 @@ export default function Autowired(target: any, propertyKey: string) {
 
 	//获取不到注入的值时默认为别名的值
 	if (!name || SpecWords.includes(name)) {
-		key = Format.formatFirstToUp(propertyKey);
+		key = FormatStr.formatFirstToUp(propertyKey);
 	}
 
 	AddRequireModule(target, propertyKey, key);

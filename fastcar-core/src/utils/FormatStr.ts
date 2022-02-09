@@ -1,4 +1,4 @@
-export default class Format {
+export default class FormatStr {
 	static formatFirstToUp(str: string) {
 		return str.charAt(0).toUpperCase() + str.substring(1);
 	}

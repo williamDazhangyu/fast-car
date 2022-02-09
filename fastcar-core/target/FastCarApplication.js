@@ -16,7 +16,7 @@ const Events = require("events");
 const path = require("path");
 const classLoader_1 = require("./utils/classLoader");
 const FileUtil_1 = require("./utils/FileUtil");
-const Format_1 = require("./utils/Format");
+const FormatStr_1 = require("./utils/FormatStr");
 const Mix_1 = require("./utils/Mix");
 const TypeUtil_1 = require("./utils/TypeUtil");
 const SysConfig_1 = require("./config/SysConfig");
@@ -327,7 +327,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
             log4js.configure(logconfig);
             Object.keys(logconfig.categories).forEach(key => {
                 //加入服务
-                this.componentMap.set(Format_1.default.formatFirstToUp(key), log4js.getLogger(key));
+                this.componentMap.set(FormatStr_1.default.formatFirstToUp(key), log4js.getLogger(key));
             });
         }
         //默认追加一个系统日志

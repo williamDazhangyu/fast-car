@@ -96,3 +96,11 @@ export class ValidationUtil {
 
 	static checkType(param: any, type: string): boolean;
 }
+
+export class FormatStr {
+	static formatFirstToUp(str: string): string;
+
+	static formatFirstToLow(str: string): string;
+
+	static formatFirstToUpEnd(str: string): string;
+}

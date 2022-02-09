@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const FastCarMetaData_1 = require("../constant/FastCarMetaData");
-const Format_1 = require("../utils/Format");
+const FormatStr_1 = require("../utils/FormatStr");
 const AddRequireModule_1 = require("./AddRequireModule");
 const SpecWords = ["Boolean", "Number", "String", "Object"];
 /***
@@ -20,7 +20,7 @@ function Autowired(target, propertyKey) {
     }
     //获取不到注入的值时默认为别名的值
     if (!name || SpecWords.includes(name)) {
-        key = Format_1.default.formatFirstToUp(propertyKey);
+        key = FormatStr_1.default.formatFirstToUp(propertyKey);
     }
     AddRequireModule_1.default(target, propertyKey, key);
 }

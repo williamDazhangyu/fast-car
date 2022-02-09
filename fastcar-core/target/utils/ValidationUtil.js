@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Format_1 = require("./Format");
+const FormatStr_1 = require("./FormatStr");
 const TypeUtil_1 = require("./TypeUtil");
 //类型校验器
 class ValidationUtil {
@@ -61,7 +61,7 @@ class ValidationUtil {
         if (!Array.isArray(param)) {
             return false;
         }
-        let UpType = Format_1.default.formatFirstToUp(type);
+        let UpType = FormatStr_1.default.formatFirstToUp(type);
         let m = `is${UpType}`;
         //如果没有该方法 则返回true
         if (!Reflect.has(ValidationUtil, m)) {

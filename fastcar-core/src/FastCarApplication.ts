@@ -4,7 +4,7 @@ import * as Events from "events";
 import * as path from "path";
 import ClassLoader from "./utils/classLoader";
 import FileUtil from "./utils/FileUtil";
-import Format from "./utils/Format";
+import FormatStr from "./utils/FormatStr";
 import MixTool from "./utils/Mix";
 import TypeUtil from "./utils/TypeUtil";
 import { LogDefaultConfig, SYSConfig, SYSDefaultConfig } from "./config/SysConfig";
@@ -370,7 +370,7 @@ class FastCarApplication extends Events {
 			log4js.configure(logconfig);
 			Object.keys(logconfig.categories).forEach(key => {
 				//加入服务
-				this.componentMap.set(Format.formatFirstToUp(key), log4js.getLogger(key));
+				this.componentMap.set(FormatStr.formatFirstToUp(key), log4js.getLogger(key));
 			});
 		}
 

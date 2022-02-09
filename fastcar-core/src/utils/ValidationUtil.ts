@@ -1,5 +1,5 @@
 import { DataTypes } from "../constant/DataTypes";
-import Format from "./Format";
+import FormatStr from "./FormatStr";
 import TypeUtil from "./TypeUtil";
 //类型校验器
 export default class ValidationUtil {
@@ -74,7 +74,7 @@ export default class ValidationUtil {
 			return false;
 		}
 
-		let UpType = Format.formatFirstToUp(type);
+		let UpType = FormatStr.formatFirstToUp(type);
 		let m = `is${UpType}`;
 
 		//如果没有该方法 则返回true

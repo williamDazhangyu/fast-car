@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ValidationUtil = exports.TypeUtil = exports.FileUtil = exports.CryptoUtil = exports.DataFormat = exports.DateUtil = void 0;
+exports.FormatStr = exports.ValidationUtil = exports.TypeUtil = exports.FileUtil = exports.CryptoUtil = exports.DataFormat = exports.DateUtil = void 0;
 const CryptoUtil_1 = require("./utils/CryptoUtil");
 exports.CryptoUtil = CryptoUtil_1.default;
 const DataFormat_1 = require("./utils/DataFormat");
@@ -9,6 +9,8 @@ const DateUtil_1 = require("./utils/DateUtil");
 exports.DateUtil = DateUtil_1.default;
 const FileUtil_1 = require("./utils/FileUtil");
 exports.FileUtil = FileUtil_1.default;
+const FormatStr_1 = require("./utils/FormatStr");
+exports.FormatStr = FormatStr_1.default;
 const TypeUtil_1 = require("./utils/TypeUtil");
 exports.TypeUtil = TypeUtil_1.default;
 const ValidationUtil_1 = require("./utils/ValidationUtil");
