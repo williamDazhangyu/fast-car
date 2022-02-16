@@ -30,6 +30,13 @@ import ValidForm from "./annotation/valid/ValidForm";
 import { Rule } from "./annotation/valid/Rule";
 import BeanName from "./annotation/stereotype/BeanName";
 import ComponentInjection from "./annotation/scan/ComponentInjection";
+import DBType from "./annotation/data/DBType";
+import Field from "./annotation/data/Field";
+import PrimaryKey from "./annotation/data/PrimaryKey";
+import Table from "./annotation/data/Table";
+import Entity from "./annotation/data/Entity";
+import SqlSession from "./annotation/data/SqlSession";
+import Transactional from "./annotation/data/Transactional";
 
 //注解暴露出去
 export {
@@ -55,8 +62,6 @@ export {
 	Readonly,
 	Log,
 	AddRequireModule,
-	DS,
-	DSIndex,
 	AddChildValid,
 	DefaultVal,
 	NotNull,
@@ -65,4 +70,16 @@ export {
 	ValidCustom,
 	ValidForm,
 	Rule,
+};
+
+export {
+	DS,
+	DSIndex,
+	DBType, //数据库类型
+	Field, //数据库字段名
+	PrimaryKey, //是否为主键
+	Table, //表名
+	Entity, //表和对应编程内的类型映射
+	SqlSession, //连接会话 如果需要使用同一连接或者使用事务是传递
+	Transactional, //事务管理
 };

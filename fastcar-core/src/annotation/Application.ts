@@ -18,12 +18,14 @@ export default function Application(target: any) {
 						let afterFun = desc.value;
 
 						if (Reflect.has(app, key) && TypeUtil.isFunction(afterFun) && TypeUtil.isFunction(beforeFun)) {
-							desc.value = async (...args: any[]) => {
-								Reflect.apply(beforeFun, app, args);
-								Reflect.apply(afterFun, appProxy, args);
+							let mixFn = async (...args: any[]) => {
+								let res = await Promise.resolve(Reflect.apply(beforeFun, app, args));
+								await Promise.resolve(Reflect.apply(afterFun, appProxy, args));
+								return res;
 							};
+							Reflect.defineProperty(app, key, { value: mixFn });
 						} else {
-							Object.defineProperty(app, key, desc);
+							Reflect.defineProperty(app, key, desc);
 						}
 					}
 				}

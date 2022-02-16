@@ -255,7 +255,7 @@ class FastCarApplication extends Events {
 			this.componentMap.set(instanceKey, instance);
 
 			//判断是否有别名
-			let aliasName = Reflect.getMetadata(FastCarMetaData.Alias, classZ);
+			let aliasName = Reflect.getMetadata(FastCarMetaData.Alias, instance);
 			if (aliasName) {
 				this.componentMap.set(aliasName, instance);
 			}

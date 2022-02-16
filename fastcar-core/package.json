@@ -7,12 +7,14 @@
 	"exports": {
 		".": "./target/index.js",
 		"./annotation": "./target/annotation.js",
-		"./utils": "./target/utils.js"
+		"./utils": "./target/utils.js",
+		"./db": "./target/db.js"
 	},
 	"files": [
 		"target",
 		"index.d.ts",
 		"annotation.d.ts",
+		"./db.d.ts",
 		"utils.d.ts"
 	],
 	"dependencies": {

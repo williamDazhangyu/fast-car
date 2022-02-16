@@ -17,13 +17,15 @@ function Application(target) {
                         let beforeFun = Object.getOwnPropertyDescriptor(FastCarApplication_1.default.prototype, key)?.value;
                         let afterFun = desc.value;
                         if (Reflect.has(app, key) && TypeUtil_1.default.isFunction(afterFun) && TypeUtil_1.default.isFunction(beforeFun)) {
-                            desc.value = async (...args) => {
-                                Reflect.apply(beforeFun, app, args);
-                                Reflect.apply(afterFun, appProxy, args);
+                            let mixFn = async (...args) => {
+                                let res = await Promise.resolve(Reflect.apply(beforeFun, app, args));
+                                await Promise.resolve(Reflect.apply(afterFun, appProxy, args));
+                                return res;
                             };
+                            Reflect.defineProperty(app, key, { value: mixFn });
                         }
                         else {
-                            Object.defineProperty(app, key, desc);
+                            Reflect.defineProperty(app, key, desc);
                         }
                     }
                 }

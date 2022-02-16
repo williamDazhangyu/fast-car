@@ -224,7 +224,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
             let instance = TypeUtil_1.default.isFunction(classZ) ? new classZ() : classZ;
             this.componentMap.set(instanceKey, instance);
             //判断是否有别名
-            let aliasName = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.Alias, classZ);
+            let aliasName = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.Alias, instance);
             if (aliasName) {
                 this.componentMap.set(aliasName, instance);
             }

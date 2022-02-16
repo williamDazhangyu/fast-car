@@ -5,7 +5,7 @@ const FastCarMetaData_1 = require("../../constant/FastCarMetaData");
 function BeanName(name) {
     return function (target) {
         //生成别名 用于逻辑识别
-        Reflect.defineMetadata(FastCarMetaData_1.FastCarMetaData.Alias, name, target); //放入至原型中
+        Reflect.defineMetadata(FastCarMetaData_1.FastCarMetaData.Alias, name, target.prototype); //放入至原型中
     };
 }
 exports.default = BeanName;

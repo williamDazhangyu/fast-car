@@ -2,6 +2,8 @@ type Ret = (target: any) => void;
 
 type FRet = (target: any, methodName?: string, descriptor?: PropertyDescriptor) => void;
 
+type PMRet = (target: any, propertyKey: string) => void;
+
 type PRet = (target: any, propertyKey: string, index?: number) => void;
 
 type MRet = (target: any, methodName: string, descriptor: PropertyDescriptor) => void;
@@ -95,12 +97,6 @@ export function Readonly(target: any, name?: string, descriptor?: PropertyDescri
 // categories: { default: { appenders: ["sysLogger"], level: "ALL" } },
 export function Log(config?: Log4jsConfig): Ret;
 
-//动态数据源标记
-export function DS(name: string): FRet;
-
-//指定数据源标记位置
-export function DSIndex(target: any, name: string, index: number): void;
-
 //添加子表单校验数据
 export function AddChildValid(target: any, name: string, value: { [key: string]: any }, index?: number): void;
 
@@ -127,3 +123,30 @@ export function ValidForm(target: any, methodName: string, descriptor: PropertyD
  *
  */
 export function Rule(rules?: { [prop: string]: FormRuleModel }): PPRet;
+
+//动态数据源标记
+export function DS(name: string): FRet;
+
+//指定数据源标记位置
+export function DSIndex(target: any, name: string, index: number): void;
+
+//标记数据库类型
+export function DBType(name: string): PMRet;
+
+//标记数据列名
+export function Field(name: string): PMRet;
+
+//是否为主键
+export function PrimaryKey(target: any, propertyKey: string): void;
+
+//标记表名
+export function Table(name: string): Ret;
+
+//映射实体类
+export function Entity(className: Function): Ret;
+
+//连接会话 如果需要使用同一连接或者使用事务是传递
+export function SqlSession(target: any, name: string, index: number): void;
+
+//开启事务  driver: string = "MysqlDataSourceManager"
+export function Transactional(driver?: string): MRet;
