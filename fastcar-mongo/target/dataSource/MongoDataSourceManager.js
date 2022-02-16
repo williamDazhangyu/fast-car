@@ -13,7 +13,7 @@ const MongoDataSource_1 = require("./MongoDataSource");
 const annotation_1 = require("fastcar-core/annotation");
 const fastcar_core_1 = require("fastcar-core");
 const SqlConfig_1 = require("../type/SqlConfig");
-const SqlError_1 = require("../../../fastcar-mysql/src/type/SqlError");
+const db_1 = require("fastcar-core/db");
 let MongoDataSourceManager = class MongoDataSourceManager {
     constructor() {
         //进行数据库初始化
@@ -114,10 +114,10 @@ let MongoDataSourceManager = class MongoDataSourceManager {
         });
     }
     createSession() {
-        throw new SqlError_1.default("createSession not implemented By mongo.");
+        throw new db_1.SqlError("createSession not implemented By mongo.");
     }
     destorySession(sessionId, status) {
-        throw new SqlError_1.default("destorySession not implemented By mongo.");
+        throw new db_1.SqlError("destorySession not implemented By mongo.");
     }
 };
 __decorate([

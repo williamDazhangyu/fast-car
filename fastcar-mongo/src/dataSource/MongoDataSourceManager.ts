@@ -4,8 +4,7 @@ import { ApplicationStart, ApplicationStop, Autowired } from "fastcar-core/annot
 import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
 import { MongoConfig, MongoDefaultConfig } from "../type/SqlConfig";
 import { OperationSet, SqlExecType } from "../type/SqlExecType";
-import { DataSourceManager } from "fastcar-core/db";
-import SqlError from "../../../fastcar-mysql/src/type/SqlError";
+import { DataSourceManager, SqlError } from "fastcar-core/db";
 
 @ApplicationStart(BootPriority.Base, "start")
 @ApplicationStop(BootPriority.Lowest, "stop")
