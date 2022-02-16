@@ -1,0 +1,16 @@
+{
+	"name": "fastcar-mongo",
+	"version": "1.0.0",
+	"description": "基于fastcar-core框架下对mongo的封装",
+	"main": "index.js",
+	"author": "william_zhong",
+	"license": "MIT",
+	"dependencies": {
+		"fastcar-core": "file:../fastcar-core",
+		"mongodb": "^4.3.1",
+		"reflect-metadata": "^0.1.13"
+	},
+	"devDependencies": {
+		"@types/reflect-metadata": "^0.1.0"
+	}
+}

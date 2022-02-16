@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.OperatorEnumMapping = void 0;
+var OperatorEnumMapping;
+(function (OperatorEnumMapping) {
+    OperatorEnumMapping["="] = "$eq";
+    OperatorEnumMapping["!="] = "$ne";
+    OperatorEnumMapping[">"] = "$gt";
+    OperatorEnumMapping[">="] = "$gte";
+    OperatorEnumMapping["<"] = "$lt";
+    OperatorEnumMapping["<="] = "$lte";
+    OperatorEnumMapping["LIKE"] = "$regex";
+    OperatorEnumMapping["IN"] = "$in";
+    OperatorEnumMapping["ISNULL"] = "null";
+    OperatorEnumMapping["ISNOTNULL"] = "isNotNull";
+    OperatorEnumMapping["+"] = "$add";
+    OperatorEnumMapping["-"] = "$subtract";
+    OperatorEnumMapping["*"] = "$multiply";
+    OperatorEnumMapping["/"] = "$divide";
+})(OperatorEnumMapping = exports.OperatorEnumMapping || (exports.OperatorEnumMapping = {}));

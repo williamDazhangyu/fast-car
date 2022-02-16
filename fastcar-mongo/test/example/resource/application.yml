@@ -1,0 +1,7 @@
+settings:
+    mongo:
+        dataSoucreConfig:
+            - { source: "test", url: "mongodb://test:123456@localhost:27017/test", default: true }
+            - { source: "test2", url: "mongodb://test2:123456@localhost:27017/test2" }
+        slowSQLInterval: 500 #sql慢查询打印
+        printSQL: true
