@@ -1,6 +1,5 @@
 import "reflect-metadata";
-import { Table, DBType, PrimaryKey, Field } from "fastcar-mysql/annotation";
-import { Size, NotNull } from "fastcar-core/annotation";
+import { Table, DBType, PrimaryKey, Size, Field, NotNull } from "fastcar-core/annotation";
 @Table("test")
 class Test {
 	@DBType("int")

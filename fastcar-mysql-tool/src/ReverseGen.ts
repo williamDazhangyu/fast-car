@@ -37,8 +37,7 @@ class ReverseGenerate {
 	static genModel(taleName: string, dir: string, fieldInfo: FiledType[], style: prettier.Options): void {
 		//进行写入
 		let importHead = `import "reflect-metadata";\n`;
-		let importAnnotation: string[] = ["Table", "DBType"];
-		let importCoreAnnotation: string[] = [];
+		let importCoreAnnotation: string[] = ["Table", "DBType"];
 
 		let className = ReverseGenerate.formatClassName(taleName);
 
@@ -55,8 +54,8 @@ class ReverseGenerate {
 			let formatName = camelcase(dbName);
 			if (formatName != dbName) {
 				tmpFieldList.push(`@Field('${dbName}')`);
-				if (!importAnnotation.includes("Field")) {
-					importAnnotation.push("Field");
+				if (!importCoreAnnotation.includes("Field")) {
+					importCoreAnnotation.push("Field");
 				}
 			}
 			tmpFieldList.push(`@DBType('${field.DATA_TYPE}')`);
@@ -64,8 +63,8 @@ class ReverseGenerate {
 			if (field.COLUMN_KEY) {
 				tmpFieldList.push("@PrimaryKey");
 
-				if (!importAnnotation.includes("PrimaryKey")) {
-					importAnnotation.push("PrimaryKey");
+				if (!importCoreAnnotation.includes("PrimaryKey")) {
+					importCoreAnnotation.push("PrimaryKey");
 				}
 			}
 
@@ -126,12 +125,7 @@ class ReverseGenerate {
 
 		body.push("constructor(...args: any[]) {\nObject.assign(this, ...args);\n}");
 
-		//补全导入的头
-		importHead += `import { ${importAnnotation.join(",")} } from "fastcar-mysql/annotation";\n`;
-
-		if (importCoreAnnotation.length > 0) {
-			importHead += `import { ${importCoreAnnotation.join(",")} } from "fastcar-core/annotation";`;
-		}
+		importHead += `import { ${importCoreAnnotation.join(",")} } from "fastcar-core/annotation";`;
 
 		let content = `${importHead}\n @Table('${taleName}')\n class ${className} \{\n ${body.join("\n\n")} \n\}\n\n export default ${className}`;
 		//进行格式化
@@ -143,12 +137,7 @@ class ReverseGenerate {
 	//生成mapper层
 	static async genMapper(taleName: string, mapperDir: string, rp: string, style: prettier.Options): Promise<void> {
 		let modelName = ReverseGenerate.formatClassName(taleName);
-		let importHeadList = [
-			`import \{ Repository \} from "fastcar-core/annotation";`,
-			`import \{ Entity \} from "fastcar-mysql/annotation";`,
-			`import \{ MysqlMapper \} from "fastcar-mysql";`,
-			`import ${modelName} from "${rp}/${modelName}";`,
-		];
+		let importHeadList = [`import \{ Repository, Entity \} from "fastcar-core/annotation";`, `import \{ MysqlMapper \} from "fastcar-mysql";`, `import ${modelName} from "${rp}/${modelName}";`];
 		let className = `${modelName}Mapper`;
 		let importHead = `${importHeadList.join("\n")}`;
 		let body = `@Entity(${modelName})\n\n@Repository\n\nclass ${className} extends MysqlMapper<${modelName}> \{ \}`;
