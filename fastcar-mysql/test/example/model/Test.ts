@@ -1,8 +1,4 @@
-import Field from "../../../src/annotation/mapper/Field";
-import DBType from "../../../src/annotation/mapper/DBType";
-import PrimaryKey from "../../../src/annotation/mapper/PrimaryKey";
-import Table from "../../../src/annotation/Table";
-import { Size, NotNull } from "fastcar-core/annotation";
+import { Size, NotNull, Table, Field, DBType, PrimaryKey } from "fastcar-core/annotation";
 import "reflect-metadata";
 
 @Table("test")

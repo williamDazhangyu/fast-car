@@ -6,6 +6,8 @@ import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
 import * as mysql from "mysql2/promise";
 import * as uuid from "uuid";
 import { EnableScheduling, ScheduledInterval, TimeUnit } from "fastcar-timer";
+import { BeanName } from "fastcar-core/annotation";
+import { DataSourceManager, SqlError } from "fastcar-core/db";
 
 const SELECT = "SELECT";
 const select = "select";
@@ -13,7 +15,8 @@ const select = "select";
 @ApplicationStart(BootPriority.Base, "start")
 @ApplicationStop(BootPriority.Lowest, "stop")
 @EnableScheduling
-class MysqlDataSourceManager {
+@BeanName("MysqlDataSourceManager")
+class MysqlDataSourceManager implements DataSourceManager {
 	@Autowired
 	protected app!: FastCarApplication;
 
@@ -65,7 +68,7 @@ class MysqlDataSourceManager {
 
 	stop(): void {
 		//结束销毁
-		this.sourceMap.forEach((db) => {
+		this.sourceMap.forEach(db => {
 			db.close();
 		});
 		this.sourceMap.clear();
@@ -76,7 +79,7 @@ class MysqlDataSourceManager {
 			return;
 		}
 
-		this.config.dataSoucreConfig.forEach((item) => {
+		this.config.dataSoucreConfig.forEach(item => {
 			let source = item.source;
 			if (this.sourceMap.has(source)) {
 				return;
@@ -133,7 +136,7 @@ class MysqlDataSourceManager {
 		if (connMap) {
 			for (let [ds, conns] of connMap) {
 				let db = this.getDataSoucreByName(ds);
-				conns.forEach(async (conn) => {
+				conns.forEach(async conn => {
 					status ? await db?.rollback(conn) : await db?.commit(conn);
 					db?.releaseConnection(conn);
 				});
@@ -157,7 +160,10 @@ class MysqlDataSourceManager {
 	}
 
 	//执行会话语句
-	async exec({ sql, args = [], ds = this.getDefaultSoucre(this.isReadBySql(sql)), sessionId }: SqlExecType): Promise<any[]> {
+	async exec({ sql, args = [], ds, sessionId }: SqlExecType): Promise<any[]> {
+		if (!ds) {
+			ds = this.getDefaultSoucre(this.isReadBySql(sql));
+		}
 		if (sessionId) {
 			let connMap: Map<string, mysql.PoolConnection[]> = Reflect.get(this, sessionId);
 			if (connMap) {
@@ -166,7 +172,7 @@ class MysqlDataSourceManager {
 					connMap.set(ds, conns);
 					let db = this.sourceMap.get(ds);
 					if (!db) {
-						throw new Error(`this datasoucre ${ds} cannot be found `);
+						throw new SqlError(`this datasoucre ${ds} cannot be found `);
 					}
 					let conn = await db.getBeginConnection();
 					conns.push(conn);
@@ -176,18 +182,21 @@ class MysqlDataSourceManager {
 					return result;
 				}
 			}
-			throw new Error(`session ${sessionId} cannot be found `);
+			throw new SqlError(`session ${sessionId} cannot be found `);
 		}
 
 		return await this.execute({ sql, args, ds });
 	}
 
 	//执行sql
-	async execute({ sql, args = [], ds = this.getDefaultSoucre(this.isReadBySql(sql)) }: SqlExecType): Promise<any[]> {
+	async execute({ sql, args = [], ds }: SqlExecType): Promise<any[]> {
 		return new Promise(async (resolve, reject) => {
+			if (!ds) {
+				ds = this.getDefaultSoucre(this.isReadBySql(sql));
+			}
 			let dataSoucre = this.sourceMap.get(ds);
 			if (!dataSoucre) {
-				return reject(new Error(`this datasoucre ${ds} cannot be found `));
+				return reject(new SqlError(`this datasoucre ${ds} cannot be found `));
 			}
 
 			let conn;
@@ -196,13 +205,18 @@ class MysqlDataSourceManager {
 				let result = await this.connExecute(conn, sql, args);
 				dataSoucre.releaseConnection(conn);
 				return resolve(result);
-			} catch (e: any) {
+			} catch (e) {
 				if (conn) {
 					dataSoucre.releaseConnection(conn);
 				}
+
 				this.sysLogger.error("sql error:", mysql.format(sql, args));
-				this.sysLogger.error("reason:", e.message);
-				this.sysLogger.error("stack:", e.stack);
+
+				if (e instanceof Error) {
+					this.sysLogger.error("reason:", e.message);
+					this.sysLogger.error("stack:", e.stack);
+				}
+
 				return reject(e);
 			}
 		});
@@ -221,7 +235,7 @@ class MysqlDataSourceManager {
 				if (!conn) {
 					let db = this.sourceMap.get(ds);
 					if (!db) {
-						throw new Error(`this datasoucre ${ds} cannot be found `);
+						throw new SqlError(`this datasoucre ${ds} cannot be found `);
 					}
 					conn = await db.getBeginConnection();
 					connMap.set(ds, conn);
@@ -268,7 +282,7 @@ class MysqlDataSourceManager {
 			}
 
 			if (cleanSessions.length > 0) {
-				cleanSessions.forEach(async (sessionId) => {
+				cleanSessions.forEach(async sessionId => {
 					this.sysLogger.error(`${sessionId}: The session was longer than ${sessionTimeOut} milliseconds`);
 					this.destorySession(sessionId, true);
 				});

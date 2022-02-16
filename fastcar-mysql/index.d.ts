@@ -1,7 +1,8 @@
 import { FastCarApplication, Logger } from "fastcar-core";
 import * as mysql from "mysql2";
-import { OrderType, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "./src/operation/OperationType";
+import { DBMapper, OrderType, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "fastcar-core/db";
 import { MySqlConfig } from "./src/type/SqlConfig";
+import { DataSourceManager } from "fastcar-core/db";
 
 export enum DataTypeEnum {
 	tinyint = "boolean", //这边做一个约定为tinyint的时候为boolean类型
@@ -42,19 +43,6 @@ export enum DesignMeta {
 	mapping = "db:mapping", //映射描述
 	dbFields = "db:fields", //数据库名-ts名
 	sqlSession = "SqlSession", //sql会话
-}
-
-export enum OperatorEnum {
-	eq = "=",
-	neq = "!=",
-	gt = ">",
-	gte = ">=",
-	lt = "<",
-	lte = "<=",
-	like = "LIKE",
-	in = "IN",
-	isNUll = "ISNULL",
-	isNotNull = "IS NOT NULL",
 }
 
 declare type MapperType = {
@@ -103,7 +91,7 @@ export class MysqlDataSource {
 	getPool(): mysql.Pool;
 }
 
-export class MysqlDataSourceManager {
+export class MysqlDataSourceManager implements DataSourceManager {
 	protected app: FastCarApplication;
 	protected sysLogger: Logger;
 	protected sourceMap: Map<string, MysqlDataSource>;
@@ -144,7 +132,7 @@ export class MysqlDataSourceManager {
 	checkSession(): void;
 }
 
-export class MysqlMapper<T extends Object> {
+export class MysqlMapper<T extends Object> implements DBMapper<T> {
 	protected tableName: string;
 	protected classZ: any; //映射的原型类
 	protected mappingMap: Map<string, MapperType>; //代码别名-映射关系
@@ -182,76 +170,81 @@ export class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 更新或者添加记录多条记录(一般用于整条记录的更新)
 	 */
-	saveORUpdate(rows: T | T[], sessionId?: string, ds?: string): Promise<number>;
+	saveORUpdate(rows: T | T[], ds?: string, sessionId?: string): Promise<number | string>;
 
 	/***
 	 * @version 1.0 插入单条记录返回主键
 	 */
-	saveOne(row: T, sessionId?: string, ds?: string): Promise<number>;
+	saveOne(row: T, ds?: string, sessionId?: string): Promise<number>;
 
 	/***
 	 * @version 1.0 批量插入记录
 	 */
-	saveList(rows: T[], sessionId?: string, ds?: string): Promise<boolean>;
+	saveList(rows: T[], ds?: string, sessionId?: string): Promise<boolean>;
 
 	/***
 	 * @version 1.0 更新记录
 	 *
 	 */
-	update({ row, where, limit }: SqlUpdate, sessionId?: string, ds?: string): Promise<boolean>;
+	update({ row, where, limit }: SqlUpdate, ds?: string, sessionId?: string): Promise<boolean>;
 
 	/****
 	 * @version 1.0 更新一条数据
 	 *
 	 */
-	updateOne(sqlUpdate: SqlUpdate, sessionId?: string, ds?: string): Promise<boolean>;
+	updateOne(sqlUpdate: SqlUpdate, ds?: string, sessionId?: string): Promise<boolean>;
 
 	/***
 	 * @version 1.0 根据实体类的主键来更新数据
 	 *
 	 */
-	updateByPrimaryKey(row: T, sessionId?: string, ds?: string): Promise<boolean>;
+	updateByPrimaryKey(row: T, ds?: string, sessionId?: string): Promise<boolean>;
 
 	/***
 	 * @version 1.0 根据条件进行查找
 	 */
-	select(conditions: SqlQuery, sessionId?: string, ds?: string): Promise<T[]>;
+	select(conditions: SqlQuery, ds?: string, sessionId?: string): Promise<T[]>;
 
 	/***
 	 * @version 1.0 查询单个对象
 	 *
 	 */
-	selectOne(conditions?: SqlQuery, sessionId?: string, ds?: string): Promise<T | null>;
+	selectOne(conditions?: SqlQuery, ds?: string, sessionId?: string): Promise<T | null>;
 
 	/***
 	 * @version 1.0 通过主键查找对象
 	 *
 	 */
-	selectByPrimaryKey(row: T, sessionId?: string, ds?: string): Promise<T | null>;
+	selectByPrimaryKey(row: T, ds?: string, sessionId?: string): Promise<T | null>;
 
 	/***
 	 * @version 1.0 判定是否存在
 	 *
 	 */
-	exist(where: SqlWhere, sessionId?: string, ds?: string): Promise<boolean>;
+	exist(where: SqlWhere, ds?: string, sessionId?: string): Promise<boolean>;
 
 	/***
 	 * @version 1.0 统计符合条件的记录
 	 */
-	count(where: SqlWhere, sessionId?: string, ds?: string): Promise<number>;
+	count(where: SqlWhere, ds?: string, sessionId?: string): Promise<number>;
 
 	/***
 	 * @version 1.0 按照条件删除记录
 	 */
-	delete(conditions: SqlDelete, sessionId?: string, ds?: string): Promise<boolean>;
+	delete(conditions: SqlDelete, ds?: string, sessionId?: string): Promise<boolean>;
 
 	/***
 	 * @version 1.0 删除某条记录
 	 */
-	deleteOne(where: SqlWhere, sessionId?: string, ds?: string): Promise<boolean>;
+	deleteOne(where: SqlWhere, ds?: string, sessionId?: string): Promise<boolean>;
+
+	/***
+	 * @version 1.0 删除某条记录根据主键
+	 */
+	deleteByPrimaryKey(row: T, ds?: string, sessionId?: string): Promise<boolean>;
 
 	/***
 	 * @version 1.0 自定义sql执行
 	 */
-	execute(sql: string, args?: any[], sessionId?: string, ds?: string): Promise<any>;
+	execute(sql: string, args?: any[], ds?: string, sessionId?: string): Promise<any>;
 }

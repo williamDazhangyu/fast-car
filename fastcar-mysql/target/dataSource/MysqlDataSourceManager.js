@@ -16,6 +16,8 @@ const fastcar_core_1 = require("fastcar-core");
 const mysql = require("mysql2/promise");
 const uuid = require("uuid");
 const fastcar_timer_1 = require("fastcar-timer");
+const annotation_2 = require("fastcar-core/annotation");
+const db_1 = require("fastcar-core/db");
 const SELECT = "SELECT";
 const select = "select";
 let MysqlDataSourceManager = class MysqlDataSourceManager {
@@ -50,7 +52,7 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
     }
     stop() {
         //结束销毁
-        this.sourceMap.forEach((db) => {
+        this.sourceMap.forEach(db => {
             db.close();
         });
         this.sourceMap.clear();
@@ -59,7 +61,7 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
         if (this.config.dataSoucreConfig.length == 0) {
             return;
         }
-        this.config.dataSoucreConfig.forEach((item) => {
+        this.config.dataSoucreConfig.forEach(item => {
             let source = item.source;
             if (this.sourceMap.has(source)) {
                 return;
@@ -126,7 +128,10 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
         return defaultName;
     }
     //执行会话语句
-    async exec({ sql, args = [], ds = this.getDefaultSoucre(this.isReadBySql(sql)), sessionId }) {
+    async exec({ sql, args = [], ds, sessionId }) {
+        if (!ds) {
+            ds = this.getDefaultSoucre(this.isReadBySql(sql));
+        }
         if (sessionId) {
             let connMap = Reflect.get(this, sessionId);
             if (connMap) {
@@ -135,7 +140,7 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
                     connMap.set(ds, conns);
                     let db = this.sourceMap.get(ds);
                     if (!db) {
-                        throw new Error(`this datasoucre ${ds} cannot be found `);
+                        throw new db_1.SqlError(`this datasoucre ${ds} cannot be found `);
                     }
                     let conn = await db.getBeginConnection();
                     conns.push(conn);
@@ -145,16 +150,19 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
                     return result;
                 }
             }
-            throw new Error(`session ${sessionId} cannot be found `);
+            throw new db_1.SqlError(`session ${sessionId} cannot be found `);
         }
         return await this.execute({ sql, args, ds });
     }
     //执行sql
-    async execute({ sql, args = [], ds = this.getDefaultSoucre(this.isReadBySql(sql)) }) {
+    async execute({ sql, args = [], ds }) {
         return new Promise(async (resolve, reject) => {
+            if (!ds) {
+                ds = this.getDefaultSoucre(this.isReadBySql(sql));
+            }
             let dataSoucre = this.sourceMap.get(ds);
             if (!dataSoucre) {
-                return reject(new Error(`this datasoucre ${ds} cannot be found `));
+                return reject(new db_1.SqlError(`this datasoucre ${ds} cannot be found `));
             }
             let conn;
             try {
@@ -168,8 +176,10 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
                     dataSoucre.releaseConnection(conn);
                 }
                 this.sysLogger.error("sql error:", mysql.format(sql, args));
-                this.sysLogger.error("reason:", e.message);
-                this.sysLogger.error("stack:", e.stack);
+                if (e instanceof Error) {
+                    this.sysLogger.error("reason:", e.message);
+                    this.sysLogger.error("stack:", e.stack);
+                }
                 return reject(e);
             }
         });
@@ -185,7 +195,7 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
                 if (!conn) {
                     let db = this.sourceMap.get(ds);
                     if (!db) {
-                        throw new Error(`this datasoucre ${ds} cannot be found `);
+                        throw new db_1.SqlError(`this datasoucre ${ds} cannot be found `);
                     }
                     conn = await db.getBeginConnection();
                     connMap.set(ds, conn);
@@ -254,6 +264,7 @@ MysqlDataSourceManager = __decorate([
     annotation_1.ApplicationStart(fastcar_core_1.BootPriority.Base, "start"),
     annotation_1.ApplicationStop(fastcar_core_1.BootPriority.Lowest, "stop"),
     fastcar_timer_1.EnableScheduling,
+    annotation_2.BeanName("MysqlDataSourceManager"),
     __metadata("design:paramtypes", [])
 ], MysqlDataSourceManager);
 exports.default = MysqlDataSourceManager;

@@ -1,49 +1,20 @@
 import "reflect-metadata";
-import { DesignMeta } from "../type/DesignMeta";
-import { Autowired, DSIndex } from "fastcar-core/annotation";
+import { Autowired, DSIndex, SqlSession } from "fastcar-core/annotation";
 import MysqlDataSourceManager from "../dataSource/MysqlDataSourceManager";
-import { JoinKeys, OrderType, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "./OperationType";
-import { MapperType } from "../type/MapperType";
-import { OperatorEnum } from "./OperationType";
 import { DataFormat, TypeUtil, ValidationUtil } from "fastcar-core/utils";
 import SerializeUtil from "../util/SerializeUtil";
-import SqlSession from "../annotation/SqlSession";
+import { BaseMapper, JoinEnum } from "fastcar-core/db";
+import { OrderType, OperatorEnum, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "fastcar-core/db";
 
 /****
  * @version 1.0 采用crud方式进行数据操作
  */
-class MysqlMapper<T extends Object> {
-	protected tableName: string;
-	protected classZ: any; //映射的原型类
-	protected mappingMap: Map<string, MapperType>; //代码别名-映射关系
-	protected mappingList: MapperType[];
-	protected dbFields: Map<string, string>; //数据库别名-代码别名
-
+class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	@Autowired
 	protected dsm!: MysqlDataSourceManager;
 
 	constructor() {
-		let tClass = Reflect.getMetadata(DesignMeta.entity, this);
-		this.classZ = tClass;
-
-		let tableName = Reflect.getMetadata(DesignMeta.table, tClass);
-		if (!tableName) {
-			throw new Error(`This class ${tClass.name} has no annotation table name`);
-		}
-		this.tableName = tableName;
-		this.mappingMap = Reflect.getMetadata(DesignMeta.mapping, tClass); //映射关系
-		this.dbFields = Reflect.getMetadata(DesignMeta.dbFields, tClass); //作用的列名
-		this.mappingList = Array.of();
-
-		this.mappingMap.forEach((item) => {
-			this.mappingList.push(item);
-		});
-	}
-
-	//获取数据库别名通过代码内的名称
-	protected getFieldName(name: string): string {
-		let info = this.mappingMap.get(name);
-		return info ? info.field : name;
+		super();
 	}
 
 	//自动映射数据库字段
@@ -60,7 +31,7 @@ class MysqlMapper<T extends Object> {
 			return "*";
 		}
 
-		let list = fields.map((item) => {
+		let list = fields.map(item => {
 			return this.getFieldName(item);
 		});
 		return list.join(",");
@@ -92,7 +63,7 @@ class MysqlMapper<T extends Object> {
 		for (let key of keys) {
 			let value: any = where[key];
 
-			if (JoinKeys.includes(key)) {
+			if (JoinEnum.and == key || JoinEnum.or == key) {
 				//递归调用计算
 				let childResult = this.analysisCondition(value, key);
 				list.push(childResult.sql);
@@ -118,7 +89,7 @@ class MysqlMapper<T extends Object> {
 				let clist: string[] = Array.of();
 				let alias = this.getFieldName(key);
 
-				Object.keys(ov).forEach((operatorKeys) => {
+				Object.keys(ov).forEach(operatorKeys => {
 					let operatorValue = Reflect.get(ov, operatorKeys);
 
 					switch (operatorKeys) {
@@ -132,6 +103,14 @@ class MysqlMapper<T extends Object> {
 						}
 						case OperatorEnum.in: {
 							clist.push(`${alias} IN (?)`);
+							params.push(operatorValue);
+							break;
+						}
+						case OperatorEnum.inc:
+						case OperatorEnum.dec:
+						case OperatorEnum.multiply:
+						case OperatorEnum.division: {
+							clist.push(`${alias} = ${alias} ${operatorKeys} (?)`);
 							params.push(operatorValue);
 							break;
 						}
@@ -164,15 +143,13 @@ class MysqlMapper<T extends Object> {
 		};
 	}
 
-	protected analysisGroups(groups: OrderType = {}): string {
-		let keys = Object.keys(groups);
-
-		if (keys.length > 0) {
+	protected analysisGroups(groups: string[] = []): string {
+		if (groups.length > 0) {
 			let list: string[] = [];
-			keys.forEach((i) => {
+			groups.forEach(i => {
 				let key = i.toString();
 				let alias = this.getFieldName(key);
-				list.push(`${alias} ${groups[key]}`);
+				list.push(`${alias}`);
 			});
 
 			return `GROUP BY ${list.join(",")}`;
@@ -186,7 +163,7 @@ class MysqlMapper<T extends Object> {
 
 		if (keys.length > 0) {
 			let list: string[] = [];
-			keys.forEach((i) => {
+			keys.forEach(i => {
 				let key = i.toString();
 				let alias = this.getFieldName(key);
 				list.push(`${alias} ${orders[key]}`);
@@ -200,10 +177,23 @@ class MysqlMapper<T extends Object> {
 
 	protected analysisRow(row: RowData): RowType | null {
 		let str: string[] = [];
-		let args = Object.keys(row).map((key) => {
+		let args = Object.keys(row).map(key => {
 			let alias = this.getFieldName(key);
 			str.push(`${alias} = ?`);
-			return Reflect.get(row, key);
+
+			let v = Reflect.get(row, key);
+
+			let originName = this.dbFields.get(alias);
+			if (originName) {
+				let desc = this.mappingMap.get(originName);
+
+				if (desc) {
+					let dbValue = this.toDBValue(row, key, desc.type);
+					return dbValue;
+				}
+			}
+
+			return v;
 		});
 
 		return {
@@ -241,7 +231,7 @@ class MysqlMapper<T extends Object> {
 
 	protected setRows(rowDataList: Object[]): T[] {
 		let list: T[] = Array.of();
-		rowDataList.forEach((item) => {
+		rowDataList.forEach(item => {
 			list.push(this.setRow(item));
 		});
 
@@ -251,7 +241,7 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 更新或者添加记录多条记录(一般用于整条记录的更新)
 	 */
-	async saveORUpdate(rows: T | T[], @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<number> {
+	async saveORUpdate(rows: T | T[], @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<number> {
 		if (!Array.isArray(rows)) {
 			rows = [rows];
 		}
@@ -263,7 +253,7 @@ class MysqlMapper<T extends Object> {
 		let afterKeys: string[] = Array.of();
 		let beforeKeys: string[] = Array.of();
 
-		this.mappingList.forEach((item) => {
+		this.mappingList.forEach(item => {
 			beforeKeys.push(item.field);
 			if (!item.primaryKey) {
 				afterKeys.push(`${item.field} = VALUES (${item.field})`);
@@ -294,7 +284,7 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 插入单条记录返回主键
 	 */
-	async saveOne(row: T, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<number> {
+	async saveOne(row: T, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<number> {
 		let params: string[] = [];
 		let args: any[] = [];
 
@@ -316,13 +306,13 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 批量插入记录
 	 */
-	async saveList(rows: T[], @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
+	async saveList(rows: T[], @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		if (rows.length < 1) {
 			return Promise.reject(new Error("rows is empty"));
 		}
 
 		let keys: string[] = Array.of();
-		this.mappingList.forEach((item) => {
+		this.mappingList.forEach(item => {
 			keys.push(item.field);
 		});
 
@@ -336,7 +326,7 @@ class MysqlMapper<T extends Object> {
 			let args: any[] = [];
 
 			tpmList.forEach((row: T) => {
-				this.mappingList.forEach((item) => {
+				this.mappingList.forEach(item => {
 					args.push(this.toDBValue(row, item.name, item.type));
 				});
 				paramsList.push(`(${paramsStr})`);
@@ -353,11 +343,12 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 更新记录
 	 *
 	 */
-	async update({ row, where, limit }: SqlUpdate, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
+	async update({ row, where, limit }: SqlUpdate, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		let rowStr = this.analysisRow(row);
 		if (!rowStr) {
 			return Promise.reject(new Error("row is empty"));
 		}
+
 		let whereC = this.analysisWhere(where);
 		let limitStr = this.analysisLimit(limit);
 		let sql = `UPDATE ${this.tableName} SET ${rowStr.sql} ${whereC.sql} ${limitStr}`;
@@ -374,15 +365,15 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 更新一条数据
 	 *
 	 */
-	async updateOne(sqlUpdate: SqlUpdate, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
-		return await this.update(Object.assign({}, sqlUpdate, { limit: 1 }), sessionId, ds);
+	async updateOne(sqlUpdate: SqlUpdate, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
+		return await this.update(Object.assign({}, sqlUpdate, { limit: 1 }), ds, sessionId);
 	}
 
 	/***
 	 * @version 1.0 根据实体类的主键来更新数据
 	 *
 	 */
-	async updateByPrimaryKey(row: T, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
+	async updateByPrimaryKey(row: T, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		let sqlUpdate: SqlUpdate = {
 			where: {}, //查询条件
 			row: {},
@@ -405,13 +396,13 @@ class MysqlMapper<T extends Object> {
 			return Promise.reject(new Error(`${this.tableName} primary key  is null`));
 		}
 
-		return await this.updateOne(sqlUpdate, sessionId, ds);
+		return await this.updateOne(sqlUpdate, ds, sessionId);
 	}
 
 	/***
 	 * @version 1.0 根据条件进行查找
 	 */
-	async select(conditions: SqlQuery, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<T[]> {
+	async select(conditions: SqlQuery, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T[]> {
 		let fields = this.analysisFields(conditions.fields);
 		let whereC = this.analysisWhere(conditions.where);
 		let groupStr = this.analysisGroups(conditions.groups);
@@ -434,10 +425,10 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 查询单个对象
 	 *
 	 */
-	async selectOne(conditions?: SqlQuery, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<T | null> {
+	async selectOne(conditions?: SqlQuery, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T | null> {
 		let queryInfo = Object.assign({}, conditions, { limit: 1 });
 
-		let res = await this.select(queryInfo, sessionId, ds);
+		let res = await this.select(queryInfo, ds, sessionId);
 		let o = res.length > 0 ? res[0] : null;
 
 		return o;
@@ -447,7 +438,7 @@ class MysqlMapper<T extends Object> {
 	 * @version 1.0 通过主键查找对象
 	 *
 	 */
-	async selectByPrimaryKey(row: T, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<T | null> {
+	async selectByPrimaryKey(row: T, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T | null> {
 		let sqlQuery: SqlQuery = {
 			where: {}, //查询条件
 			limit: 1,
@@ -467,14 +458,14 @@ class MysqlMapper<T extends Object> {
 			return Promise.reject(new Error(`${this.tableName} primary key  is null`));
 		}
 
-		return await this.selectOne(sqlQuery, sessionId, ds);
+		return await this.selectOne(sqlQuery, ds, sessionId);
 	}
 
 	/***
 	 * @version 1.0 判定是否存在
 	 *
 	 */
-	async exist(where: SqlWhere, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
+	async exist(where: SqlWhere, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		let whereC = this.analysisWhere(where);
 		let args = whereC.args;
 
@@ -487,7 +478,7 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 统计符合条件的记录
 	 */
-	async count(where: SqlWhere, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<number> {
+	async count(where: SqlWhere, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<number> {
 		let whereC = this.analysisWhere(where);
 		let args = whereC.args;
 		let sql = `SELECT COUNT(1) as num FROM ${this.tableName} ${whereC.sql}`;
@@ -500,7 +491,7 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 按照条件删除记录
 	 */
-	async delete(conditions: SqlDelete, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
+	async delete(conditions: SqlDelete, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		let whereC = this.analysisWhere(conditions.where);
 		let limitStr = this.analysisLimit(conditions.limit);
 
@@ -515,21 +506,39 @@ class MysqlMapper<T extends Object> {
 	/***
 	 * @version 1.0 删除某条记录
 	 */
-	async deleteOne(where: SqlWhere, @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<boolean> {
+	async deleteOne(where: SqlWhere, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		return await this.delete(
 			{
 				where,
 				limit: 1,
 			},
-			sessionId,
-			ds
+			ds,
+			sessionId
 		);
+	}
+
+	async deleteByPrimaryKey(row: T, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
+		let conditions = {};
+		this.mappingList.forEach(item => {
+			if (item.primaryKey) {
+				let value = Reflect.get(row, item.name);
+				if (ValidationUtil.isNotNull(value)) {
+					Reflect.set(conditions, item.field, value);
+				}
+			}
+		});
+
+		if (Object.keys(conditions).length == 0) {
+			return false;
+		}
+
+		return await this.deleteOne(conditions, ds, sessionId);
 	}
 
 	/***
 	 * @version 1.0 自定义sql执行
 	 */
-	async execute(sql: string, args: any[] = [], @SqlSession sessionId?: string, @DSIndex ds?: string): Promise<any> {
+	async execute(sql: string, args: any[] = [], @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<any> {
 		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
 
 		return rows;

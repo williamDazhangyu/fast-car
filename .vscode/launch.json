@@ -111,6 +111,23 @@
             "env": {
                 "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
             }
+        },
+        {
+            "name": "Run MongoSimple",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${workspaceRoot}/fastcar-mongo/test/example/simple/app.ts"
+            ],
+            "cwd": "${workspaceRoot}/fastcar-mongo",
+            "protocol": "inspector",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
+            }
         }
     ]
 }

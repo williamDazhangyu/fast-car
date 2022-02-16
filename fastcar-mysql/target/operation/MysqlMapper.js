@@ -13,37 +13,18 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
-const DesignMeta_1 = require("../type/DesignMeta");
 const annotation_1 = require("fastcar-core/annotation");
 const MysqlDataSourceManager_1 = require("../dataSource/MysqlDataSourceManager");
-const OperationType_1 = require("./OperationType");
-const OperationType_2 = require("./OperationType");
 const utils_1 = require("fastcar-core/utils");
 const SerializeUtil_1 = require("../util/SerializeUtil");
-const SqlSession_1 = require("../annotation/SqlSession");
+const db_1 = require("fastcar-core/db");
+const db_2 = require("fastcar-core/db");
 /****
  * @version 1.0 采用crud方式进行数据操作
  */
-class MysqlMapper {
+class MysqlMapper extends db_1.BaseMapper {
     constructor() {
-        let tClass = Reflect.getMetadata(DesignMeta_1.DesignMeta.entity, this);
-        this.classZ = tClass;
-        let tableName = Reflect.getMetadata(DesignMeta_1.DesignMeta.table, tClass);
-        if (!tableName) {
-            throw new Error(`This class ${tClass.name} has no annotation table name`);
-        }
-        this.tableName = tableName;
-        this.mappingMap = Reflect.getMetadata(DesignMeta_1.DesignMeta.mapping, tClass); //映射关系
-        this.dbFields = Reflect.getMetadata(DesignMeta_1.DesignMeta.dbFields, tClass); //作用的列名
-        this.mappingList = Array.of();
-        this.mappingMap.forEach((item) => {
-            this.mappingList.push(item);
-        });
-    }
-    //获取数据库别名通过代码内的名称
-    getFieldName(name) {
-        let info = this.mappingMap.get(name);
-        return info ? info.field : name;
+        super();
     }
     //自动映射数据库字段
     toDBValue(v, key, type) {
@@ -56,7 +37,7 @@ class MysqlMapper {
         if (fields.length == 0) {
             return "*";
         }
-        let list = fields.map((item) => {
+        let list = fields.map(item => {
             return this.getFieldName(item);
         });
         return list.join(",");
@@ -82,7 +63,7 @@ class MysqlMapper {
         }
         for (let key of keys) {
             let value = where[key];
-            if (OperationType_1.JoinKeys.includes(key)) {
+            if (db_1.JoinEnum.and == key || db_1.JoinEnum.or == key) {
                 //递归调用计算
                 let childResult = this.analysisCondition(value, key);
                 list.push(childResult.sql);
@@ -93,15 +74,15 @@ class MysqlMapper {
                 //对缺省类型进行补充
                 if (utils_1.TypeUtil.isArray(value)) {
                     //数组类型
-                    Reflect.set(ov, OperationType_2.OperatorEnum.in, value);
+                    Reflect.set(ov, db_2.OperatorEnum.in, value);
                 }
                 else if (utils_1.ValidationUtil.isNull(value)) {
                     //空值类型
-                    Reflect.set(ov, OperationType_2.OperatorEnum.isNUll, value);
+                    Reflect.set(ov, db_2.OperatorEnum.isNUll, value);
                 }
                 else if (!utils_1.TypeUtil.isObject(value)) {
                     //基本类型
-                    Reflect.set(ov, OperationType_2.OperatorEnum.eq, value);
+                    Reflect.set(ov, db_2.OperatorEnum.eq, value);
                 }
                 else {
                     ov = value;
@@ -109,19 +90,27 @@ class MysqlMapper {
                 //聚合类型
                 let clist = Array.of();
                 let alias = this.getFieldName(key);
-                Object.keys(ov).forEach((operatorKeys) => {
+                Object.keys(ov).forEach(operatorKeys => {
                     let operatorValue = Reflect.get(ov, operatorKeys);
                     switch (operatorKeys) {
-                        case OperationType_2.OperatorEnum.isNUll: {
+                        case db_2.OperatorEnum.isNUll: {
                             clist.push(`ISNULL(${alias})`);
                             break;
                         }
-                        case OperationType_2.OperatorEnum.isNotNull: {
+                        case db_2.OperatorEnum.isNotNull: {
                             clist.push(`${alias} IS NOT NULL`);
                             break;
                         }
-                        case OperationType_2.OperatorEnum.in: {
+                        case db_2.OperatorEnum.in: {
                             clist.push(`${alias} IN (?)`);
+                            params.push(operatorValue);
+                            break;
+                        }
+                        case db_2.OperatorEnum.inc:
+                        case db_2.OperatorEnum.dec:
+                        case db_2.OperatorEnum.multiply:
+                        case db_2.OperatorEnum.division: {
+                            clist.push(`${alias} = ${alias} ${operatorKeys} (?)`);
                             params.push(operatorValue);
                             break;
                         }
@@ -151,14 +140,13 @@ class MysqlMapper {
             args: params,
         };
     }
-    analysisGroups(groups = {}) {
-        let keys = Object.keys(groups);
-        if (keys.length > 0) {
+    analysisGroups(groups = []) {
+        if (groups.length > 0) {
             let list = [];
-            keys.forEach((i) => {
+            groups.forEach(i => {
                 let key = i.toString();
                 let alias = this.getFieldName(key);
-                list.push(`${alias} ${groups[key]}`);
+                list.push(`${alias}`);
             });
             return `GROUP BY ${list.join(",")}`;
         }
@@ -168,7 +156,7 @@ class MysqlMapper {
         let keys = Object.keys(orders);
         if (keys.length > 0) {
             let list = [];
-            keys.forEach((i) => {
+            keys.forEach(i => {
                 let key = i.toString();
                 let alias = this.getFieldName(key);
                 list.push(`${alias} ${orders[key]}`);
@@ -179,10 +167,19 @@ class MysqlMapper {
     }
     analysisRow(row) {
         let str = [];
-        let args = Object.keys(row).map((key) => {
+        let args = Object.keys(row).map(key => {
             let alias = this.getFieldName(key);
             str.push(`${alias} = ?`);
-            return Reflect.get(row, key);
+            let v = Reflect.get(row, key);
+            let originName = this.dbFields.get(alias);
+            if (originName) {
+                let desc = this.mappingMap.get(originName);
+                if (desc) {
+                    let dbValue = this.toDBValue(row, key, desc.type);
+                    return dbValue;
+                }
+            }
+            return v;
         });
         return {
             args: args,
@@ -212,7 +209,7 @@ class MysqlMapper {
     }
     setRows(rowDataList) {
         let list = Array.of();
-        rowDataList.forEach((item) => {
+        rowDataList.forEach(item => {
             list.push(this.setRow(item));
         });
         return list;
@@ -220,7 +217,7 @@ class MysqlMapper {
     /***
      * @version 1.0 更新或者添加记录多条记录(一般用于整条记录的更新)
      */
-    async saveORUpdate(rows, sessionId, ds) {
+    async saveORUpdate(rows, ds, sessionId) {
         if (!Array.isArray(rows)) {
             rows = [rows];
         }
@@ -229,7 +226,7 @@ class MysqlMapper {
         }
         let afterKeys = Array.of();
         let beforeKeys = Array.of();
-        this.mappingList.forEach((item) => {
+        this.mappingList.forEach(item => {
             beforeKeys.push(item.field);
             if (!item.primaryKey) {
                 afterKeys.push(`${item.field} = VALUES (${item.field})`);
@@ -254,7 +251,7 @@ class MysqlMapper {
     /***
      * @version 1.0 插入单条记录返回主键
      */
-    async saveOne(row, sessionId, ds) {
+    async saveOne(row, ds, sessionId) {
         let params = [];
         let args = [];
         for (let item of this.mappingList) {
@@ -272,12 +269,12 @@ class MysqlMapper {
     /***
      * @version 1.0 批量插入记录
      */
-    async saveList(rows, sessionId, ds) {
+    async saveList(rows, ds, sessionId) {
         if (rows.length < 1) {
             return Promise.reject(new Error("rows is empty"));
         }
         let keys = Array.of();
-        this.mappingList.forEach((item) => {
+        this.mappingList.forEach(item => {
             keys.push(item.field);
         });
         let keysStr = keys.join(",");
@@ -288,7 +285,7 @@ class MysqlMapper {
             let tpmList = rows.slice(0, 1000);
             let args = [];
             tpmList.forEach((row) => {
-                this.mappingList.forEach((item) => {
+                this.mappingList.forEach(item => {
                     args.push(this.toDBValue(row, item.name, item.type));
                 });
                 paramsList.push(`(${paramsStr})`);
@@ -303,7 +300,7 @@ class MysqlMapper {
      * @version 1.0 更新记录
      *
      */
-    async update({ row, where, limit }, sessionId, ds) {
+    async update({ row, where, limit }, ds, sessionId) {
         let rowStr = this.analysisRow(row);
         if (!rowStr) {
             return Promise.reject(new Error("row is empty"));
@@ -320,14 +317,14 @@ class MysqlMapper {
      * @version 1.0 更新一条数据
      *
      */
-    async updateOne(sqlUpdate, sessionId, ds) {
-        return await this.update(Object.assign({}, sqlUpdate, { limit: 1 }), sessionId, ds);
+    async updateOne(sqlUpdate, ds, sessionId) {
+        return await this.update(Object.assign({}, sqlUpdate, { limit: 1 }), ds, sessionId);
     }
     /***
      * @version 1.0 根据实体类的主键来更新数据
      *
      */
-    async updateByPrimaryKey(row, sessionId, ds) {
+    async updateByPrimaryKey(row, ds, sessionId) {
         let sqlUpdate = {
             where: {},
             row: {},
@@ -348,12 +345,12 @@ class MysqlMapper {
         if (Object.keys(sqlUpdate.where).length == 0) {
             return Promise.reject(new Error(`${this.tableName} primary key  is null`));
         }
-        return await this.updateOne(sqlUpdate, sessionId, ds);
+        return await this.updateOne(sqlUpdate, ds, sessionId);
     }
     /***
      * @version 1.0 根据条件进行查找
      */
-    async select(conditions, sessionId, ds) {
+    async select(conditions, ds, sessionId) {
         let fields = this.analysisFields(conditions.fields);
         let whereC = this.analysisWhere(conditions.where);
         let groupStr = this.analysisGroups(conditions.groups);
@@ -371,9 +368,9 @@ class MysqlMapper {
      * @version 1.0 查询单个对象
      *
      */
-    async selectOne(conditions, sessionId, ds) {
+    async selectOne(conditions, ds, sessionId) {
         let queryInfo = Object.assign({}, conditions, { limit: 1 });
-        let res = await this.select(queryInfo, sessionId, ds);
+        let res = await this.select(queryInfo, ds, sessionId);
         let o = res.length > 0 ? res[0] : null;
         return o;
     }
@@ -381,7 +378,7 @@ class MysqlMapper {
      * @version 1.0 通过主键查找对象
      *
      */
-    async selectByPrimaryKey(row, sessionId, ds) {
+    async selectByPrimaryKey(row, ds, sessionId) {
         let sqlQuery = {
             where: {},
             limit: 1,
@@ -398,13 +395,13 @@ class MysqlMapper {
         if (Object.keys(sqlQuery.where).length == 0) {
             return Promise.reject(new Error(`${this.tableName} primary key  is null`));
         }
-        return await this.selectOne(sqlQuery, sessionId, ds);
+        return await this.selectOne(sqlQuery, ds, sessionId);
     }
     /***
      * @version 1.0 判定是否存在
      *
      */
-    async exist(where, sessionId, ds) {
+    async exist(where, ds, sessionId) {
         let whereC = this.analysisWhere(where);
         let args = whereC.args;
         let sql = `SELECT 1 FROM ${this.tableName} ${whereC.sql} LIMIT 1`;
@@ -414,7 +411,7 @@ class MysqlMapper {
     /***
      * @version 1.0 统计符合条件的记录
      */
-    async count(where, sessionId, ds) {
+    async count(where, ds, sessionId) {
         let whereC = this.analysisWhere(where);
         let args = whereC.args;
         let sql = `SELECT COUNT(1) as num FROM ${this.tableName} ${whereC.sql}`;
@@ -424,7 +421,7 @@ class MysqlMapper {
     /***
      * @version 1.0 按照条件删除记录
      */
-    async delete(conditions, sessionId, ds) {
+    async delete(conditions, ds, sessionId) {
         let whereC = this.analysisWhere(conditions.where);
         let limitStr = this.analysisLimit(conditions.limit);
         let sql = `DELETE FROM ${this.tableName} ${whereC.sql} ${limitStr}`;
@@ -435,16 +432,31 @@ class MysqlMapper {
     /***
      * @version 1.0 删除某条记录
      */
-    async deleteOne(where, sessionId, ds) {
+    async deleteOne(where, ds, sessionId) {
         return await this.delete({
             where,
             limit: 1,
-        }, sessionId, ds);
+        }, ds, sessionId);
+    }
+    async deleteByPrimaryKey(row, ds, sessionId) {
+        let conditions = {};
+        this.mappingList.forEach(item => {
+            if (item.primaryKey) {
+                let value = Reflect.get(row, item.name);
+                if (utils_1.ValidationUtil.isNotNull(value)) {
+                    Reflect.set(conditions, item.field, value);
+                }
+            }
+        });
+        if (Object.keys(conditions).length == 0) {
+            return false;
+        }
+        return await this.deleteOne(conditions, ds, sessionId);
     }
     /***
      * @version 1.0 自定义sql执行
      */
-    async execute(sql, args = [], sessionId, ds) {
+    async execute(sql, args = [], ds, sessionId) {
         let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
         return rows;
     }
@@ -454,85 +466,91 @@ __decorate([
     __metadata("design:type", MysqlDataSourceManager_1.default)
 ], MysqlMapper.prototype, "dsm", void 0);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "saveORUpdate", null);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "saveOne", null);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Array, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "saveList", null);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "update", null);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "updateOne", null);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "updateByPrimaryKey", null);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "select", null);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "selectOne", null);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "selectByPrimaryKey", null);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "exist", null);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "count", null);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "delete", null);
 __decorate([
-    __param(1, SqlSession_1.default), __param(2, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MysqlMapper.prototype, "deleteOne", null);
 __decorate([
-    __param(2, SqlSession_1.default), __param(3, annotation_1.DSIndex),
+    __param(1, annotation_1.DSIndex), __param(2, annotation_1.SqlSession),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], MysqlMapper.prototype, "deleteByPrimaryKey", null);
+__decorate([
+    __param(2, annotation_1.DSIndex), __param(3, annotation_1.SqlSession),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Array, String, String]),
     __metadata("design:returntype", Promise)

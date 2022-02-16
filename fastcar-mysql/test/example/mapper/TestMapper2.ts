@@ -1,5 +1,4 @@
-import { DS, Repository } from "fastcar-core/annotation";
-import Entity from "../../../src/annotation/Entity";
+import { DS, Entity, Repository } from "fastcar-core/annotation";
 import MysqlMapper from "../../../src/operation/MysqlMapper";
 import Test from "../model/Test";
 
