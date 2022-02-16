@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DesignMeta = exports.BaseMapper = exports.OrderEnum = exports.JoinEnum = exports.OperatorEnum = void 0;
+exports.DesignMeta = exports.SqlError = exports.BaseMapper = exports.OrderEnum = exports.JoinEnum = exports.OperatorEnum = void 0;
 const BaseMapper_1 = require("./model/BaseMapper");
 exports.BaseMapper = BaseMapper_1.default;
+const SqlError_1 = require("./type/SqlError");
+exports.SqlError = SqlError_1.default;
 var OperatorEnum;
 (function (OperatorEnum) {
     OperatorEnum["eq"] = "=";

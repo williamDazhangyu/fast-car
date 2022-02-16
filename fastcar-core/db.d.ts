@@ -266,3 +266,5 @@ export interface DataSourceManager {
 
 	stop(): void;
 }
+
+export class SqlError extends Error {}

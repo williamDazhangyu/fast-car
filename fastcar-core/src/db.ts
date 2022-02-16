@@ -1,4 +1,5 @@
 import BaseMapper from "./model/BaseMapper";
+import SqlError from "./type/SqlError";
 
 export enum OperatorEnum {
 	eq = "=",
@@ -147,7 +148,7 @@ export interface DBMapper<T> {
 	deleteByPrimaryKey(row: T, ds?: string, sessionId?: string): Promise<boolean>;
 }
 
-export { BaseMapper };
+export { BaseMapper, SqlError };
 
 export type MapperType = {
 	name: string; //量变名称
