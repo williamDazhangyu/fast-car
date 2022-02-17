@@ -10,6 +10,9 @@
 		"target",
 		"index.d.ts"
 	],
+	"engines": {
+		"node": ">=16"
+	},
 	"devDependencies": {
 		"@types/camelcase": "^5.2.0",
 		"@types/prettier": "^2.4.2"

@@ -17,6 +17,9 @@
 		"./db.d.ts",
 		"utils.d.ts"
 	],
+	"engines": {
+		"node": ">=16"
+	},
 	"dependencies": {
 		"log4js": "^6.3.0",
 		"reflect-metadata": "^0.1.13",

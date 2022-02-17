@@ -14,6 +14,9 @@
 		"index.d.ts",
 		"annotation.d.ts"
 	],
+	"engines": {
+		"node": ">=16"
+	},
 	"dependencies": {
 		"fastcar-core": "file:../fastcar-core",
 		"mongodb": "^4.3.1",

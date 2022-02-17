@@ -12,6 +12,9 @@
 		"target",
 		"index.d.ts"
 	],
+	"engines": {
+		"node": ">=16"
+	},
 	"dependencies": {
 		"node-cron": "^3.0.0",
 		"reflect-metadata": "^0.1.13",
