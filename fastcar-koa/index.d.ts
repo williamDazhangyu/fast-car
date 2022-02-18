@@ -65,3 +65,6 @@ export function KoaCors(app: FastCarApplication): MiddleWareType;
 
 //解析静态文件
 export function KoaStatic(app: FastCarApplication): MiddleWareType;
+
+//支持api说明
+export function Swagger(app: FastCarApplication): MiddleWareType;

@@ -1,5 +1,6 @@
 import * as koaStatic from "koa-static";
 import * as KoaRange from "koa-range";
+import * as KoaMount from "koa-mount";
 import { FastCarApplication } from "fastcar-core";
 import { KoaConfig } from "../type/KoaConfig";
 import * as fs from "fs";
@@ -15,21 +16,27 @@ export default function KoaStatic(app: FastCarApplication): Koa.Middleware[] {
 
 	let koaConfig: KoaConfig = app.getSetting("koa");
 
-	if (Array.isArray(koaConfig?.koaStatic)) {
-		for (let fp of koaConfig.koaStatic) {
-			let rp = path.join(app.getResourcePath(), fp);
-			if (!fs.existsSync(fp)) {
-				if (!fs.existsSync(rp)) {
-					console.error(`${fp} is not found`);
-					continue;
-				} else {
-					fp = rp;
+	if (!!koaConfig?.koaStatic) {
+		let keys = Object.keys(koaConfig?.koaStatic);
+		if (keys.length > 0) {
+			for (let key of keys) {
+				let fp = koaConfig.koaStatic[key];
+				let rp = path.join(app.getResourcePath(), fp);
+				if (!fs.existsSync(fp)) {
+					if (!fs.existsSync(rp)) {
+						console.error(`${fp} is not found`);
+						continue;
+					} else {
+						fp = rp;
+					}
 				}
-			}
 
-			mlist.push(koaStatic(fp));
+				if (!key.startsWith("/")) {
+					key = `/${key}`;
+				}
+				mlist.push(KoaMount(key, koaStatic(fp)));
+			}
 		}
 	}
-
 	return mlist;
 }

@@ -27,13 +27,16 @@
 		"reflect-metadata": "^0.1.13"
 	},
 	"dependencies": {
+		"@types/koa-mount": "^4.0.1",
 		"fastcar-core": "file:../fastcar-core",
 		"koa": "^2.13.1",
 		"koa-body": "^4.2.0",
 		"koa-bodyparser": "^4.3.0",
+		"koa-mount": "^4.0.0",
 		"koa-range": "^0.3.0",
 		"koa-router": "^10.1.1",
 		"koa-static": "^5.0.0",
-		"koa2-cors": "^2.0.6"
+		"koa2-cors": "^2.0.6",
+		"swagger-ui-dist": "^4.5.0"
 	}
 }

@@ -1,0 +1,37 @@
+openapi: "3.0.0"
+info:
+  title: "api 测试"
+  description: "测试"
+  version: "1.0.0"
+servers:
+  - url: http://localhost:1234
+    description: 默认版本
+paths:
+  /getHello:
+    get:
+      summary: hello 请求
+      tags:
+        - "hello"
+      description: ""
+      parameters:
+        - in: query
+          name: id
+          description: 传一个id过去
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        code: { type: integer, default: 200, description: "响应码" }
+        msg: { type: string, default: "success", description: "响应描述" }
+        data: { type: object, description: "自定义数据" }

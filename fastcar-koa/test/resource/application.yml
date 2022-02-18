@@ -3,8 +3,11 @@ application:
 settings:
     koa:
         server: { port: 1234 } #服务器配置 支持 http http2和https
-        koaStatic: #静态资源访问
-            - "public"
+        # koaStatic: #静态资源访问
+        #     { "public": "public" }
+        swagger:
+            enable: true
+            api: { "index": "/public/api/index.yaml" }
         extra: #额外配置支持
             cors: #跨域支持示范
                 origin: "https://localhost:1234"
