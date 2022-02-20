@@ -45,21 +45,25 @@
             ]
         },
         {
-            "name": "Run Simple",
+            "name": "Run CoreSimple",
             "type": "node",
             "request": "launch",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "stopOnEntry": false,
             "args": [
-                "${workspaceRoot}/fastcar-core/test/example/simple/app.ts"
+                "${workspaceRoot}/fastcar-core/test/example/simple/app.ts",
+                "--no-timeouts"
             ],
             "cwd": "${workspaceRoot}",
+            "runtimeExecutable": null,
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
+            },
             "protocol": "inspector",
             "runtimeArgs": [
                 "-r",
                 "ts-node/register"
-            ],
-            "env": {
-                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
-            }
+            ]
         },
         {
             "name": "Run MysqlSimple",
