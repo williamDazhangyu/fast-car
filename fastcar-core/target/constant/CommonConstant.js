@@ -7,5 +7,7 @@ var CommonConstant;
     CommonConstant["Settings"] = "settings";
     CommonConstant["Resource"] = "resource";
     CommonConstant["ENV"] = "env";
+    CommonConstant["BasePath"] = "basePath";
+    CommonConstant["BaseFileName"] = "baseFileName";
 })(CommonConstant = exports.CommonConstant || (exports.CommonConstant = {}));
 exports.FileResSuffix = ["json", "yml", "js"];

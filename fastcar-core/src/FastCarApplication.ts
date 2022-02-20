@@ -34,8 +34,11 @@ class FastCarApplication extends Events {
 
 		this.sysConfig = SYSDefaultConfig;
 		this.componentMap = new Map();
-		this.basePath = require.main?.path || module.path;
-		this.baseFileName = require.main?.filename || module.filename;
+
+		let gloabalDir = Reflect.get(global, CommonConstant.BasePath);
+		let globalFile = Reflect.get(global, CommonConstant.BaseFileName);
+		this.basePath = gloabalDir || require.main?.path || module.path;
+		this.baseFileName = globalFile || require.main?.filename || module.filename;
 		this.applicationStatus = AppStatusEnum.READY;
 
 		this.loadSelf();
@@ -239,6 +242,7 @@ class FastCarApplication extends Events {
 
 	/***
 	 * @version 1.0 转成实例对象
+	 * @version 1.0.1 新增加载时识别载入配置选项
 	 *
 	 */
 	convertInstance(classZ: any, fp: string) {
@@ -251,7 +255,21 @@ class FastCarApplication extends Events {
 				return;
 			}
 
+			//判断是否需要加载对应配置
+			let cp = Reflect.getMetadata(LifeCycleModule.LoadConfigure, classZ);
 			let instance = TypeUtil.isFunction(classZ) ? new classZ() : classZ;
+
+			if (cp) {
+				let fp = path.join(this.getResourcePath(), cp);
+				let tmpConfig = FileUtil.getResource(fp);
+
+				//进行实例化赋值
+				if (tmpConfig) {
+					//进行赋值不改变基础属性
+					MixTool.copPropertyValue(instance, tmpConfig);
+				}
+			}
+
 			this.componentMap.set(instanceKey, instance);
 
 			//判断是否有别名

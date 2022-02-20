@@ -5,4 +5,5 @@ var LifeCycleModule;
 (function (LifeCycleModule) {
     LifeCycleModule["ApplicationStart"] = "applicationStart";
     LifeCycleModule["ApplicationStop"] = "applicationStop";
+    LifeCycleModule["LoadConfigure"] = "loadConfigure";
 })(LifeCycleModule = exports.LifeCycleModule || (exports.LifeCycleModule = {}));

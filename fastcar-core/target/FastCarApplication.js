@@ -33,8 +33,10 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
         super();
         this.sysConfig = SysConfig_1.SYSDefaultConfig;
         this.componentMap = new Map();
-        this.basePath = require.main?.path || module.path;
-        this.baseFileName = require.main?.filename || module.filename;
+        let gloabalDir = Reflect.get(global, CommonConstant_1.CommonConstant.BasePath);
+        let globalFile = Reflect.get(global, CommonConstant_1.CommonConstant.BaseFileName);
+        this.basePath = gloabalDir || require.main?.path || module.path;
+        this.baseFileName = globalFile || require.main?.filename || module.filename;
         this.applicationStatus = AppStatusEnum_1.AppStatusEnum.READY;
         this.loadSelf();
         this.addHot();
@@ -210,6 +212,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
     }
     /***
      * @version 1.0 转成实例对象
+     * @version 1.0.1 新增加载时识别载入配置选项
      *
      */
     convertInstance(classZ, fp) {
@@ -221,7 +224,18 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
                 Mix_1.default.assign(beforeInstance, classZ);
                 return;
             }
+            //判断是否需要加载对应配置
+            let cp = Reflect.getMetadata(LifeCycleModule_1.LifeCycleModule.LoadConfigure, classZ);
             let instance = TypeUtil_1.default.isFunction(classZ) ? new classZ() : classZ;
+            if (cp) {
+                let fp = path.join(this.getResourcePath(), cp);
+                let tmpConfig = FileUtil_1.default.getResource(fp);
+                //进行实例化赋值
+                if (tmpConfig) {
+                    //进行赋值不改变基础属性
+                    Mix_1.default.copPropertyValue(instance, tmpConfig);
+                }
+            }
             this.componentMap.set(instanceKey, instance);
             //判断是否有别名
             let aliasName = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.Alias, instance);

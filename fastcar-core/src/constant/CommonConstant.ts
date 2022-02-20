@@ -3,6 +3,8 @@ export enum CommonConstant {
 	Settings = "settings",
 	Resource = "resource",
 	ENV = "env",
+	BasePath = "basePath",
+	BaseFileName = "baseFileName",
 }
 
 export const FileResSuffix = ["json", "yml", "js"];
