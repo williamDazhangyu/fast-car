@@ -17,7 +17,7 @@ export enum ComponentKind {
 }
 
 export enum BootPriority {
-	Base = 0, //一般系统级的会优先启动这一个
+	Base = 0, //一般系统级的会优先启动这一个 比如数据库组件等
 	Sys = 1, //系统优先的
 	Common = 2, //常用
 	Other = 3, //额外的

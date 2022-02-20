@@ -477,7 +477,7 @@ class FastCarApplication extends Events {
 			let fn = item[exec];
 
 			if (TypeUtil.isPromise(fn)) {
-				await item[exec]();
+				await Promise.resolve(Reflect.apply(fn, item, []));
 			} else {
 				Reflect.apply(fn, item, []);
 			}

@@ -417,7 +417,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
         for (let { exec, item } of list) {
             let fn = item[exec];
             if (TypeUtil_1.default.isPromise(fn)) {
-                await item[exec]();
+                await Promise.resolve(Reflect.apply(fn, item, []));
             }
             else {
                 Reflect.apply(fn, item, []);
