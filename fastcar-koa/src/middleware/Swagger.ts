@@ -4,6 +4,7 @@ import * as path from "path";
 import { FastCarApplication } from "fastcar-core";
 import { KoaConfig } from "../type/KoaConfig";
 import * as koaStatic from "koa-static";
+import * as KoaMount from "koa-mount";
 
 const swaggerDefalutUrl = "https://petstore.swagger.io/v2/swagger.json";
 //api显示和管理
@@ -36,7 +37,7 @@ export default function Swagger(app: FastCarApplication): Middleware[] {
 
 		//进行设置静态访问路径
 		const swaggerUiAssetPath = require("swagger-ui-dist").getAbsoluteFSPath();
-		mlist.push(koaStatic(swaggerUiAssetPath));
+		mlist.push(KoaMount("/swagger-ui", koaStatic(swaggerUiAssetPath)));
 
 		const swaggerTemplate = fs.readFileSync(path.join(swaggerUiAssetPath, "index.html"), "utf-8");
 		const fn = async (ctx: Context, next: Next) => {
@@ -45,7 +46,7 @@ export default function Swagger(app: FastCarApplication): Middleware[] {
 			if (!!item) {
 				//输出路径
 				ctx.type = "text/html";
-				ctx.body = swaggerTemplate.replace(swaggerDefalutUrl, item);
+				ctx.body = swaggerTemplate.replace(swaggerDefalutUrl, item).replace(/\.\//g, "./swagger-ui/");
 				return;
 			}
 
@@ -61,7 +62,7 @@ export default function Swagger(app: FastCarApplication): Middleware[] {
 
 			await next();
 		}
-		mlist.push(fn);
+		mlist.unshift(fn);
 	}
 
 	return mlist;

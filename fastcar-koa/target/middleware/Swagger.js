@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const path = require("path");
 const koaStatic = require("koa-static");
+const KoaMount = require("koa-mount");
 const swaggerDefalutUrl = "https://petstore.swagger.io/v2/swagger.json";
 //api显示和管理
 function Swagger(app) {
@@ -25,7 +26,7 @@ function Swagger(app) {
         }
         //进行设置静态访问路径
         const swaggerUiAssetPath = require("swagger-ui-dist").getAbsoluteFSPath();
-        mlist.push(koaStatic(swaggerUiAssetPath));
+        mlist.push(KoaMount("/swagger-ui", koaStatic(swaggerUiAssetPath)));
         const swaggerTemplate = fs.readFileSync(path.join(swaggerUiAssetPath, "index.html"), "utf-8");
         const fn = async (ctx, next) => {
             let url = ctx.url;
@@ -33,7 +34,7 @@ function Swagger(app) {
             if (!!item) {
                 //输出路径
                 ctx.type = "text/html";
-                ctx.body = swaggerTemplate.replace(swaggerDefalutUrl, item);
+                ctx.body = swaggerTemplate.replace(swaggerDefalutUrl, item).replace(/\.\//g, "./swagger-ui/");
                 return;
             }
             let fp = fileMap.get(url);
@@ -45,7 +46,7 @@ function Swagger(app) {
             }
             await next();
         };
-        mlist.push(fn);
+        mlist.unshift(fn);
     }
     return mlist;
 }
