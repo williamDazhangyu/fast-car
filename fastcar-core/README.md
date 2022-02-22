@@ -97,3 +97,7 @@ class APP {
 ## 更多用法
 
 参考项目git地址 fastcar-core/test 下的simple内
+
+## 项目开源地址
+
+git clone https://e.coding.net/william_zhong/fast-car/fast-car.git

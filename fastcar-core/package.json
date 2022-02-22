@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-core",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"main": "target/index.js",
 	"author": "william_zhong",
 	"license": "MIT",
@@ -40,6 +40,6 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "http://github.com/midwayjs/midway.git"
+		"url": "https://e.coding.net/william_zhong/fast-car/fast-car.git"
 	}
 }
