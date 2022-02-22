@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-core",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"main": "target/index.js",
 	"author": "william_zhong",
 	"license": "MIT",
