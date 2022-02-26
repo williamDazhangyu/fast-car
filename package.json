@@ -1,6 +1,7 @@
 {
 	"name": "fast-car",
-	"version": "1.0.0",
+	"version": "0.0.1",
+	"homepage": "https://william_zhong.coding.net/public/fast-car/fast-car/git/files",
 	"main": "index.js",
 	"repository": "https://e.coding.net/william_zhong/fast-car/fast-car.git",
 	"author": "zhongjx <1433589043@qq.com>",
