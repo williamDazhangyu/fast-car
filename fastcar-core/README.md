@@ -83,6 +83,50 @@ Rule 校验规则开启
 ## 基本用法
 
 ```ts
+//声明一个组件
+import { Service } from "fastcar-core/annotation";
+
+@Service
+class HelloService {
+  say() {
+     console.info("hello world");
+   }
+}
+
+export default HelloService;
+```
+
+```ts
+//引入依赖组件
+import { Controller, Autowired } from "fastcar-core/annotation";
+
+@Controller
+class HelloController {
+
+    //自动注入组件
+    @Autowired
+    private hello!: HelloService;
+
+    callHello() {
+      this.hello.say();
+    }
+}
+```
+
+```ts
+//生命周期内运行
+import { ApplicationStart } from "fastcar-core/annotation";
+
+@ApplicationStart()
+export default class StartRunner {
+    run() {
+        console.info("服务启动后调用的方法");
+    }
+}
+```
+
+```ts
+//声明入口应用 这边有个约定 启动后会自动扫描所在文件夹下的文件 并进行注入
 import { FastCarApplication } from "fastcar-core";
 import { Application } from "fastcar-core/annotation";
 
