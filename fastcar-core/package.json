@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-core",
-	"version": "0.1.2",
+	"version": "0.1.4",
 	"homepage": "https://william_zhong.coding.net/public/fast-car/fast-car/git/files",
 	"main": "target/index.js",
 	"author": "william_zhong",
@@ -16,7 +16,7 @@
 		"target",
 		"index.d.ts",
 		"annotation.d.ts",
-		"./db.d.ts",
+		"db.d.ts",
 		"utils.d.ts"
 	],
 	"keywords": [
