@@ -18,7 +18,10 @@ function getFormValue(value: any, prop: string, defaultValue?: any) {
 	if (ValidationUtil.isNotNull(value)) {
 		if (TypeUtil.isObject(value)) {
 			if (Reflect.has(value, prop)) {
-				return value[prop];
+				let propValue = Reflect.get(value, prop);
+				if (ValidationUtil.isNotNull(propValue)) {
+					return propValue;
+				}
 			}
 		} else {
 			return value;
