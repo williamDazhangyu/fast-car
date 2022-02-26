@@ -7,9 +7,9 @@ npm install fastcar-redis
 ## 使用过程
 
 * 在应用(application)配置下使用 可配置多个 source为自定义数据源名称
-settings:
-    redis:
-        - { source: "default", host: "localhost", port: 6379, password: "123456" }
+* settings:
+        redis:
+            - { source: "default", host: "localhost", port: 6379, password: "123456" }
 
 * 应用入口开启
 
