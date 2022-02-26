@@ -1,6 +1,7 @@
 {
 	"name": "fastcar-redis",
 	"version": "1.0.0",
+	"homepage": "https://william_zhong.coding.net/public/fast-car/fast-car/git/files",
 	"main": "target/index.js",
 	"author": "william_zhong",
 	"license": "MIT",
@@ -8,7 +9,14 @@
 		".": "./target/index.js",
 		"./annotation": "./target/annotation.js"
 	},
+	"keywords": [
+		"redis",
+		"crud",
+		"fastcar-core",
+		"fastcar-redis"
+	],
 	"files": [
+		"src",
 		"target",
 		"index.d.ts",
 		"annotation.d.ts"
@@ -17,10 +25,14 @@
 		"node": ">=16"
 	},
 	"dependencies": {
-		"fastcar-core": "file:../fastcar-core",
+		"fastcar-core": "^0.1.2",
 		"redis": "3.1.2"
 	},
 	"devDependencies": {
 		"@types/redis": "2.8.32"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://e.coding.net/william_zhong/fast-car/fast-car.git"
 	}
 }
