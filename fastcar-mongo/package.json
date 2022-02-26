@@ -1,6 +1,7 @@
 {
 	"name": "fastcar-mongo",
-	"version": "1.0.0",
+	"version": "0.1.0",
+	"homepage": "https://william_zhong.coding.net/public/fast-car/fast-car/git/files",
 	"description": "基于fastcar-core框架下对mongo的封装",
 	"main": "target/index.js",
 	"author": "william_zhong",
@@ -10,19 +11,31 @@
 		"./annotation": "./target/annotation.js"
 	},
 	"files": [
+		"src",
 		"target",
 		"index.d.ts",
 		"annotation.d.ts"
+	],
+	"keywords": [
+		"mongo",
+		"mongodb",
+		"database",
+		"fastcar-mongo",
+		"fastcar-core"
 	],
 	"engines": {
 		"node": ">=16"
 	},
 	"dependencies": {
-		"fastcar-core": "file:../fastcar-core",
+		"fastcar-core": "^0.1.4",
 		"mongodb": "^4.3.1",
 		"reflect-metadata": "^0.1.13"
 	},
 	"devDependencies": {
 		"@types/reflect-metadata": "^0.1.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://e.coding.net/william_zhong/fast-car/fast-car.git"
 	}
 }
