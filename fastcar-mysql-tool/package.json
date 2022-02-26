@@ -1,14 +1,22 @@
 {
 	"name": "fastcar-mysql-tool",
-	"version": "1.0.0",
+	"version": "0.1.0",
+	"homepage": "https://william_zhong.coding.net/public/fast-car/fast-car/git/files",
+	"description": "逆向生成对应的model和mapper",
 	"main": "target/index.js",
 	"license": "MIT",
 	"exports": {
 		".": "./target/index.js"
 	},
 	"files": [
+		"src",
 		"target",
 		"index.d.ts"
+	],
+	"keywords": [
+		"fastcar-mysql",
+		"fastcar-core",
+		"ORM"
 	],
 	"engines": {
 		"node": ">=16"
@@ -19,8 +27,12 @@
 	},
 	"dependencies": {
 		"camelcase": "^6.2.1",
-		"fastcar-mysql": "file:../fastcar-mysql",
+		"fastcar-mysql": "^0.1.0",
 		"mysql2": "^2.3.3",
 		"prettier": "^2.5.1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://e.coding.net/william_zhong/fast-car/fast-car.git"
 	}
 }
