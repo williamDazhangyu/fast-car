@@ -20,7 +20,8 @@
 	"keywords": [
 		"ioc",
 		"spring",
-		"node"
+		"node",
+		"fastcar-core"
 	],
 	"engines": {
 		"node": ">=16"
