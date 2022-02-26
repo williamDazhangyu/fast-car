@@ -2,11 +2,17 @@ import { Controller, Rule, ValidForm } from "fastcar-core/annotation";
 import GetMapping from "../../../src/annotation/router/GetMapping";
 import PostMapping from "../../../src/annotation/router/PostMapping";
 import RequestMapping from "../../../src/annotation/router/RequestMapping";
+import { GET } from "../../../src/annotation";
 
 @Controller
 // @RequestMapping("/test") //允许头部追加url
 export default class HelloController {
 	hello: string = "hello";
+
+	@GET("/")
+	home() {
+		return "hello world";
+	}
 
 	//支持多种http的请求方式
 	@GetMapping("/getHello")

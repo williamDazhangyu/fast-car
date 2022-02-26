@@ -200,11 +200,17 @@ export default class KoaApplication {
 		}
 	}
 
-	stop(): void {
-		this.serverList.forEach(server => {
+	async stop(): Promise<void> {
+		for (let server of this.serverList) {
 			server.close();
-		});
+		}
 
-		this.sysLogger.info("koa server close");
+		//等待一秒结束
+		await new Promise(resolve => {
+			setTimeout(() => {
+				this.sysLogger.info("koa server close");
+				resolve(0);
+			}, 1000);
+		});
 	}
 }

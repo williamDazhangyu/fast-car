@@ -173,11 +173,17 @@ let KoaApplication = class KoaApplication {
             }
         }
     }
-    stop() {
-        this.serverList.forEach(server => {
+    async stop() {
+        for (let server of this.serverList) {
             server.close();
+        }
+        //等待一秒结束
+        await new Promise(resolve => {
+            setTimeout(() => {
+                this.sysLogger.info("koa server close");
+                resolve(0);
+            }, 1000);
         });
-        this.sysLogger.info("koa server close");
     }
 };
 __decorate([

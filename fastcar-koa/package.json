@@ -1,6 +1,7 @@
 {
 	"name": "fastcar-koa",
-	"version": "1.0.0",
+	"version": "0.1.0",
+	"homepage": "https://william_zhong.coding.net/public/fast-car/fast-car/git/files",
 	"description": "fastcar框架下对koa的包装",
 	"main": "target/index.js",
 	"author": "william_zhong",
@@ -10,9 +11,17 @@
 		"./annotation": "./target/annotation.js"
 	},
 	"files": [
+		"src",
 		"target",
 		"index.d.ts",
 		"annotation.d.ts"
+	],
+	"keywords": [
+		"koa",
+		"web",
+		"node",
+		"fastcar-core",
+		"fastcar-koa"
 	],
 	"engines": {
 		"node": ">=16"
@@ -24,11 +33,11 @@
 		"@types/koa-router": "^7.4.4",
 		"@types/koa-static": "^4.0.2",
 		"@types/koa2-cors": "^2.0.2",
+		"@types/koa-mount": "^4.0.1",
 		"reflect-metadata": "^0.1.13"
 	},
 	"dependencies": {
-		"@types/koa-mount": "^4.0.1",
-		"fastcar-core": "file:../fastcar-core",
+		"fastcar-core": "^0.1.2",
 		"koa": "^2.13.1",
 		"koa-body": "^4.2.0",
 		"koa-bodyparser": "^4.3.0",
@@ -38,5 +47,9 @@
 		"koa-static": "^5.0.0",
 		"koa2-cors": "^2.0.6",
 		"swagger-ui-dist": "^4.5.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://e.coding.net/william_zhong/fast-car/fast-car.git"
 	}
 }
