@@ -48,6 +48,7 @@ describe("表单校验测试", () => {
 		class B {
 			@NotNull
 			c!: string;
+
 			@Size({ minSize: 1, maxSize: 10 })
 			d?: number;
 		}
