@@ -20,6 +20,11 @@ class DataFormat {
         return value;
     }
     static formatBoolean(value) {
+        if (typeof value == "string") {
+            if ((value = "false")) {
+                return false;
+            }
+        }
         return !!value;
     }
     static formatArray(value, type) {
