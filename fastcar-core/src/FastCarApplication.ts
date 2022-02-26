@@ -135,8 +135,13 @@ class FastCarApplication extends Events {
 	 */
 	loadSysConfig() {
 		this.updateSysConfig(this.sysConfig, CommonConstant.Application);
+
 		let env = Reflect.get(this, CommonConstant.ENV) || this.sysConfig.application.env;
+
 		this.updateSysConfig(this.sysConfig, `${CommonConstant.Application}-${env}`);
+
+		//自定义环境变量设置
+		process.env.NODE_ENV = env;
 
 		//读取app的必要信息 name和版本号 根据 package.json
 		let packagePath = path.join(this.basePath, "../", "package.json");
