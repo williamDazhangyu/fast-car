@@ -10,9 +10,9 @@ fastcar-core提供类似于spring的注解方式
 
 ## 基本功能
 
-1.自动加载声明的组件
-2.提供数据源的模板
-3.提供自定义校验数据
+* 自动加载声明的组件
+* 提供数据源的模板
+* 提供自定义校验数据
 
 ## 快速安装
 
@@ -34,7 +34,7 @@ Component 标注为组件
 
 ComponentInjection  自定义组件入口
 
-BeanName 指明组件名称
+BeanName 指明组件名称(每个组件具有一个系统生成id为"类名:16位随机值",为了便于调用可自定义逻辑名)
 
 Configure 表明为配置组件
 
@@ -80,6 +80,37 @@ ValidForm 校验表单开启
 
 Rule 校验规则开启
 
+## 约定
+
+### 配置文件约定
+
+* 所有项目配置文件均放在resource文件夹下
+* application.yml (或者js,json) 代表应用配置文件
+* application-{env}.yml (或者js,json) 代表不同环境的配置 在 application中可以采用env指定开发环境
+* application 中 settings 代表第三方自定义组件或者值,  application代表应用设置
+* 自定义配置可以通过注解Configure来进行映射(后续考虑支持url的配置)
+
+### 应用程序约定
+
+* 应用程序声明周期分为启动中->运行时->停止前->结束后
+* 在介于启动中和运行时的阶段，可采用ApplicationStart进行相应的组件逻辑初始化操作
+* 在停止前阶段，可采用ApplicationStop进行相应的组件结束操作
+
+### 应用程序执行顺序
+
+* 加载系统配置
+* 扫描application所在目录或者指定目录下的组件，并注入实例
+* 遍历所有实例，并进行装配所依赖的服务
+* 运行所有标注为ApplicationStart的组件，而且是按照优先级顺序依次执行
+* 服务停止前运行所有标注为ApplicationStop的组件，也是按照优先级顺序依次执行
+* 结束运行
+
+### 声明约定
+
+* index.d.ts 代表实现的 Application及其他配置说明
+* annotation.d.ts 代表所实现的注解
+* utils.d.ts 代表基础的工具类
+
 ## 基本用法
 
 ```ts
@@ -87,6 +118,21 @@ Rule 校验规则开启
 import { Service } from "fastcar-core/annotation";
 
 @Service
+class HelloService {
+  say() {
+     console.info("hello world");
+   }
+}
+
+export default HelloService;
+```
+
+```ts
+//声明一个别名组件
+import { Service, BeanName } from "fastcar-core/annotation";
+
+@Service
+@BeanName("HelloService")
 class HelloService {
   say() {
      console.info("hello world");
@@ -138,10 +184,34 @@ class APP {
 }
 ```
 
+```ts
+//表单示例
+import { NotNull, Size, Rule, ValidForm } from "fastcar-core/annotation";
+
+class B {
+    @NotNull
+    c!: string;
+
+    @Size({ minSize: 1, maxSize: 10 })
+    d?: number;
+}
+
+class A {
+
+    @ValidForm  //开启表单校验
+    test(a: string, @Rule() @NotNull b: B) {
+      console.log(a, b);
+    }
+}
+
+let instance = new A();
+instance.test("a", { c: "c", d: 13 }); //校验失败
+```
+
 ## 更多用法
 
 参考项目git地址 fastcar-core/test 下的simple内
 
 ## 项目开源地址
 
-git clone https://e.coding.net/william_zhong/fast-car/fast-car.git
+git clone <https://e.coding.net/william_zhong/fast-car/fast-car.git>
