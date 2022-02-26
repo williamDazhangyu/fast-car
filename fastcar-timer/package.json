@@ -1,6 +1,7 @@
 {
 	"name": "fastcar-timer",
-	"version": "1.0.0",
+	"version": "0.1.0",
+	"homepage": "https://william_zhong.coding.net/public/fast-car/fast-car/git/files",
 	"main": "./target/index.js",
 	"types": "index.d.ts",
 	"author": "william_zhong",
@@ -8,7 +9,14 @@
 	"exports": {
 		".": "./target/index.js"
 	},
+	"keywords": [
+		"timer",
+		"cron",
+		"node-cron",
+		"fastcar-timer"
+	],
 	"files": [
+		"src",
 		"target",
 		"index.d.ts"
 	],
@@ -24,5 +32,9 @@
 		"@types/node-cron": "^3.0.0",
 		"@types/tz-offset": "^0.0.0",
 		"@types/reflect-metadata": "^0.1.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://e.coding.net/william_zhong/fast-car/fast-car.git"
 	}
 }
