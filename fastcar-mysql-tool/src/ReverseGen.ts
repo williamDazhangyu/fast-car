@@ -7,6 +7,7 @@ import { DataTypeEnum } from "fastcar-mysql";
 import { FiledType } from "./FiledType";
 
 const DESCSQL = "SELECT * from information_schema.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ? ";
+const MAXBigNum = Math.pow(2, 53);
 
 //从数据库表逆向生成类
 class ReverseGenerate {
@@ -88,6 +89,10 @@ class ReverseGenerate {
 						let scaleNum = Math.pow(10, field.NUMERIC_SCALE);
 						num += (scaleNum - 1) / scaleNum;
 					}
+					//如果是最大的值则进行注入最大限制
+					if (num >= MAXBigNum) {
+						num = MAXBigNum;
+					}
 					tmpFieldList.push(`@Size({ maxSize: ${num - 1} })`);
 				} else {
 					tmpFieldList.push(`@Size({ maxSize: ${length} })`);
@@ -127,7 +132,7 @@ class ReverseGenerate {
 
 		importHead += `import { ${importCoreAnnotation.join(",")} } from "fastcar-core/annotation";`;
 
-		let content = `${importHead}\n @Table('${taleName}')\n class ${className} \{\n ${body.join("\n\n")} \n\}\n\n export default ${className}`;
+		let content = `${importHead}\n\n @Table('${taleName}')\n class ${className} \{\n ${body.join("\n\n")} \n\}\n\n export default ${className}`;
 		//进行格式化
 		const formatText = prettier.format(content, style);
 		let fp = path.join(dir, `${className}.ts`);
