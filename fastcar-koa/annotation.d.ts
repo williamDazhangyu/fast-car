@@ -23,7 +23,7 @@ export function PatchMapping(url?: string): MRet;
 
 export function PutMapping(url?: string): MRet;
 
-export function RequestMapping(url: string): MRet;
+export function RequestMapping(url: string): Ret;
 
 export function ALL(url?: string): MRet;
 
@@ -37,7 +37,7 @@ export function PATCH(url?: string): MRet;
 
 export function PUT(url?: string): MRet;
 
-export function REQUEST(url?: string): MRet;
+export function REQUEST(url?: string): Ret;
 
 //开启koa应用
 export function EnableKoa(target: any): void;
