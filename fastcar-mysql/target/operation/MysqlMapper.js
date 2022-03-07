@@ -227,9 +227,10 @@ class MysqlMapper extends db_1.BaseMapper {
         let afterKeys = Array.of();
         let beforeKeys = Array.of();
         this.mappingList.forEach(item => {
-            beforeKeys.push(item.field);
+            let fieldKey = `\`${item.field}\``;
+            beforeKeys.push(fieldKey);
             if (!item.primaryKey) {
-                afterKeys.push(`${item.field} = VALUES (${item.field})`);
+                afterKeys.push(`${fieldKey} = VALUES (${fieldKey})`);
             }
         });
         let args = [];
@@ -257,7 +258,7 @@ class MysqlMapper extends db_1.BaseMapper {
         for (let item of this.mappingList) {
             let dbValue = this.toDBValue(row, item.name, item.type);
             if (utils_1.ValidationUtil.isNotNull(dbValue)) {
-                params.push(item.field);
+                params.push(`\`${item.field}\``);
                 args.push(dbValue);
             }
         }
@@ -275,7 +276,7 @@ class MysqlMapper extends db_1.BaseMapper {
         }
         let keys = Array.of();
         this.mappingList.forEach(item => {
-            keys.push(item.field);
+            keys.push(`\`${item.field}\``);
         });
         let keysStr = keys.join(",");
         let sql = `INSERT INTO ${this.tableName} (${keysStr}) VALUES `;

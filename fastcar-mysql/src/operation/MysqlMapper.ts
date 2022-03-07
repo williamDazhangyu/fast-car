@@ -254,9 +254,10 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let beforeKeys: string[] = Array.of();
 
 		this.mappingList.forEach(item => {
-			beforeKeys.push(item.field);
+			let fieldKey = `\`${item.field}\``;
+			beforeKeys.push(fieldKey);
 			if (!item.primaryKey) {
-				afterKeys.push(`${item.field} = VALUES (${item.field})`);
+				afterKeys.push(`${fieldKey} = VALUES (${fieldKey})`);
 			}
 		});
 
@@ -291,7 +292,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		for (let item of this.mappingList) {
 			let dbValue = this.toDBValue(row, item.name, item.type);
 			if (ValidationUtil.isNotNull(dbValue)) {
-				params.push(item.field);
+				params.push(`\`${item.field}\``);
 				args.push(dbValue);
 			}
 		}
@@ -313,7 +314,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 		let keys: string[] = Array.of();
 		this.mappingList.forEach(item => {
-			keys.push(item.field);
+			keys.push(`\`${item.field}\``);
 		});
 
 		let keysStr = keys.join(",");

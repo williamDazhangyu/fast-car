@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-mysql",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"homepage": "https://william_zhong.coding.net/public/fast-car/fast-car/git/files",
 	"description": "基于fastcar-core框架下对mysql的封装",
 	"main": "target/index.js",
