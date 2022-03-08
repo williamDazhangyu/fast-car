@@ -1,7 +1,7 @@
 {
 	"name": "fastcar-timer",
 	"version": "0.1.0",
-	"homepage": "https://william_zhong.coding.net/public/fast-car/fast-car/git/files",
+	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "./target/index.js",
 	"types": "index.d.ts",
 	"author": "william_zhong",
@@ -35,6 +35,6 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://e.coding.net/william_zhong/fast-car/fast-car.git"
+		"url": "https://github.com/williamDazhangyu/fast-car.git"
 	}
 }

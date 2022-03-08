@@ -1,7 +1,7 @@
 {
 	"name": "fastcar-mysql",
 	"version": "0.1.1",
-	"homepage": "https://william_zhong.coding.net/public/fast-car/fast-car/git/files",
+	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "基于fastcar-core框架下对mysql的封装",
 	"main": "target/index.js",
 	"author": "william_zhong",
@@ -40,6 +40,6 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://e.coding.net/william_zhong/fast-car/fast-car.git"
+		"url": "https://github.com/williamDazhangyu/fast-car.git"
 	}
 }

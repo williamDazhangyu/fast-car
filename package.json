@@ -1,9 +1,9 @@
 {
 	"name": "fast-car",
 	"version": "0.0.1",
-	"homepage": "https://william_zhong.coding.net/public/fast-car/fast-car/git/files",
+	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "index.js",
-	"repository": "https://e.coding.net/william_zhong/fast-car/fast-car.git",
+	"repository": "https://github.com/williamDazhangyu/fast-car.git",
 	"author": "zhongjx <1433589043@qq.com>",
 	"license": "MIT",
 	"devDependencies": {

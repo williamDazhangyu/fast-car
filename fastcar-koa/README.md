@@ -105,6 +105,6 @@ export const app = new APP();
 
 ## 项目开源地址
 
-* 项目下载 git clone <https://e.coding.net/william_zhong/fast-car/fast-car.git>
+* 项目下载 git clone <https://github.com/williamDazhangyu/fast-car.git>
 
-* 在线查看 <https://william_zhong.coding.net/public/fast-car/fast-car/git/files>
+* 在线查看 <https://github.com/williamDazhangyu/fast-car>
