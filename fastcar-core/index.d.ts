@@ -62,7 +62,7 @@ declare type ApplicationConfig = {
 	hotter?: boolean;
 };
 
-export default abstract class Logger {
+export abstract class Logger {
 	abstract log(...args: any[]): void;
 
 	abstract debug(...args: any[]): void;

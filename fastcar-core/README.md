@@ -64,7 +64,7 @@ Override 用于标注方法已被重新实现
 
 Readonly 作用于属性是否只读
 
-Log  制定日志配置
+Log  使用logger
 
 AddRequireModule 自定义添加制定木块
 
