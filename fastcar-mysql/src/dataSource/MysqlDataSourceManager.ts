@@ -1,7 +1,7 @@
 import { MySqlConfig, MySqlConfigDefault } from "../type/SqlConfig";
 import { SqlExecType } from "../type/SqlExecType";
 import MysqlDataSource from "./MysqlDataSource";
-import { ApplicationStart, ApplicationStop, Autowired } from "fastcar-core/annotation";
+import { ApplicationStart, ApplicationStop, Autowired, Log } from "fastcar-core/annotation";
 import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
 import * as mysql from "mysql2/promise";
 import * as uuid from "uuid";
@@ -20,7 +20,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 	@Autowired
 	protected app!: FastCarApplication;
 
-	@Autowired
+	@Log("sql")
 	protected sysLogger!: Logger;
 
 	protected sourceMap: Map<string, MysqlDataSource>;
@@ -41,7 +41,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 		let finalSQL = mysql.format(sql, args);
 
 		if (this.config.printSQL) {
-			this.sysLogger.info("printSQL", finalSQL);
+			this.sysLogger.info(finalSQL);
 		}
 
 		//检查sql执行时间

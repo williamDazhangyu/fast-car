@@ -30,7 +30,7 @@ let MysqlDataSourceManager = class MysqlDataSourceManager {
         //打印sql
         let finalSQL = mysql.format(sql, args);
         if (this.config.printSQL) {
-            this.sysLogger.info("printSQL", finalSQL);
+            this.sysLogger.info(finalSQL);
         }
         //检查sql执行时间
         let beforeTime = Date.now();
@@ -251,7 +251,7 @@ __decorate([
     __metadata("design:type", fastcar_core_1.FastCarApplication)
 ], MysqlDataSourceManager.prototype, "app", void 0);
 __decorate([
-    annotation_1.Autowired,
+    annotation_1.Log("sql"),
     __metadata("design:type", fastcar_core_1.Logger)
 ], MysqlDataSourceManager.prototype, "sysLogger", void 0);
 __decorate([

@@ -1,11 +1,12 @@
 {
 	"name": "fastcar-mysql",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "基于fastcar-core框架下对mysql的封装",
 	"main": "target/index.js",
 	"author": "william_zhong",
 	"license": "MIT",
+	"types": "index.d.ts",
 	"exports": {
 		".": "./target/index.js",
 		"./annotation": "./target/annotation.js"
@@ -27,7 +28,7 @@
 		"node": ">=16"
 	},
 	"dependencies": {
-		"fastcar-core": "^0.1.4",
+		"fastcar-core": "^0.2.2",
 		"fastcar-timer": "^0.1.0",
 		"mysql2": "^2.3.3",
 		"uuid": "^8.3.2"

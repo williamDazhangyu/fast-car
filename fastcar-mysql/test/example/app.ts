@@ -7,7 +7,6 @@ import TestTransactional from "./service/TestTransactional";
 
 @Application
 @EnableMysql //开启mysql数据库
-@Log()
 class APP {
 	app!: FastCarApplication;
 }
