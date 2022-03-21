@@ -104,7 +104,7 @@ let KoaApplication = class KoaApplication {
             }
             case KoaConfig_1.HttpProtocol.https: {
                 if (!config.ssl) {
-                    this.sysLogger.error(`https requires ssl config`);
+                    this.koaLogger.error(`https requires ssl config`);
                     process.exit();
                 }
                 server = https.createServer({
@@ -130,7 +130,7 @@ let KoaApplication = class KoaApplication {
             }
         }
         let listentCallBack = () => {
-            this.sysLogger.info(`server ${appName} is running in ${config.port}`);
+            this.koaLogger.info(`server ${appName} is running in ${config.port}`);
         };
         if (!!config.hostname) {
             server.listen(config.port, config.hostname, listentCallBack);
@@ -180,7 +180,7 @@ let KoaApplication = class KoaApplication {
         //等待一秒结束
         await new Promise(resolve => {
             setTimeout(() => {
-                this.sysLogger.info("koa server close");
+                this.koaLogger.info("koa server close");
                 resolve(0);
             }, 1000);
         });
@@ -191,9 +191,9 @@ __decorate([
     __metadata("design:type", fastcar_core_1.FastCarApplication)
 ], KoaApplication.prototype, "app", void 0);
 __decorate([
-    annotation_1.Autowired,
+    annotation_1.Log("koa"),
     __metadata("design:type", fastcar_core_1.Logger)
-], KoaApplication.prototype, "sysLogger", void 0);
+], KoaApplication.prototype, "koaLogger", void 0);
 KoaApplication = __decorate([
     annotation_1.ApplicationStart(fastcar_core_1.BootPriority.Lowest, "start"),
     annotation_1.ApplicationStop(fastcar_core_1.BootPriority.Base, "stop"),

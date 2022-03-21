@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { ApplicationStart, ApplicationStop, Autowired } from "fastcar-core/annotation";
+import { ApplicationStart, ApplicationStop, Autowired, Log } from "fastcar-core/annotation";
 import { FastCarApplication, BootPriority, ComponentKind, Logger } from "fastcar-core";
 import * as Koa from "koa";
 import * as KoaRouter from "koa-router";
@@ -21,8 +21,8 @@ export default class KoaApplication {
 	@Autowired
 	protected app!: FastCarApplication;
 
-	@Autowired
-	protected sysLogger!: Logger;
+	@Log("koa")
+	protected koaLogger!: Logger;
 
 	protected serverList: (http.Server | https.Server | http2.Http2SecureServer | http2.Http2Server)[];
 
@@ -120,7 +120,7 @@ export default class KoaApplication {
 			}
 			case HttpProtocol.https: {
 				if (!config.ssl) {
-					this.sysLogger.error(`https requires ssl config`);
+					this.koaLogger.error(`https requires ssl config`);
 					process.exit();
 				}
 				server = https.createServer(
@@ -152,7 +152,7 @@ export default class KoaApplication {
 		}
 
 		let listentCallBack = () => {
-			this.sysLogger.info(`server ${appName} is running in ${config.port}`);
+			this.koaLogger.info(`server ${appName} is running in ${config.port}`);
 		};
 
 		if (!!config.hostname) {
@@ -208,7 +208,7 @@ export default class KoaApplication {
 		//等待一秒结束
 		await new Promise(resolve => {
 			setTimeout(() => {
-				this.sysLogger.info("koa server close");
+				this.koaLogger.info("koa server close");
 				resolve(0);
 			}, 1000);
 		});
