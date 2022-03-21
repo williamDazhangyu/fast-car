@@ -1,24 +1,7 @@
 settings:
-    log4js:
-        appenders:
-            logger:
-                type: "dateFile"
-                filename: "./logs/log"
-                pattern: ".yyyy-MM-dd.log"
-                maxLogSize: 1048576 #最大1M
-                backups: 5 #最多备份文件
-                alwaysIncludePattern: true
-            loggerError:
-                type: "dateFile"
-                filename: "./logs/error"
-                pattern: ".yyyy-MM-dd.log"
-                maxLogSize: 1048576 #最大1M
-                backups: 5 #最多备份文件
-                alwaysIncludePattern: true
-        categories:
-            logger:
-                appenders: ["logger"]
-                level: "ALL"
-            loggerError:
-                appenders: ["loggerError"]
-                level: "ERROR"
+    log:
+        consoleLevel: info
+        fileLevel: info
+        maxsize: 1024
+        maxFiles: 10
+        printConsole: true

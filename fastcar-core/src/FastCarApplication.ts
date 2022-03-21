@@ -42,7 +42,7 @@ class FastCarApplication extends Events {
 		this.baseFileName = globalFile || require.main?.filename || module.filename;
 		this.applicationStatus = AppStatusEnum.READY;
 
-		this.loggerFactory = new WinstonLogger(Object.assign({}, LogDefaultConfig, { rootPath: path.join(this.basePath, "logs") }));
+		this.loggerFactory = new WinstonLogger(Object.assign({}, LogDefaultConfig, { rootPath: path.join(this.basePath, "../logs") }));
 		this.sysLogger = this.loggerFactory.addLogger(CommonConstant.SYSLOGGER);
 
 		this.loadSelf();
@@ -402,7 +402,7 @@ class FastCarApplication extends Events {
 	startLog() {
 		let logConfig = this.getSetting("log");
 		if (logConfig) {
-			this.loggerFactory.setConfig(Object.assign({}, LogDefaultConfig, { rootPath: path.join(this.getBasePath(), "logs") }, logConfig));
+			this.loggerFactory.setConfig(Object.assign({}, LogDefaultConfig, { rootPath: path.join(this.getBasePath(), "../logs") }, logConfig));
 			this.sysLogger = this.loggerFactory.addLogger(CommonConstant.SYSLOGGER);
 		}
 	}

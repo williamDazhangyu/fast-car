@@ -37,7 +37,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
         this.basePath = gloabalDir || require.main?.path || module.path;
         this.baseFileName = globalFile || require.main?.filename || module.filename;
         this.applicationStatus = AppStatusEnum_1.AppStatusEnum.READY;
-        this.loggerFactory = new WinstonLogger_1.default(Object.assign({}, SysConfig_1.LogDefaultConfig, { rootPath: path.join(this.basePath, "logs") }));
+        this.loggerFactory = new WinstonLogger_1.default(Object.assign({}, SysConfig_1.LogDefaultConfig, { rootPath: path.join(this.basePath, "../logs") }));
         this.sysLogger = this.loggerFactory.addLogger(CommonConstant_1.CommonConstant.SYSLOGGER);
         this.loadSelf();
         this.addHot();
@@ -347,7 +347,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
     startLog() {
         let logConfig = this.getSetting("log");
         if (logConfig) {
-            this.loggerFactory.setConfig(Object.assign({}, SysConfig_1.LogDefaultConfig, { rootPath: path.join(this.getBasePath(), "logs") }, logConfig));
+            this.loggerFactory.setConfig(Object.assign({}, SysConfig_1.LogDefaultConfig, { rootPath: path.join(this.getBasePath(), "../logs") }, logConfig));
             this.sysLogger = this.loggerFactory.addLogger(CommonConstant_1.CommonConstant.SYSLOGGER);
         }
     }
