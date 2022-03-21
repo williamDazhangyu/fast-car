@@ -38,7 +38,7 @@
 		"reflect-metadata": "^0.1.13"
 	},
 	"dependencies": {
-		"fastcar-core": "^0.2.2",
+		"fastcar-core": "latest",
 		"koa": "^2.13.1",
 		"koa-body": "^4.2.0",
 		"koa-bodyparser": "^4.3.0",

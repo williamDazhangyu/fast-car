@@ -28,8 +28,8 @@
 		"node": ">=16"
 	},
 	"dependencies": {
-		"fastcar-core": "^0.2.2",
-		"fastcar-timer": "^0.1.0",
+		"fastcar-core": "latest",
+		"fastcar-timer": "latest",
 		"mysql2": "^2.3.3",
 		"uuid": "^8.3.2"
 	},

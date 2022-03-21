@@ -26,7 +26,7 @@
 		"node": ">=16"
 	},
 	"dependencies": {
-		"fastcar-core": "^0.2.2",
+		"fastcar-core": "latest",
 		"redis": "3.1.2"
 	},
 	"devDependencies": {

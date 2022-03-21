@@ -28,7 +28,7 @@
 		"node": ">=16"
 	},
 	"dependencies": {
-		"fastcar-core": "^0.2.2",
+		"fastcar-core": "latest",
 		"mongodb": "^4.3.1",
 		"reflect-metadata": "^0.1.13"
 	},
