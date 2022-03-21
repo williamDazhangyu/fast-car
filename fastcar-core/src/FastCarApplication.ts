@@ -331,7 +331,7 @@ class FastCarApplication extends Events {
 
 		let loggerSet: Map<string, string> = Reflect.getMetadata(FastCarMetaData.LoggerModule, instance);
 		if (loggerSet) {
-			loggerSet.forEach((propertyKey, loggerName) => {
+			loggerSet.forEach((loggerName, propertyKey) => {
 				let logger = this.loggerFactory.getLogger(loggerName);
 				if (!logger) {
 					this.loggerFactory.addLogger(loggerName);

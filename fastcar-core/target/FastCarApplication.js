@@ -285,7 +285,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
         }
         let loggerSet = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.LoggerModule, instance);
         if (loggerSet) {
-            loggerSet.forEach((propertyKey, loggerName) => {
+            loggerSet.forEach((loggerName, propertyKey) => {
                 let logger = this.loggerFactory.getLogger(loggerName);
                 if (!logger) {
                     this.loggerFactory.addLogger(loggerName);
