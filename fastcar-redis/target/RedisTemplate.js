@@ -207,7 +207,7 @@ __decorate([
     __metadata("design:type", RedisDataSourceManager_1.default)
 ], RedisTemplate.prototype, "db", void 0);
 __decorate([
-    annotation_1.Autowired,
+    annotation_1.Log("redis"),
     __metadata("design:type", fastcar_core_1.Logger)
 ], RedisTemplate.prototype, "sysLogger", void 0);
 __decorate([

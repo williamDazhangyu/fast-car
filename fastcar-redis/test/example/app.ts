@@ -1,11 +1,10 @@
 import { FastCarApplication } from "fastcar-core";
-import { Application, Log } from "fastcar-core/annotation";
+import { Application } from "fastcar-core/annotation";
 import EnableRedis from "../../src/annotation/EnableRedis";
 import SimpleService from "./service/SimpleService";
 
 @Application
 @EnableRedis
-@Log()
 class APP {
 	app!: FastCarApplication;
 }

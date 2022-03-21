@@ -1,6 +1,6 @@
 import RedisDataSource from "./RedisDataSource";
 import * as redis from "redis";
-import { ApplicationStart, ApplicationStop, Autowired } from "fastcar-core/annotation";
+import { ApplicationStart, ApplicationStop, Autowired, Log } from "fastcar-core/annotation";
 import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
 
 interface RedisConfig extends redis.ClientOpts {
@@ -19,7 +19,7 @@ class RedisDataSourceManager {
 	@Autowired
 	protected app!: FastCarApplication;
 
-	@Autowired
+	@Log("redis")
 	protected sysLogger!: Logger;
 
 	constructor() {

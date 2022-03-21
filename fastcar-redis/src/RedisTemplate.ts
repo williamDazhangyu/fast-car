@@ -1,4 +1,4 @@
-import { Autowired, DSIndex } from "fastcar-core/annotation";
+import { Autowired, DSIndex, Log } from "fastcar-core/annotation";
 import RedisDataSourceManager from "./RedisDataSourceManager";
 import { Logger } from "fastcar-core";
 
@@ -10,7 +10,7 @@ export default class RedisTemplate {
 	@Autowired
 	private db!: RedisDataSourceManager;
 
-	@Autowired
+	@Log("redis")
 	protected sysLogger!: Logger;
 
 	set(key: string, value: string | Object, @DSIndex source?: string): Promise<string> {

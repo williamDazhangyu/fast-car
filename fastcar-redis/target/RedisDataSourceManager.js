@@ -52,7 +52,7 @@ __decorate([
     __metadata("design:type", fastcar_core_1.FastCarApplication)
 ], RedisDataSourceManager.prototype, "app", void 0);
 __decorate([
-    annotation_1.Autowired,
+    annotation_1.Log("redis"),
     __metadata("design:type", fastcar_core_1.Logger)
 ], RedisDataSourceManager.prototype, "sysLogger", void 0);
 RedisDataSourceManager = __decorate([
