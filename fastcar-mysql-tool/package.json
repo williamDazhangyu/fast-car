@@ -5,6 +5,7 @@
 	"description": "逆向生成对应的model和mapper",
 	"main": "target/index.js",
 	"license": "MIT",
+	"types": "index.d.ts",
 	"exports": {
 		".": "./target/index.js"
 	},
