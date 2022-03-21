@@ -5,6 +5,7 @@ export enum CommonConstant {
 	ENV = "env",
 	BasePath = "basePath",
 	BaseFileName = "baseFileName",
+	SYSLOGGER = "sys",
 }
 
 export const FileResSuffix = ["json", "yml", "js"];

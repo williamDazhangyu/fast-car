@@ -24,4 +24,5 @@ var FastCarMetaData;
     FastCarMetaData["Hotter"] = "hotter";
     FastCarMetaData["InjectionUniqueKey"] = "injection_uniqueKey";
     FastCarMetaData["Alias"] = "alias";
+    FastCarMetaData["LoggerModule"] = "LoggerModule";
 })(FastCarMetaData = exports.FastCarMetaData || (exports.FastCarMetaData = {}));

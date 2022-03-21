@@ -16,18 +16,17 @@ const Events = require("events");
 const path = require("path");
 const classLoader_1 = require("./utils/classLoader");
 const FileUtil_1 = require("./utils/FileUtil");
-const FormatStr_1 = require("./utils/FormatStr");
 const Mix_1 = require("./utils/Mix");
 const TypeUtil_1 = require("./utils/TypeUtil");
 const SysConfig_1 = require("./config/SysConfig");
 const FastCarMetaData_1 = require("./constant/FastCarMetaData");
 const CommonConstant_1 = require("./constant/CommonConstant");
 const LifeCycleModule_1 = require("./constant/LifeCycleModule");
-const log4js = require("log4js");
 const fs = require("fs");
 const AppStatusEnum_1 = require("./constant/AppStatusEnum");
 const ValidationUtil_1 = require("./utils/ValidationUtil");
 const Component_1 = require("./annotation/stereotype/Component");
+const WinstonLogger_1 = require("./model/WinstonLogger");
 let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends Events {
     constructor() {
         super();
@@ -38,6 +37,8 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
         this.basePath = gloabalDir || require.main?.path || module.path;
         this.baseFileName = globalFile || require.main?.filename || module.filename;
         this.applicationStatus = AppStatusEnum_1.AppStatusEnum.READY;
+        this.loggerFactory = new WinstonLogger_1.default(Object.assign({}, SysConfig_1.LogDefaultConfig, { rootPath: path.join(this.basePath, "logs") }));
+        this.sysLogger = this.loggerFactory.addLogger(CommonConstant_1.CommonConstant.SYSLOGGER);
         this.loadSelf();
         this.addHot();
     }
@@ -75,6 +76,13 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
     getResourcePath() {
         let resourcePath = path.join(this.basePath, "../", CommonConstant_1.CommonConstant.Resource);
         return resourcePath;
+    }
+    /***
+     * @version 1.0 获取项目的基本路径
+     *
+     */
+    getBasePath() {
+        return this.basePath;
     }
     /***
      * @version 1.0 更新系统配置
@@ -116,8 +124,8 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
         });
     }
     /***
-     * @version 1.0 加载系统配置
-     * @param 加载顺序为 default json < yaml < env
+     * @version 1.0 加载系统配置 加载顺序为 default json < yaml < env
+     *
      */
     loadSysConfig() {
         this.updateSysConfig(this.sysConfig, CommonConstant_1.CommonConstant.Application);
@@ -252,30 +260,39 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
     }
     /***
      * @version 1.0 装配模块
-     *
+     * @version 1.0 装配日志模块
      */
     injectionModule(instance) {
         let relyname = FastCarMetaData_1.FastCarMetaData.IocModule;
         let moduleList = Reflect.getMetadata(relyname, instance);
-        if (!moduleList || moduleList.size == 0) {
-            return;
-        }
-        moduleList.forEach((name, propertyKey) => {
-            let func = this.componentMap.get(name);
-            //如果等于自身则进行注入
-            if (name === FastCarApplication_1.name || name === FastCarMetaData_1.FastCarMetaData.APP) {
-                func = this;
-            }
-            else {
-                if (!this.componentMap.has(name)) {
-                    //找不到依赖项
-                    let injectionError = new Error(`Unsatisfied dependency expressed through ${propertyKey} in ${instance.name} `);
-                    this.sysLogger.error(injectionError.message);
-                    throw injectionError;
+        if (moduleList && moduleList.size > 0) {
+            moduleList.forEach((name, propertyKey) => {
+                let func = this.componentMap.get(name);
+                //如果等于自身则进行注入
+                if (name === FastCarApplication_1.name || name === FastCarMetaData_1.FastCarMetaData.APP) {
+                    func = this;
                 }
-            }
-            Reflect.set(instance, propertyKey, func);
-        });
+                else {
+                    if (!this.componentMap.has(name)) {
+                        //找不到依赖项
+                        let injectionError = new Error(`Unsatisfied dependency expressed through ${propertyKey} in ${instance.name} `);
+                        this.sysLogger.error(injectionError.message);
+                        throw injectionError;
+                    }
+                }
+                Reflect.set(instance, propertyKey, func);
+            });
+        }
+        let loggerSet = Reflect.getMetadata(FastCarMetaData_1.FastCarMetaData.LoggerModule, instance);
+        if (loggerSet) {
+            loggerSet.forEach((propertyKey, loggerName) => {
+                let logger = this.loggerFactory.getLogger(loggerName);
+                if (!logger) {
+                    this.loggerFactory.addLogger(loggerName);
+                }
+                Reflect.set(instance, propertyKey, this.loggerFactory.getLogger(loggerName));
+            });
+        }
     }
     /**
      * @version 1.0 加载需要注入的类
@@ -284,7 +301,7 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
         this.componentMap.forEach((instance, instanceName) => {
             //补充实例找不到时 不能被注解
             if (!instance) {
-                let insatnceError = new Error(`instance not found by ${instanceName}`);
+                let insatnceError = new Error(`instance not found by ${instanceName.toString()}`);
                 this.sysLogger.error(insatnceError.message);
                 throw insatnceError;
             }
@@ -325,30 +342,14 @@ let FastCarApplication = FastCarApplication_1 = class FastCarApplication extends
     }
     /**
      * @version 1.0 开启日志系统
+     * @version 1.1 更改为采用winston日志
      */
     startLog() {
-        if (!Reflect.has(this, "log4js")) {
-            Reflect.set(this, "log4js", SysConfig_1.LogDefaultConfig);
-            log4js.configure(SysConfig_1.LogDefaultConfig);
+        let logConfig = this.getSetting("log");
+        if (logConfig) {
+            this.loggerFactory.setConfig(Object.assign({}, SysConfig_1.LogDefaultConfig, { rootPath: path.join(this.getBasePath(), "logs") }, logConfig));
+            this.sysLogger = this.loggerFactory.addLogger(CommonConstant_1.CommonConstant.SYSLOGGER);
         }
-        let logconfig = this.getSetting("log4js");
-        if (logconfig) {
-            let existConfig = Reflect.get(this, "log4js");
-            if (!!existConfig) {
-                logconfig.appenders = Object.assign(existConfig.appenders, logconfig?.appenders);
-                logconfig.categories = Object.assign(existConfig.categories, logconfig?.categories);
-                logconfig = Object.assign(existConfig, logconfig);
-            }
-            //导入日志模块
-            log4js.configure(logconfig);
-            Object.keys(logconfig.categories).forEach(key => {
-                //加入服务
-                this.componentMap.set(FormatStr_1.default.formatFirstToUp(key), log4js.getLogger(key));
-            });
-        }
-        //默认追加一个系统日志
-        this.sysLogger = log4js.getLogger();
-        this.componentMap.set("SysLogger", this.sysLogger);
     }
     /***
      * @version 1.0 初始化应用

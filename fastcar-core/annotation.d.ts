@@ -10,15 +10,6 @@ type MRet = (target: any, methodName: string, descriptor: PropertyDescriptor) =>
 
 type PPRet = (target: any, method: string, index: number) => void;
 
-declare interface Log4jsConfig {
-	appenders: { [name: string]: any };
-	categories: { [name: string]: { appenders: string[]; level: string; enableCallStack?: boolean } };
-	pm2?: boolean;
-	pm2InstanceVar?: string;
-	levels?: any;
-	disableClustering?: boolean;
-}
-
 type SizeModel = {
 	minSize?: number;
 	maxSize?: number;
@@ -87,15 +78,7 @@ export function Override(target: any, name?: string, descriptor?: PropertyDescri
 //用于标记是否只读
 export function Readonly(target: any, name?: string, descriptor?: PropertyDescriptor): void;
 
-//用于打印日志
-//默认配置
-// appenders: {
-// 		sysLogger: {
-// 			type: "console",
-// 		},
-// 	},
-// categories: { default: { appenders: ["sysLogger"], level: "ALL" } },
-export function Log(config?: Log4jsConfig): Ret;
+export function Log(category?: string): PMRet;
 
 //添加子表单校验数据
 export function AddChildValid(target: any, name: string, value: { [key: string]: any }, index?: number): void;

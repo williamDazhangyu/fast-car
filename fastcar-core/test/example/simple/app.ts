@@ -1,7 +1,6 @@
 import "reflect-metadata";
 import Application from "../../../src/annotation/Application";
 import ENV from "../../../src/annotation/env/ENV";
-import Log from "../../../src/annotation/Log";
 import HelloController from "./controller/HelloController";
 import FastCarApplication from "../../../src/FastCarApplication";
 import AliasController from "./controller/AliasController";
@@ -9,7 +8,6 @@ import BaseFilePath from "../../../src/annotation/env/BaseFilePath";
 import BasePath from "../../../src/annotation/env/BasePath";
 @Application
 @ENV("TEST")
-@Log() //启用默认日志注释 如果和方法重名则进行警告
 @BasePath(__dirname) //直接运行ts文件时可不用
 @BaseFilePath(__filename)
 class APP {

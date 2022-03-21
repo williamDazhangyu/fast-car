@@ -1,5 +1,5 @@
+import { WinstonLoggerType } from "../type/WinstonLoggerType";
 import { ApplicationConfig } from "./ApplicationConfig";
-import { Log4jsConfig } from "./Log4jsConfig";
 
 /***
  * @version 1.0 系统基础配置
@@ -19,11 +19,11 @@ export const SYSDefaultConfig: SYSConfig = {
 	settings: new Map<string, Object>(), //自定义配置
 };
 
-export const LogDefaultConfig: Log4jsConfig = {
-	appenders: {
-		sysLogger: {
-			type: "console",
-		},
-	},
-	categories: { default: { appenders: ["sysLogger"], level: "ALL" } },
+export const LogDefaultConfig: WinstonLoggerType = {
+	consoleLevel: "info",
+	fileLevel: "info",
+	rootPath: __dirname, //日志路径
+	maxsize: 1024 * 1024 * 10, //默认10M
+	maxFiles: 30,
+	printConsole: true,
 };

@@ -13,6 +13,7 @@ export default class DateUtil {
 			hh: DateUtil.twoDigits(dataC.getHours()),
 			mm: DateUtil.twoDigits(dataC.getMinutes()),
 			ss: DateUtil.twoDigits(dataC.getSeconds()),
+			ms: DateUtil.twoDigits(dataC.getMilliseconds()),
 		};
 	}
 
@@ -44,6 +45,20 @@ export default class DateUtil {
 			.replace(/hh/, desc.hh)
 			.replace(/mm/, desc.mm)
 			.replace(/ss/, desc.ss);
+
+		return str;
+	}
+
+	static toDateTimeMS(datetime: number | string | Date = Date.now(), format: string = "YYYY-MM-DD hh:mm:ss.sss") {
+		let desc = DateUtil.toDateDesc(datetime);
+		let str = format
+			.replace(/YYYY/, desc.YYYY)
+			.replace(/MM/, desc.MM)
+			.replace(/DD/, desc.DD)
+			.replace(/hh/, desc.hh)
+			.replace(/mm/, desc.mm)
+			.replace(/ss/, desc.ss)
+			.replace(/sss/, desc.ms);
 
 		return str;
 	}

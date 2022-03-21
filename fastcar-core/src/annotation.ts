@@ -15,7 +15,6 @@ import Configure from "./annotation/stereotype/Configure";
 import Controller from "./annotation/stereotype/Controller";
 import Injection from "./annotation/stereotype/Injection";
 import Service from "./annotation/stereotype/Service";
-import Log from "./annotation/Log";
 import Repository from "./annotation/stereotype/Repository";
 import AddRequireModule from "./annotation/AddRequireModule";
 import DS from "./annotation/data/DS";
@@ -37,6 +36,7 @@ import Table from "./annotation/data/Table";
 import Entity from "./annotation/data/Entity";
 import SqlSession from "./annotation/data/SqlSession";
 import Transactional from "./annotation/data/Transactional";
+import Log from "./annotation/stereotype/Log";
 
 //注解暴露出去
 export {

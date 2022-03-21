@@ -1,9 +1,9 @@
-export default interface Logger {
-	log(...args: any[]): void;
+export default abstract class Logger {
+	abstract info(...args: any[]): void;
 
-	info(...args: any[]): void;
+	abstract debug(...args: any[]): void;
 
-	warn(...args: any[]): void;
+	abstract warn(...args: any[]): void;
 
-	error(...args: any[]): void;
+	abstract error(...args: any[]): void;
 }

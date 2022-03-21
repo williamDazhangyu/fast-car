@@ -1,3 +1,5 @@
+import * as Events from "events";
+
 declare type FIELDTYPE = {
 	field: string;
 	order?: boolean; //是否为倒序 order true为倒序
@@ -60,49 +62,19 @@ declare type ApplicationConfig = {
 	hotter?: boolean;
 };
 
-export class Logger {
-	new(dispatch: Function, name: string): Logger;
+export default abstract class Logger {
+	abstract log(...args: any[]): void;
 
-	readonly category: string;
-	level: string;
+	abstract debug(...args: any[]): void;
 
-	log(...args: any[]): void;
+	abstract info(...args: any[]): void;
 
-	isLevelEnabled(level?: string): boolean;
+	abstract warn(...args: any[]): void;
 
-	isTraceEnabled(): boolean;
-	isDebugEnabled(): boolean;
-	isInfoEnabled(): boolean;
-	isWarnEnabled(): boolean;
-	isErrorEnabled(): boolean;
-	isFatalEnabled(): boolean;
-
-	_log(level: string, data: any): void;
-
-	addContext(key: string, value: any): void;
-
-	removeContext(key: string): void;
-
-	clearContext(): void;
-
-	setParseCallStackFunction(parseFunction: Function): void;
-
-	trace(message: any, ...args: any[]): void;
-
-	debug(message: any, ...args: any[]): void;
-
-	info(message: any, ...args: any[]): void;
-
-	warn(message: any, ...args: any[]): void;
-
-	error(message: any, ...args: any[]): void;
-
-	fatal(message: any, ...args: any[]): void;
-
-	mark(message: any, ...args: any[]): void;
+	abstract error(...args: any[]): void;
 }
 
-export class FastCarApplication {
+export class FastCarApplication extends Events {
 	/***
 	 * @version 1.0 根据原型加载注入的方法
 	 *
@@ -123,6 +95,12 @@ export class FastCarApplication {
 	 * @version 1.0 获取资源路径
 	 */
 	getResourcePath(): string;
+
+	/***
+	 * @version 1.0 获取项目的基本路径
+	 *
+	 */
+	getBasePath(): string;
 
 	/**
 	 * @version 1.0 更新系统配置

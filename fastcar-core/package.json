@@ -1,10 +1,11 @@
 {
 	"name": "fastcar-core",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "target/index.js",
 	"author": "william_zhong",
 	"license": "MIT",
+	"types": "index.d.ts",
 	"exports": {
 		".": "./target/index.js",
 		"./annotation": "./target/annotation.js",
@@ -30,12 +31,11 @@
 		"node": ">=16"
 	},
 	"dependencies": {
-		"log4js": "^6.3.0",
 		"reflect-metadata": "^0.1.13",
+		"winston": "^3.6.0",
 		"yaml": "^1.10.2"
 	},
 	"devDependencies": {
-		"@types/log4js": "^2.3.5",
 		"@types/mocha": "^9.0.0",
 		"@types/node": "^16.11.7",
 		"@types/reflect-metadata": "^0.1.0",

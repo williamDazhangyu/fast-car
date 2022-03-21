@@ -11,10 +11,10 @@ exports.SYSDefaultConfig = {
     settings: new Map(), //自定义配置
 };
 exports.LogDefaultConfig = {
-    appenders: {
-        sysLogger: {
-            type: "console",
-        },
-    },
-    categories: { default: { appenders: ["sysLogger"], level: "ALL" } },
+    consoleLevel: "info",
+    fileLevel: "info",
+    rootPath: __dirname,
+    maxsize: 1024 * 1024 * 10,
+    maxFiles: 30,
+    printConsole: true,
 };
