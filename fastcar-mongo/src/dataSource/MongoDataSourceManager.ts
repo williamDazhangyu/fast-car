@@ -1,6 +1,6 @@
 import { Db } from "mongodb";
 import MongoDataSource from "./MongoDataSource";
-import { ApplicationStart, ApplicationStop, Autowired } from "fastcar-core/annotation";
+import { ApplicationStart, ApplicationStop, Autowired, Log } from "fastcar-core/annotation";
 import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
 import { MongoConfig, MongoDefaultConfig } from "../type/SqlConfig";
 import { OperationSet, SqlExecType } from "../type/SqlExecType";
@@ -12,7 +12,7 @@ class MongoDataSourceManager implements DataSourceManager {
 	@Autowired
 	protected app!: FastCarApplication;
 
-	@Autowired
+	@Log("sql")
 	protected sysLogger!: Logger;
 
 	protected sourceMap: Map<string, MongoDataSource>;
@@ -50,7 +50,7 @@ class MongoDataSourceManager implements DataSourceManager {
 
 		//打印sql
 		if (this.config.printSQL) {
-			this.sysLogger.info("printSQL", finalSQL);
+			this.sysLogger.info(finalSQL);
 		}
 
 		//检查sql执行时间

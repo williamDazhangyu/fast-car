@@ -42,7 +42,7 @@ let MongoDataSourceManager = class MongoDataSourceManager {
             .join(".");
         //打印sql
         if (this.config.printSQL) {
-            this.sysLogger.info("printSQL", finalSQL);
+            this.sysLogger.info(finalSQL);
         }
         //检查sql执行时间
         let beforeTime = Date.now();
@@ -125,7 +125,7 @@ __decorate([
     __metadata("design:type", fastcar_core_1.FastCarApplication)
 ], MongoDataSourceManager.prototype, "app", void 0);
 __decorate([
-    annotation_1.Autowired,
+    annotation_1.Log("sql"),
     __metadata("design:type", fastcar_core_1.Logger)
 ], MongoDataSourceManager.prototype, "sysLogger", void 0);
 MongoDataSourceManager = __decorate([
