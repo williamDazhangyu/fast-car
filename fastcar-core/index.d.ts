@@ -52,7 +52,7 @@ export enum FastCarMetaData {
 
 declare type SYSConfig = {
 	application: ApplicationConfig; //应用配置
-	settings: Map<string, any>; //自定义设置项
+	settings: Map<string | symbol, any>; //自定义设置项
 };
 
 declare type ApplicationConfig = {
@@ -108,18 +108,18 @@ export class FastCarApplication extends Events {
 	updateSysConfig(sysConfig: SYSConfig, configName: string): void;
 
 	/**
-	 * @version 1.0 加载系统配置
-	 * @param 加载顺序为 default json < yaml < env
+	 * @version 1.0 加载系统配置 加载顺序为 default json < yaml < env
+	 *
 	 */
 	loadSysConfig(): void;
 
-	setSetting(key: string, value: any): void;
+	setSetting(key: string | symbol, value: any): void;
 
 	/**
 	 * @version 1.0 获取自定义设置 设置优先级 配置自定义>系统配置>初始化
 	 * @param key
 	 */
-	getSetting(key: string): any;
+	getSetting(key: string | symbol): any;
 
 	/**
 	 * @version 1.0 获取应用配置

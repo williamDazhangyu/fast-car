@@ -6,7 +6,7 @@ export default function BaseFilePath(name: string) {
 	return function(target: any) {
 		let stats = fs.statSync(name);
 		if (stats.isFile()) {
-			Reflect.set(global, CommonConstant.BaseFileName, name);
+			Reflect.set(target.prototype, CommonConstant.BaseFileName, name);
 		}
 	};
 }

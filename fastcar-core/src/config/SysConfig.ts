@@ -6,7 +6,7 @@ import { ApplicationConfig } from "./ApplicationConfig";
  */
 export type SYSConfig = {
 	application: ApplicationConfig; //应用配置
-	settings: Map<string, any>; //自定义设置项
+	settings: Map<string | symbol, any>; //自定义设置项
 };
 
 export const SYSDefaultConfig: SYSConfig = {

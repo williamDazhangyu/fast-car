@@ -6,7 +6,7 @@ export default function BasePath(name: string) {
 	return function(target: any) {
 		let stats = fs.statSync(name);
 		if (stats.isDirectory()) {
-			Reflect.set(global, CommonConstant.BasePath, name);
+			Reflect.set(target.prototype, CommonConstant.BasePath, name);
 		}
 	};
 }

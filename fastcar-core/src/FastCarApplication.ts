@@ -24,26 +24,18 @@ import Logger from "./interface/Logger";
 class FastCarApplication extends Events {
 	protected componentMap: Map<string | symbol, any>; //组件键值对
 	protected sysConfig: SYSConfig; //系统配置
-	protected basePath: string; //入口文件夹路径
-	protected baseFileName: string; //入口文件路径
-	protected loggerFactory: WinstonLogger;
+	protected basePath!: string; //入口文件夹路径
+	protected baseFileName!: string; //入口文件路径
+	protected loggerFactory!: WinstonLogger;
 	protected applicationStatus: AppStatusEnum;
-	protected sysLogger: winston.Logger;
+	protected sysLogger!: winston.Logger;
 
 	constructor() {
 		super();
 
 		this.sysConfig = SYSDefaultConfig;
 		this.componentMap = new Map();
-
-		let gloabalDir = Reflect.get(global, CommonConstant.BasePath);
-		let globalFile = Reflect.get(global, CommonConstant.BaseFileName);
-		this.basePath = gloabalDir || require.main?.path || module.path;
-		this.baseFileName = globalFile || require.main?.filename || module.filename;
 		this.applicationStatus = AppStatusEnum.READY;
-
-		this.loggerFactory = new WinstonLogger(Object.assign({}, LogDefaultConfig, { rootPath: path.join(this.basePath, "../logs") }));
-		this.sysLogger = this.loggerFactory.addLogger(CommonConstant.SYSLOGGER);
 
 		this.loadSelf();
 		this.addHot();
@@ -168,7 +160,7 @@ class FastCarApplication extends Events {
 		}
 	}
 
-	setSetting(key: string, value: any) {
+	setSetting(key: string | symbol, value: any) {
 		this.sysConfig.settings.set(key, value);
 	}
 
@@ -176,7 +168,7 @@ class FastCarApplication extends Events {
 	 * @version 1.0 获取自定义设置 设置优先级 配置自定义>系统配置>初始化
 	 *
 	 */
-	getSetting(key: string): any {
+	getSetting(key: string | symbol): any {
 		let res = this.sysConfig.settings.get(key);
 		if (ValidationUtil.isNotNull(res)) {
 			return res;
@@ -401,16 +393,24 @@ class FastCarApplication extends Events {
 	 */
 	startLog() {
 		let logConfig = this.getSetting("log");
+		let defaultConfig = Object.assign({}, LogDefaultConfig, { rootPath: path.join(this.basePath, "../logs") });
 		if (logConfig) {
-			this.loggerFactory.setConfig(Object.assign({}, LogDefaultConfig, { rootPath: path.join(this.getBasePath(), "../logs") }, logConfig));
-			this.sysLogger = this.loggerFactory.addLogger(CommonConstant.SYSLOGGER);
+			Object.assign(defaultConfig, logConfig);
 		}
+
+		this.loggerFactory = new WinstonLogger(defaultConfig);
+		//添加系统日志
+		this.sysLogger = this.loggerFactory.addLogger(CommonConstant.SYSLOGGER);
 	}
 
 	/***
 	 * @version 1.0 初始化应用
 	 */
 	init() {
+		//加载配置
+		this.basePath = Reflect.get(this, CommonConstant.BasePath) || require.main?.path || module.path;
+		this.baseFileName = Reflect.get(this, CommonConstant.BaseFileName) || require.main?.filename || module.filename;
+
 		this.beforeStartServer();
 		this.startServer();
 		this.addExitEvent();
