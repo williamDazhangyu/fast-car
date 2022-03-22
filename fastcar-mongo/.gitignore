@@ -4,3 +4,4 @@ yarn.lock
 **/*.out
 logs/*
 *.log
+target/*
