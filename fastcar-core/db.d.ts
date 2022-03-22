@@ -262,6 +262,8 @@ export interface DataSourceManager {
 
 	destorySession(sessionId: string, status: boolean): void;
 
+	destorySession(sessionId: string, status: boolean): Promise<void>;
+
 	start(): void;
 
 	stop(): void;

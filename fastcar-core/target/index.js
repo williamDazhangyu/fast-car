@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DataMap = exports.ValidError = exports.FastCarMetaData = exports.FastCarApplication = exports.BootPriority = exports.ComponentKind = exports.LifeCycleModule = void 0;
+exports.Logger = exports.DataMap = exports.ValidError = exports.FastCarMetaData = exports.FastCarApplication = exports.BootPriority = exports.ComponentKind = exports.LifeCycleModule = void 0;
 const BootPriority_1 = require("./constant/BootPriority");
 Object.defineProperty(exports, "BootPriority", { enumerable: true, get: function () { return BootPriority_1.BootPriority; } });
 const ComponentKind_1 = require("./constant/ComponentKind");
@@ -11,6 +11,8 @@ const LifeCycleModule_1 = require("./constant/LifeCycleModule");
 Object.defineProperty(exports, "LifeCycleModule", { enumerable: true, get: function () { return LifeCycleModule_1.LifeCycleModule; } });
 const FastCarApplication_1 = require("./FastCarApplication");
 exports.FastCarApplication = FastCarApplication_1.default;
+const Logger_1 = require("./interface/Logger");
+exports.Logger = Logger_1.default;
 const DataMap_1 = require("./model/DataMap");
 exports.DataMap = DataMap_1.default;
 const ValidError_1 = require("./model/ValidError");

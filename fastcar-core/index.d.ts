@@ -63,11 +63,9 @@ declare type ApplicationConfig = {
 };
 
 export abstract class Logger {
-	abstract log(...args: any[]): void;
+	abstract info(...args: any[]): void;
 
 	abstract debug(...args: any[]): void;
-
-	abstract info(...args: any[]): void;
 
 	abstract warn(...args: any[]): void;
 
