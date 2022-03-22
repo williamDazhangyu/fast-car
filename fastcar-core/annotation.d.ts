@@ -43,7 +43,7 @@ export function ComponentInjection(target: any, ...names: string[]): void;
  * 用于描述不同组件的作用类
  */
 export function Component(target: any): void;
-export function Configure(target: any): void;
+export function Configure(name: string): Ret;
 export function Controller(target: any): void;
 export function Service(target: any): void;
 export function Repository(target: any): void;
