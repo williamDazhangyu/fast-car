@@ -168,7 +168,7 @@ export default class KoaApplication {
 		const koaApp = this.koaApp;
 
 		//加载中间件
-		let middlewareList: Function[] = Reflect.getMetadata(DesignMeta.KoaMIDDLEWARE, this.app);
+		let middlewareList: Function[] = this.app.getSetting(DesignMeta.KoaMIDDLEWARE);
 		if (Array.isArray(middlewareList)) {
 			for (let m of middlewareList) {
 				if (TypeUtil.isPromise(m)) {
