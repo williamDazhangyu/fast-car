@@ -11,3 +11,5 @@ let factoryLogger = new WinstonLogger({
 
 let sys = factoryLogger.addLogger("sys");
 sys.info({ hello: "world" });
+sys.info("1", "2", "3");
+sys.error(new Error("error ~"));

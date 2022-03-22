@@ -24,6 +24,12 @@ export default class WinstonLogger {
 		return `\x1B[${colorStyle[0]}m ${str} \x1B[${colorStyle[1]}m`;
 	}
 
+	//数据着色为白色
+	private colorizeData(data: any) {
+		let msg = ValidationUtil.isObject(data) ? JSON.stringify(data) : data;
+		return `\x1B[37m ${msg} \x1B[39m`;
+	}
+
 	setConfig(config: WinstonLoggerType) {
 		this.config = config;
 	}
@@ -69,15 +75,17 @@ export default class WinstonLogger {
 					//新增打印控制台
 					if (this.config.printConsole) {
 						let text = this.colorize(util.format("[%s] [%s] %s - ", timestamp, level, info.label), info.level);
-						text += ValidationUtil.isObject(content.message) ? JSON.stringify(content.message) : content.message;
+						text += this.colorizeData(content.message);
 
 						if (Reflect.has(info, SPLAT)) {
-							let splatMsg = Reflect.get(info, SPLAT);
-							text += " " + JSON.stringify(splatMsg);
+							let splatMsg: any[] = Reflect.get(info, SPLAT);
+							splatMsg.forEach(item => {
+								text += " " + this.colorizeData(item);
+							});
 						}
 
 						if (info.stack) {
-							text += `\nstatck: ${info.stack}`;
+							text += this.colorizeData(`\nstatck: ${info.stack}`);
 						}
 						let fn = console.info;
 						if (Reflect.has(console, info.level)) {
