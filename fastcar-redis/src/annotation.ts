@@ -1,3 +1,3 @@
-import { EnableRedis } from "../annotation";
+import EnableRedis from "./annotation/EnableRedis";
 
 export { EnableRedis };
