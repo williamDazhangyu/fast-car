@@ -89,11 +89,10 @@ class ReverseGenerate {
 						let scaleNum = Math.pow(10, field.NUMERIC_SCALE);
 						num += (scaleNum - 1) / scaleNum;
 					}
-					//如果是最大的值则进行注入最大限制
-					if (num >= MAXBigNum) {
-						num = MAXBigNum;
+					//太大了 没有意义提示
+					if (num < MAXBigNum) {
+						tmpFieldList.push(`@Size({ maxSize: ${num - 1} })`);
 					}
-					tmpFieldList.push(`@Size({ maxSize: ${num - 1} })`);
 				} else {
 					tmpFieldList.push(`@Size({ maxSize: ${length} })`);
 				}
