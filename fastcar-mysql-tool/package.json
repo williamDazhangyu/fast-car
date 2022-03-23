@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-mysql-tool",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "逆向生成对应的model和mapper",
 	"main": "target/index.js",
@@ -12,6 +12,8 @@
 	"files": [
 		"src",
 		"target",
+		"test",
+		"LICENSE",
 		"index.d.ts"
 	],
 	"keywords": [
@@ -28,7 +30,7 @@
 	},
 	"dependencies": {
 		"camelcase": "^6.2.1",
-		"fastcar-mysql": "latest",
+		"fastcar-mysql": "^0.1.4",
 		"mysql2": "^2.3.3",
 		"prettier": "^2.5.1"
 	},

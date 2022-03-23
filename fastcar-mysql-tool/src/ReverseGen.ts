@@ -39,10 +39,12 @@ class ReverseGenerate {
 		//进行写入
 		let importHead = `import "reflect-metadata";\n`;
 		let importCoreAnnotation: string[] = ["Table", "DBType"];
+		let parseDateFlag = false;
 
 		let className = ReverseGenerate.formatClassName(taleName);
 
 		let body = Array.of();
+		let objectKeys = "";
 		fieldInfo.forEach((field) => {
 			//显示注释 类名称(不一致时必填) 类型(必填) 设计的key值如果有可填写 默认值
 			let tmpFieldList = Array.of();
@@ -116,6 +118,10 @@ class ReverseGenerate {
 						tsValue = `${formatName}:${tsType}=${!!field.COLUMN_DEFAULT};`;
 						break;
 					}
+					case "Date": {
+						tsValue = `${formatName}:${tsType}=new Date('${field.COLUMN_DEFAULT}');`;
+						break;
+					}
 					default: {
 						tsValue = `${formatName}:${tsType}='${field.COLUMN_DEFAULT}';`;
 						break;
@@ -126,10 +132,21 @@ class ReverseGenerate {
 			}
 			tmpFieldList.push(tsValue);
 			body.push(tmpFieldList.join("\n"));
+			if (tsType == "Date") {
+				parseDateFlag = true;
+				objectKeys += `${formatName}:DateUtil.toDateTime(this.${formatName}),\n`;
+			} else {
+				objectKeys += `${formatName}:this.${formatName},\n`;
+			}
 		});
 
 		body.push("constructor(...args: any[]) {\nObject.assign(this, ...args);\n}");
+		body.push(`toObject() {\nreturn{\n ${objectKeys} };\n}\n`);
 
+		//添加一个object的序列化
+		if (parseDateFlag) {
+			importHead += "import { DateUtil } from 'fastcar-core/utils'\n";
+		}
 		importHead += `import { ${importCoreAnnotation.join(",")} } from "fastcar-core/annotation";`;
 
 		let content = `${importHead}\n\n @Table('${taleName}')\n class ${className} \{\n ${body.join("\n\n")} \n\}\n\n export default ${className}`;
