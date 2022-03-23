@@ -53,12 +53,13 @@ class ReverseGenerate {
 			}
 
 			let formatName = camelcase(dbName);
-			if (formatName != dbName) {
-				tmpFieldList.push(`@Field('${dbName}')`);
-				if (!importCoreAnnotation.includes("Field")) {
-					importCoreAnnotation.push("Field");
-				}
+
+			//不缺省field字段
+			tmpFieldList.push(`@Field('${dbName}')`);
+			if (!importCoreAnnotation.includes("Field")) {
+				importCoreAnnotation.push("Field");
 			}
+
 			tmpFieldList.push(`@DBType('${field.DATA_TYPE}')`);
 
 			if (field.COLUMN_KEY) {
