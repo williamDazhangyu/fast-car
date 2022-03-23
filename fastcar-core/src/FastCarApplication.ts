@@ -266,7 +266,6 @@ class FastCarApplication extends Events {
 
 			//判断是否需要加载对应配置
 			let cp = Reflect.getMetadata(LifeCycleModule.LoadConfigure, classZ);
-			let instance = TypeUtil.isFunction(classZ) ? new classZ() : classZ;
 
 			if (cp) {
 				let fp = path.join(this.getResourcePath(), cp);
@@ -275,10 +274,15 @@ class FastCarApplication extends Events {
 				//进行实例化赋值
 				if (tmpConfig) {
 					//进行赋值不改变基础属性
-					MixTool.copPropertyValue(instance, tmpConfig);
+					if (TypeUtil.isFunction(classZ)) {
+						MixTool.copPropertyValue(classZ.prototype, tmpConfig);
+					} else {
+						MixTool.copPropertyValue(classZ, tmpConfig);
+					}
 				}
 			}
 
+			let instance = TypeUtil.isFunction(classZ) ? new classZ() : classZ;
 			this.componentMap.set(instanceKey, instance);
 
 			//判断是否有别名
