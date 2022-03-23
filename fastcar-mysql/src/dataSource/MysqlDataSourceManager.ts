@@ -97,8 +97,12 @@ class MysqlDataSourceManager implements DataSourceManager {
 				this.writeDefaultSource = source;
 			}
 
+			//将不必要的属性不要传给mysql了
 			let tmpConfig = Object.assign({}, item);
-			Reflect.deleteProperty(tmpConfig, "source");
+			["source", "readDefault", "writeDefault", "default"].forEach(key => {
+				Reflect.deleteProperty(tmpConfig, key);
+			});
+
 			let ds = new MysqlDataSource(tmpConfig);
 			this.sourceMap.set(source, ds);
 		});
