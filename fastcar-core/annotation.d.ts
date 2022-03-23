@@ -133,3 +133,9 @@ export function SqlSession(target: any, name: string, index: number): void;
 
 //开启事务  driver: string = "MysqlDataSourceManager"
 export function Transactional(driver?: string): MRet;
+
+//设置入口路径
+export function BaseFilePath(name: string): Ret;
+
+//设置入口文件夹路径
+export function BasePath(name: string): Ret;

@@ -37,10 +37,11 @@ import Entity from "./annotation/data/Entity";
 import SqlSession from "./annotation/data/SqlSession";
 import Transactional from "./annotation/data/Transactional";
 import Log from "./annotation/stereotype/Log";
+import BaseFilePath from "./annotation/env/BaseFilePath";
+import BasePath from "./annotation/env/BasePath";
 
 //注解暴露出去
 export {
-	ENV,
 	ApplicationStart,
 	ApplicationStop,
 	ComponentScan,
@@ -83,3 +84,5 @@ export {
 	SqlSession, //连接会话 如果需要使用同一连接或者使用事务是传递
 	Transactional, //事务管理
 };
+
+export { ENV, BaseFilePath, BasePath };
