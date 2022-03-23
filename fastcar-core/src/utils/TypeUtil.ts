@@ -30,9 +30,10 @@ export default class TypeUtil {
 		return typeName == "object";
 	}
 
+	//忽略.d.ts文件
 	static isTSORJS(fp: string): boolean {
 		let suffix = FileUtil.getSuffix(fp);
-		return ["ts", "js"].includes(suffix);
+		return ["ts", "js"].includes(suffix) && !fp.endsWith(".d.ts");
 	}
 
 	static isPromise(f: Function) {
