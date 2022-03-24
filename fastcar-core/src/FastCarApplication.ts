@@ -431,7 +431,7 @@ class FastCarApplication extends Events {
 	 * @version 1.0 根据原型获取组件的加载信息
 	 *
 	 */
-	getComponentDetailByTarget(target: Object): any {
+	getComponentDetailByTarget(target: Object): ComponentDesc | undefined {
 		let key = this.getInjectionUniqueKey(target);
 		return this.componentDeatils.get(key);
 	}

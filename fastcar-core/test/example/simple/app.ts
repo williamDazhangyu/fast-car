@@ -32,4 +32,12 @@ describe("程序应用测试", () => {
 		let controller1: AliasController = appInsatcne.app.getComponentByName("controller1");
 		console.log("controller1类型和AliasController相符", controller1 instanceof AliasController);
 	});
+
+	it("获取完善的加载信息", () => {
+		let appInfo = appInsatcne.app.getComponentDetailByName(FastCarApplication.name);
+		console.log("app 加载信息", appInfo);
+
+		let hellControllerInfo = appInsatcne.app.getComponentDetailByTarget(HelloController);
+		console.log("hellControllerInfo 加载信息", hellControllerInfo);
+	});
 });
