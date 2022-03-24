@@ -18,10 +18,18 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	}
 
 	//自动映射数据库字段
+	//兼容不小心传了数据的值
 	protected toDBValue(v: any, key: string, type: string): any {
 		let value = Reflect.get(v, key);
-		let tmpValue = SerializeUtil.serialize(value, type);
+		//去数据库映射值
+		let info = this.mappingMap.get(key);
+		if (info) {
+			if (ValidationUtil.isNull(value)) {
+				value = Reflect.get(v, info.field);
+			}
+		}
 
+		let tmpValue = SerializeUtil.serialize(value, type);
 		return tmpValue;
 	}
 
