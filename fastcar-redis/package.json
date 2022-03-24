@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-redis",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "target/index.js",
 	"author": "william_zhong",
