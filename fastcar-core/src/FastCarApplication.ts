@@ -19,6 +19,7 @@ import Component from "./annotation/stereotype/Component";
 import WinstonLogger from "./model/WinstonLogger";
 import * as winston from "winston";
 import Logger from "./interface/Logger";
+import { ComponentDesc } from "./type/ComponentDesc";
 
 @Component
 class FastCarApplication extends Events {
@@ -29,12 +30,14 @@ class FastCarApplication extends Events {
 	protected loggerFactory!: WinstonLogger;
 	protected applicationStatus: AppStatusEnum;
 	protected sysLogger!: winston.Logger;
+	protected componentDeatils: Map<string | symbol, ComponentDesc>; //读取路径  名称
 
 	constructor() {
 		super();
 
 		this.sysConfig = SYSDefaultConfig;
 		this.componentMap = new Map();
+		this.componentDeatils = new Map();
 		this.applicationStatus = AppStatusEnum.READY;
 
 		this.loadSelf();
@@ -53,6 +56,11 @@ class FastCarApplication extends Events {
 	loadSelf(): void {
 		let key = this.getInjectionUniqueKey(FastCarApplication);
 		this.componentMap.set(key, this);
+		this.componentDeatils.set("FastCarApplication", {
+			id: key,
+			name: "FastCarApplication",
+			path: __filename,
+		});
 	}
 
 	/***
@@ -268,8 +276,8 @@ class FastCarApplication extends Events {
 			let cp = Reflect.getMetadata(LifeCycleModule.LoadConfigure, classZ);
 
 			if (cp) {
-				let fp = path.join(this.getResourcePath(), cp);
-				let tmpConfig = FileUtil.getResource(fp);
+				let rfp = path.join(this.getResourcePath(), cp);
+				let tmpConfig = FileUtil.getResource(rfp);
 
 				//进行实例化赋值
 				if (tmpConfig) {
@@ -284,11 +292,21 @@ class FastCarApplication extends Events {
 
 			let instance = TypeUtil.isFunction(classZ) ? new classZ() : classZ;
 			this.componentMap.set(instanceKey, instance);
+			this.componentDeatils.set(instanceKey, {
+				id: instanceKey,
+				name: classZ?.name || FileUtil.getFileName(fp),
+				path: fp,
+			});
 
 			//判断是否有别名
 			let aliasName = Reflect.getMetadata(FastCarMetaData.Alias, instance);
 			if (aliasName) {
 				this.componentMap.set(aliasName, instance);
+				this.componentDeatils.set(aliasName, {
+					id: aliasName,
+					name: aliasName,
+					path: fp,
+				});
 			}
 
 			//判断是否需要热更加载
@@ -302,9 +320,11 @@ class FastCarApplication extends Events {
 	 * @version 1.0 装配模块
 	 * @version 1.0 装配日志模块
 	 */
-	injectionModule(instance: any): void {
+	injectionModule(instance: any, instanceName: string | symbol): void {
 		let relyname = FastCarMetaData.IocModule;
 		let moduleList: Map<string, string> = Reflect.getMetadata(relyname, instance);
+		let detailInfo = this.componentDeatils.get(instanceName);
+
 		if (moduleList && moduleList.size > 0) {
 			moduleList.forEach((name: string, propertyKey: string) => {
 				let func = this.componentMap.get(name);
@@ -315,7 +335,7 @@ class FastCarApplication extends Events {
 				} else {
 					if (!this.componentMap.has(name)) {
 						//找不到依赖项
-						let injectionError = new Error(`Unsatisfied dependency expressed through ${propertyKey} in ${instance.name} `);
+						let injectionError = new Error(`Unsatisfied dependency expressed through [${propertyKey}] in ${detailInfo?.path} `);
 						this.sysLogger.error(injectionError.message);
 						throw injectionError;
 					}
@@ -350,7 +370,7 @@ class FastCarApplication extends Events {
 				throw insatnceError;
 			}
 
-			this.injectionModule(instance);
+			this.injectionModule(instance, instanceName);
 		});
 	}
 
@@ -379,7 +399,7 @@ class FastCarApplication extends Events {
 	/***
 	 * @version 1.0 根据名称组件
 	 */
-	getComponentByName(name: string): any {
+	getComponentByName(name: string | symbol): any {
 		return this.componentMap.get(name);
 	}
 
@@ -389,6 +409,31 @@ class FastCarApplication extends Events {
 	getComponentByTarget(target: Object): any {
 		let key = this.getInjectionUniqueKey(target);
 		return this.componentMap.get(key);
+	}
+
+	/**
+	 * @version 1.0 获取组件详情列表
+	 *
+	 */
+	getComponentDetailsList(): ComponentDesc[] {
+		return [...this.componentDeatils.values()];
+	}
+
+	/***
+	 * @version 1.0 根据名称获取组件的加载情况
+	 *
+	 */
+	getComponentDetailByName(name: string | symbol): ComponentDesc | undefined {
+		return this.componentDeatils.get(name);
+	}
+
+	/***
+	 * @version 1.0 根据原型获取组件的加载信息
+	 *
+	 */
+	getComponentDetailByTarget(target: Object): any {
+		let key = this.getInjectionUniqueKey(target);
+		return this.componentDeatils.get(key);
 	}
 
 	/**

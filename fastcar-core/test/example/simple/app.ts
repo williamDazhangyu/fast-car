@@ -19,7 +19,6 @@ class APP {
 }
 
 let appInsatcne = new APP();
-
 describe("程序应用测试", () => {
 	it("获取配置", () => {
 		//调用相关方法

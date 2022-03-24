@@ -62,6 +62,12 @@ declare type ApplicationConfig = {
 	hotter?: boolean;
 };
 
+declare type ComponentDesc = {
+	id: string;
+	name: string;
+	path: string;
+};
+
 export abstract class Logger {
 	abstract info(...args: any[]): void;
 
@@ -136,7 +142,19 @@ export class FastCarApplication extends Events {
 	 * @version 1.0 装配单个模块
 	 *
 	 */
-	injectionModule(instanceName: string, instance: any): void;
+	injectionModule(instance: any, instanceName: string | symbol): void;
+
+	/***
+	 * @version 1.0 根据名称获取组件的加载情况
+	 *
+	 */
+	getComponentDetailByName(name: string | symbol): ComponentDesc | undefined;
+
+	/***
+	 * @version 1.0 根据原型获取组件的加载信息
+	 *
+	 */
+	getComponentDetailByTarget(target: Object): any;
 
 	/**
 	 * @version 1.0 加载需要注入的类
@@ -160,12 +178,18 @@ export class FastCarApplication extends Events {
 	 * @version 1.0 根据名称组件
 	 * @param name
 	 */
-	getComponentByName(name: string): any;
+	getComponentByName(name: string | symbol): any;
 
 	/***
 	 * @version 1.0 根据原型获取实例
 	 */
 	getComponentByTarget(target: Object): any;
+
+	/**
+	 * @version 1.0 获取组件详情列表
+	 *
+	 */
+	getComponentDetailsList(): ComponentDesc[];
 
 	/**
 	 * @version 1.0 开启日志系统
