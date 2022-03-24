@@ -24,8 +24,10 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		//去数据库映射值
 		let info = this.mappingMap.get(key);
 		if (info) {
-			if (ValidationUtil.isNull(value)) {
-				value = Reflect.get(v, info.field);
+			//优先取数据库值
+			let dbValue = Reflect.get(v, info.field);
+			if (ValidationUtil.isNotNull(dbValue)) {
+				value = dbValue;
 			}
 		}
 
