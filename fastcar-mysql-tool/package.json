@@ -30,7 +30,7 @@
 	},
 	"dependencies": {
 		"camelcase": "^6.2.1",
-		"fastcar-mysql": "^0.1.4",
+		"fastcar-mysql": "^0.1.7",
 		"mysql2": "^2.3.3",
 		"prettier": "^2.5.1"
 	},
