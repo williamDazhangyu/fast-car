@@ -121,6 +121,8 @@ export class MysqlDataSourceManager implements DataSourceManager {
 	//执行sql
 	execute(sqlExec: SqlExecType): Promise<any[]>;
 
+	query(sqlExec: SqlExecType): Promise<any[]>;
+
 	//执行多个sql语句 默认开启事务
 	batchExecute(tasks: SqlExecType[]): Promise<boolean>;
 
@@ -247,4 +249,9 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 	 * @version 1.0 自定义sql执行
 	 */
 	execute(sql: string, args?: any[], ds?: string, sessionId?: string): Promise<any>;
+
+	/***
+	 * @version 1.0 自定义sql执行 动态sql优先使用这个
+	 */
+	query(sql: string, args?: any[], ds?: string, sessionId?: string): Promise<any>;
 }

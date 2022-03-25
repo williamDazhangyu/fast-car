@@ -168,6 +168,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 		if (!ds) {
 			ds = this.getDefaultSoucre(this.isReadBySql(sql));
 		}
+
 		if (sessionId) {
 			let connMap: Map<string, mysql.PoolConnection[]> = Reflect.get(this, sessionId);
 			if (connMap) {
@@ -190,6 +191,11 @@ class MysqlDataSourceManager implements DataSourceManager {
 		}
 
 		return await this.execute({ sql, args, ds });
+	}
+
+	async query({ sql, args = [], ds, sessionId }: SqlExecType): Promise<any[]> {
+		let querySql = mysql.format(sql, args);
+		return await this.exec({ sql: querySql, ds, sessionId });
 	}
 
 	//执行sql

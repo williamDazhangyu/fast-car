@@ -99,6 +99,11 @@ class SimpleService {
 	async opeatorError() {
 		return await this.myMapper.execute("select * from noExistTable");
 	}
+
+	//数组测试
+	async queryIds() {
+		return await this.myMapper.select({ where: { id: [2, 3] } });
+	}
 }
 
 export default SimpleService;

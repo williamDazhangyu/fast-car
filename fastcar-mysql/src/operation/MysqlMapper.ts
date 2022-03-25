@@ -101,8 +101,9 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 				Object.keys(ov).forEach(operatorKeys => {
 					let operatorValue = Reflect.get(ov, operatorKeys);
+					let formatOperatorKeys = operatorKeys.toUpperCase();
 
-					switch (operatorKeys) {
+					switch (formatOperatorKeys) {
 						case OperatorEnum.isNUll: {
 							clist.push(`ISNULL(${alias})`);
 							break;
@@ -112,20 +113,25 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 							break;
 						}
 						case OperatorEnum.in: {
-							clist.push(`${alias} IN (?)`);
-							params.push(operatorValue);
+							if (Array.isArray(operatorValue)) {
+								clist.push(`${alias} IN ( ${operatorValue.map(() => "?").join(",")} )`);
+								params = [...params, ...operatorValue];
+							} else {
+								clist.push(`${alias} IN ( ? )`);
+								params.push(operatorValue);
+							}
 							break;
 						}
 						case OperatorEnum.inc:
 						case OperatorEnum.dec:
 						case OperatorEnum.multiply:
 						case OperatorEnum.division: {
-							clist.push(`${alias} = ${alias} ${operatorKeys} (?)`);
+							clist.push(`${alias} = ${alias} ${formatOperatorKeys} (?)`);
 							params.push(operatorValue);
 							break;
 						}
 						default: {
-							clist.push(`${alias} ${operatorKeys} ?`);
+							clist.push(`${alias} ${formatOperatorKeys} ?`);
 							params.push(operatorValue);
 							break;
 						}
@@ -551,6 +557,15 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	 */
 	async execute(sql: string, args: any[] = [], @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<any> {
 		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
+
+		return rows;
+	}
+
+	/***
+	 * @version 1.0 自定义sql执行 动态sql优先使用这个
+	 */
+	async query(sql: string, args: any[] = [], @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<any> {
+		let [rows] = await this.dsm.query({ sql, args, ds, sessionId });
 
 		return rows;
 	}
