@@ -72,7 +72,7 @@ class ReverseGenerate {
 				}
 			}
 
-			if (field.IS_NULLABLE == "YES") {
+			if (field.IS_NULLABLE == "NO") {
 				tmpFieldList.push("@NotNull");
 
 				if (!importCoreAnnotation.includes("NotNull")) {
