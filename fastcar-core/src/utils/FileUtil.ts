@@ -3,6 +3,7 @@ import * as path from "path";
 import * as yaml from "yaml";
 
 const fileResSuffix = ["json", "yml", "js"]; //文件资源后缀名
+const bytesUnit = ["B", "K", "M", "G"];
 
 export default class FileUtil {
 	/***
@@ -103,5 +104,18 @@ export default class FileUtil {
 		}
 
 		return null;
+	}
+
+	//格式化字节大小
+	static formatBytes(n: number): string {
+		for (let i = 0; i < bytesUnit.length; i++) {
+			let nn = n / Math.pow(1024, i);
+			if (nn <= 1024) {
+				return `${nn.toFixed(2)}(${bytesUnit[i]})`;
+			}
+		}
+
+		let maxL = bytesUnit.length - 1;
+		return `${(n / Math.pow(1024, maxL)).toFixed(2)}(${bytesUnit[maxL]})`;
 	}
 }

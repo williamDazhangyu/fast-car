@@ -76,6 +76,26 @@ export default class DateUtil {
 		return str;
 	}
 
+	static getTimeStr(datetime: number) {
+		let days = datetime / (1000 * 60 * 60 * 24);
+		if (days >= 1) {
+			return `${days.toFixed(2)}d`;
+		}
+
+		let hours = datetime / (1000 * 60 * 60);
+		if (hours >= 1) {
+			return `${hours.toFixed(2)}h`;
+		}
+
+		let minutes = datetime / (1000 * 60);
+		if (minutes >= 1) {
+			return `${minutes.toFixed(2)}m`;
+		}
+
+		let seconds = datetime / 1000;
+		return `${Math.floor(seconds)}s`;
+	}
+
 	static getDateTime(datetimeStr?: string | number): number {
 		if (datetimeStr) {
 			let dataC = new Date(datetimeStr);

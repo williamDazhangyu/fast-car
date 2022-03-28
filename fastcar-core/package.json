@@ -45,5 +45,8 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/williamDazhangyu/fast-car.git"
+	},
+	"scripts": {
+		"build": "tsc"
 	}
 }

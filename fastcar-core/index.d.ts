@@ -1,4 +1,5 @@
 import * as Events from "events";
+import { ProcessType } from "./src/type/ProcessType";
 
 declare type FIELDTYPE = {
 	field: string;
@@ -265,6 +266,12 @@ export class FastCarApplication extends Events {
 	 *
 	 */
 	specifyHotUpdate(fp: string): void;
+
+	/***
+	 * @version 1.0 获取进程的信息
+	 *
+	 */
+	getMemoryUsage(): ProcessType;
 }
 
 //校验错误

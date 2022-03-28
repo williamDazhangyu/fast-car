@@ -20,6 +20,8 @@ import WinstonLogger from "./model/WinstonLogger";
 import * as winston from "winston";
 import Logger from "./interface/Logger";
 import { ComponentDesc } from "./type/ComponentDesc";
+import DateUtil from "./utils/DateUtil";
+import { ProcessType } from "./type/ProcessType";
 
 @Component
 class FastCarApplication extends Events {
@@ -31,6 +33,7 @@ class FastCarApplication extends Events {
 	protected applicationStatus: AppStatusEnum;
 	protected sysLogger!: winston.Logger;
 	protected componentDeatils: Map<string | symbol, ComponentDesc>; //读取路径  名称
+	protected liveTime: number;
 
 	constructor() {
 		super();
@@ -39,6 +42,7 @@ class FastCarApplication extends Events {
 		this.componentMap = new Map();
 		this.componentDeatils = new Map();
 		this.applicationStatus = AppStatusEnum.READY;
+		this.liveTime = Date.now();
 
 		this.loadSelf();
 		this.addHot();
@@ -643,6 +647,27 @@ class FastCarApplication extends Events {
 		if (fs.existsSync(fp)) {
 			this.emit("reload", fp);
 		}
+	}
+
+	/***
+	 * @version 1.0 获取进程的信息
+	 *
+	 */
+	getMemoryUsage(): ProcessType {
+		let { rss, heapTotal, heapUsed, arrayBuffers, external } = process.memoryUsage();
+
+		return {
+			pid: process.pid, //进程id
+			name: this.sysConfig.application.name,
+			env: this.sysConfig.application.env,
+			version: this.sysConfig.application.version,
+			rss: FileUtil.formatBytes(rss), //常住集大小
+			heapTotal: FileUtil.formatBytes(heapTotal), //V8 的内存使用量
+			heapUsed: FileUtil.formatBytes(heapUsed),
+			arrayBuffers: FileUtil.formatBytes(arrayBuffers), //包含所有的Buffer
+			external: FileUtil.formatBytes(external), //绑定到 V8 管理的 JavaScript 对象的 C++ 对象的内存使用量
+			uptime: DateUtil.getTimeStr(Date.now() - this.liveTime), //运行时间
+		};
 	}
 }
 

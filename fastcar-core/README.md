@@ -212,6 +212,23 @@ let instance = new A();
 instance.test("a", { c: "c", d: 13 }); //校验失败
 ```
 
+```ts
+//本地配置映射示例
+import { Configure } from "fastcar-core/annotation";
+
+//读取resource下的配置 如hello.yml中为hello: "world"
+@Configure("hello.yml")
+class HelloConfig {
+ hello!: string; //初始化完成后则为hello=world
+}
+
+//根据不同的环境加载不同的映射配置
+@Configure(`evnconfig-${process.env.NODE_ENV}.yml`)
+ class EnvConfig {
+ text!: string;
+}
+```
+
 ## 更多用法
 
 参考项目git地址 fastcar-core/test 下的simple内
