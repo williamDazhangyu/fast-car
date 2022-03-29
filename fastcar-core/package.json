@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-core",
-	"version": "0.2.9",
+	"version": "0.2.10",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "target/index.js",
 	"author": "william_zhong",
@@ -19,7 +19,8 @@
 		"index.d.ts",
 		"annotation.d.ts",
 		"db.d.ts",
-		"utils.d.ts"
+		"utils.d.ts",
+		"LICENSE"
 	],
 	"keywords": [
 		"ioc",
