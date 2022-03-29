@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-redis",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "target/index.js",
 	"author": "william_zhong",
@@ -19,18 +19,23 @@
 	"files": [
 		"src",
 		"target",
+		"test",
 		"index.d.ts",
-		"annotation.d.ts"
+		"annotation.d.ts",
+		"LICENSE"
 	],
 	"engines": {
 		"node": ">=16"
 	},
 	"dependencies": {
-		"fastcar-core": "^0.2.8",
 		"redis": "3.1.2"
 	},
 	"devDependencies": {
-		"@types/redis": "2.8.32"
+		"@types/redis": "2.8.32",
+		"fastcar-core": "^0.2.10"
+	},
+	"peerDependencies": {
+		"fastcar-core": "*"
 	},
 	"repository": {
 		"type": "git",
