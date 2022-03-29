@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-mongo",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "基于fastcar-core框架下对mongo的封装",
 	"main": "target/index.js",
@@ -14,8 +14,10 @@
 	"files": [
 		"src",
 		"target",
+		"test",
 		"index.d.ts",
-		"annotation.d.ts"
+		"annotation.d.ts",
+		"LICENSE"
 	],
 	"keywords": [
 		"mongo",
@@ -28,12 +30,15 @@
 		"node": ">=16"
 	},
 	"dependencies": {
-		"fastcar-core": "latest",
 		"mongodb": "^4.3.1",
 		"reflect-metadata": "^0.1.13"
 	},
 	"devDependencies": {
-		"@types/reflect-metadata": "^0.1.0"
+		"@types/reflect-metadata": "^0.1.0",
+		"fastcar-core": "^0.2.10"
+	},
+	"peerDependencies": {
+		"fastcar-core": "*"
 	},
 	"repository": {
 		"type": "git",
