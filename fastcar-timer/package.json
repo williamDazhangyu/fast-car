@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-timer",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "./target/index.js",
 	"types": "index.d.ts",
@@ -18,7 +18,8 @@
 	"files": [
 		"src",
 		"target",
-		"index.d.ts"
+		"index.d.ts",
+		"LICENSE"
 	],
 	"engines": {
 		"node": ">=16"
