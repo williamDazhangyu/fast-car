@@ -1,0 +1,27 @@
+application:
+    name: "simple"
+settings:
+    rpc:
+        list:
+            - {
+                  id: "rpc-server-1",
+                  type: "socket.io",
+                  port: 1235,
+                  extra: {},
+                  serviceType: "rpc",
+              }
+            - {
+                  id: "rpc-server-2",
+                  type: "mqtt",
+                  port: 1236,
+                  extra: {},
+                  serviceType: "rpc",
+              }
+            - {
+                  id: "rpc-server-3",
+                  type: "socket.io",
+                  port: 1237,
+                  extra: {},
+                  serviceType: "rpc",
+                  secure: { username: "user", password: "123456" },
+              }
