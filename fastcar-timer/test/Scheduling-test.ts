@@ -47,7 +47,7 @@ describe("定时器测试", () => {
 			}
 
 			@ScheduledInterval({ fixedRate: 1000, initialDelay: 1 })
-			run(stop?: boolean) {
+			run(diff: number, stop?: boolean) {
 				console.log(this.hello);
 			}
 		}
@@ -55,7 +55,13 @@ describe("定时器测试", () => {
 		let t = new TimerTest();
 
 		setTimeout(() => {
-			t.run(true);
-		}, 10000);
+			console.log("销毁定时器");
+			t.run(0, true);
+		}, 2000);
+
+		setTimeout(() => {
+			console.log("开启定时器");
+			t.run(0, false);
+		}, 5000);
 	});
 });

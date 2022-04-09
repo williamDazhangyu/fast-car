@@ -18,13 +18,13 @@ function addScheduledModule(target: any, m: string) {
 
 //计划函数
 function Scheduled(config: ScheduledConfig) {
-	return function(target: any, methodName: string, descriptor: PropertyDescriptor) {
+	return function (target: any, methodName: string, descriptor: PropertyDescriptor) {
 		//进行绑定
 		const fn = descriptor.value;
 		addScheduledModule(target, methodName);
 
 		//避免多次调用会重复触发
-		descriptor.value = function(stop?: boolean) {
+		descriptor.value = function (diff: number, stop: boolean = false) {
 			let timeId = `${methodName}`;
 
 			if (Reflect.hasMetadata(ScheduledModule, this)) {
