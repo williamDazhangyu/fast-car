@@ -63,6 +63,9 @@ export function AddRequireModule(target: any, m: string, alias: string): void;
 //自动注入类
 export function Autowired(target: any, propertyKey: string): void;
 
+//调用时注入类
+export function CallDependency(target: any, propertyKey: string): void;
+
 //异常方法类
 export function ExceptionMonitor(target: any): void;
 

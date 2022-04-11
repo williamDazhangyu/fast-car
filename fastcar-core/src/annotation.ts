@@ -39,6 +39,7 @@ import Transactional from "./annotation/data/Transactional";
 import Log from "./annotation/stereotype/Log";
 import BaseFilePath from "./annotation/env/BaseFilePath";
 import BasePath from "./annotation/env/BasePath";
+import CallDependency from "./annotation/Calldependency";
 
 //注解暴露出去
 export {
@@ -56,6 +57,7 @@ export {
 	Injection,
 	Application,
 	Autowired,
+	CallDependency,
 	ExceptionMonitor,
 	Deprecate,
 	NotImplemented,

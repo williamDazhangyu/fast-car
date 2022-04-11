@@ -22,6 +22,7 @@ let appInsatcne = new APP();
 
 //引用记得放在app扫描后进行
 import EnvConfig from "./config/EnvConfig";
+import CallService from "./service/CallService";
 
 describe("程序应用测试", () => {
 	it("获取配置", () => {
@@ -49,5 +50,9 @@ describe("程序应用测试", () => {
 	it("根据环境动态设置变量", () => {
 		let evnConfig: EnvConfig = appInsatcne.app.getComponentByTarget(EnvConfig);
 		console.log(evnConfig.text);
+	});
+	it("测试调用时加载时机才会注入方法", () => {
+		let callServerice = new CallService();
+		callServerice.sayHello();
 	});
 });

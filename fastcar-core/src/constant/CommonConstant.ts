@@ -6,6 +6,7 @@ export const CommonConstant = {
 	BasePath: Symbol("basePath"),
 	BaseFileName: Symbol("baseFileName"),
 	SYSLOGGER: "sys",
+	FastcarApp: Symbol("FastcarApp"), //应用app
 };
 
 export const FileResSuffix = ["json", "yml", "js"];

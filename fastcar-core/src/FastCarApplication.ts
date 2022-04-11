@@ -65,6 +65,8 @@ class FastCarApplication extends Events {
 			name: "FastCarApplication",
 			path: __filename,
 		});
+		//暴露一个全局的app 以便调用
+		Reflect.set(global, CommonConstant.FastcarApp, this);
 	}
 
 	/***
@@ -113,7 +115,7 @@ class FastCarApplication extends Events {
 				let currConfig = Reflect.get(sysConfig, property);
 				Reflect.deleteProperty(fileContent, property);
 				if (CommonConstant.Settings == property) {
-					Object.keys(addConfig).forEach(key => {
+					Object.keys(addConfig).forEach((key) => {
 						let afterConfig = addConfig[key];
 						let beforeConfig = this.sysConfig.settings.get(key);
 						if (beforeConfig) {
@@ -128,7 +130,7 @@ class FastCarApplication extends Events {
 			}
 		};
 
-		FileResSuffix.forEach(suffix => {
+		FileResSuffix.forEach((suffix) => {
 			let fileContent = FileUtil.getResource(path.join(resPath, `${configName}.${suffix}`));
 			if (fileContent) {
 				replaceSetting(CommonConstant.Settings, fileContent);
@@ -212,7 +214,7 @@ class FastCarApplication extends Events {
 		let includeList: string[] = Reflect.get(this, FastCarMetaData.ComponentScan);
 
 		if (includeList) {
-			includeList.forEach(item => {
+			includeList.forEach((item) => {
 				let tmpList = FileUtil.getFilePathList(item);
 				tmpFilePath = tmpFilePath.concat(tmpList);
 			});
@@ -225,12 +227,12 @@ class FastCarApplication extends Events {
 		let excludeList: string[] = Reflect.get(this, FastCarMetaData.ComponentScanExclusion);
 		if (excludeList) {
 			let excludAllPath: string[] = [];
-			excludeList.forEach(item => {
+			excludeList.forEach((item) => {
 				let exlist = FileUtil.getFilePathList(item);
 				excludAllPath = [...excludAllPath, ...exlist];
 			});
 
-			filePathList = filePathList.filter(item => {
+			filePathList = filePathList.filter((item) => {
 				return !excludAllPath.includes(item);
 			});
 		}
@@ -383,7 +385,7 @@ class FastCarApplication extends Events {
 	 */
 	getComponentByType(name: ComponentKind): any[] {
 		let instanceList: any[] = Array.of();
-		this.componentMap.forEach(instance => {
+		this.componentMap.forEach((instance) => {
 			let flag = Reflect.hasMetadata(name, instance);
 			if (flag) {
 				instanceList.push(instance);
@@ -489,7 +491,7 @@ class FastCarApplication extends Events {
 			this.exitEvent("sigint exit");
 		});
 
-		process.on("message", async msg => {
+		process.on("message", async (msg) => {
 			if (msg == "shutdown") {
 				this.exitEvent("shutdown");
 			}

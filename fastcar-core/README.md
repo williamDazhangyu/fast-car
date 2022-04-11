@@ -54,6 +54,8 @@ Application 声明为一个应用
 
 Autowired 自动注入依赖的组件
 
+CallDependency 调用时注入组件(调用对象可以不是组件 可以是一个普通类) 0.2.11版本以上生效
+
 ExceptionMonitor 声明异常监听
 
 Deprecate 用于标注方法是否被放弃 当调用时会提示已放弃该方法
@@ -226,6 +228,23 @@ class HelloConfig {
 @Configure(`evnconfig-${process.env.NODE_ENV}.yml`)
  class EnvConfig {
  text!: string;
+}
+```
+
+```ts
+//调用依赖版本示例
+import HelloService from "./HelloService";
+import { CallDependency } from "fastcar-core/annotation";
+
+export default class CallService {
+
+ //仅在调用时才会注入组件信息
+ @CallDependency
+ private hello!: HelloService;
+
+ sayHello() {
+  return this.hello.say();
+ }
 }
 ```
 

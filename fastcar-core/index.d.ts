@@ -1,4 +1,6 @@
 import * as Events from "events";
+import { ComponentKind } from "./src/constant/ComponentKind";
+import { LifeCycleModule } from "./src/constant/LifeCycleModule";
 import { ProcessType } from "./src/type/ProcessType";
 
 declare type FIELDTYPE = {
@@ -6,50 +8,6 @@ declare type FIELDTYPE = {
 	order?: boolean; //是否为倒序 order true为倒序
 	compare?: Function;
 };
-
-export enum LifeCycleModule {
-	ApplicationStart = "applicationStart", //应用初始化完全完成后运行
-	ApplicationStop = "applicationStop", //应用结束之前进行执行
-	LoadConfigure = "loadConfigure", //应用加载配置文件
-}
-
-export enum ComponentKind {
-	Controller = "Controller",
-	Service = "Service",
-	Component = "Component",
-}
-
-export enum BootPriority {
-	Base = 0, //一般系统级的会优先启动这一个 比如数据库组件等
-	Sys = 1, //系统优先的
-	Common = 2, //常用
-	Other = 3, //额外的
-	Lowest = 10000, //默认优先级1万最低
-}
-
-//元数据加载模块
-export enum FastCarMetaData {
-	paramTypes = "design:paramtypes", //传参类型
-	returnType = "design:returntype", //返回类型
-	designType = "design:type", //设计类型
-	InjectionMap = "InjectionMap", //应用服务需要加载的模块
-	IocModule = "IocModule", //每个中间件需要加载的模块
-	ComponentScan = "ComponentScan", //扫描路径
-	ComponentScanExclusion = "ComponentScanExclusion", //排序的扫描路径
-	RouterMap = "RouterMap", //路由集合模块
-	SpecifyMap = "SpecifyMap", //特定的组件集合
-	APP = "APP", //用于指定名称
-	DS = "dynamicDataSource",
-	DSIndex = "dynamicDataSourceIndex", //数据源索引位置
-	ValidFormRules = "validFormRules", //表单校验原始数据
-	ValidChildFormRules = "validChildFormRules", //原始
-	ValidSize = "valid:size", //校验长度
-	NotNull = "valid:notNull", //不为空
-	ValidCustom = "valid:custom", //自定义校验方式
-	Hotter = "hotter", //是否支持热更
-	InjectionUniqueKey = "injection_uniqueKey",
-	Alias = "alias", //别名
-}
 
 declare type SYSConfig = {
 	application: ApplicationConfig; //应用配置
@@ -68,6 +26,18 @@ declare type ComponentDesc = {
 	name: string;
 	path: string;
 };
+
+export * from "./src/constant/LifeCycleModule";
+
+export * from "./src/constant/ComponentKind";
+
+export * from "./src/constant/BootPriority";
+
+//元数据加载模块
+export * from "./src/constant/FastCarMetaData";
+
+//自定义常量模块
+export * from "./src/constant/CommonConstant";
 
 export abstract class Logger {
 	abstract info(...args: any[]): void;
