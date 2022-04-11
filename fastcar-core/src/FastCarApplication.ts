@@ -325,6 +325,7 @@ class FastCarApplication extends Events {
 	/***
 	 * @version 1.0 装配模块
 	 * @version 1.0 装配日志模块
+	 * @version 1.1 移除装配日志模块 改为随用随取
 	 */
 	injectionModule(instance: any, instanceName: string | symbol): void {
 		let relyname = FastCarMetaData.IocModule;
@@ -348,18 +349,6 @@ class FastCarApplication extends Events {
 				}
 
 				Reflect.set(instance, propertyKey, func);
-			});
-		}
-
-		let loggerSet: Map<string, string> = Reflect.getMetadata(FastCarMetaData.LoggerModule, instance);
-		if (loggerSet) {
-			loggerSet.forEach((loggerName, propertyKey) => {
-				let logger = this.loggerFactory.getLogger(loggerName);
-				if (!logger) {
-					this.loggerFactory.addLogger(loggerName);
-				}
-
-				Reflect.set(instance, propertyKey, this.loggerFactory.getLogger(loggerName));
 			});
 		}
 	}
@@ -670,6 +659,15 @@ class FastCarApplication extends Events {
 			external: FileUtil.formatBytes(external), //绑定到 V8 管理的 JavaScript 对象的 C++ 对象的内存使用量
 			uptime: DateUtil.getTimeStr(Date.now() - this.liveTime), //运行时间
 		};
+	}
+
+	getLogger(category = CommonConstant.SYSLOGGER): winston.Logger {
+		let logger = this.loggerFactory.getLogger(category);
+		if (!logger) {
+			return this.loggerFactory.addLogger(category);
+		}
+
+		return logger;
 	}
 }
 

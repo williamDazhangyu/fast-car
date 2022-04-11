@@ -221,6 +221,12 @@ export class FastCarApplication extends Events {
 	getSysLogger(): Logger;
 
 	/***
+	 * @version 0.2.11 根据名称获取logger
+	 *
+	 */
+	getLogger(category?: string): Logger;
+
+	/***
 	 * @version 1.0 获取文件内容
 	 */
 	getFileContent(fp: string): string;
