@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-koa",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "fastcar框架下对koa的包装",
 	"main": "target/index.js",
@@ -37,7 +37,8 @@
 		"@types/koa-router": "^7.4.4",
 		"@types/koa-static": "^4.0.2",
 		"@types/koa2-cors": "^2.0.2",
-		"fastcar-core": "^0.2.9",
+		"fastcar-core": "^0.2.10",
+		"fastcar-server": "^0.0.1",
 		"reflect-metadata": "^0.1.13"
 	},
 	"dependencies": {
@@ -52,10 +53,14 @@
 		"swagger-ui-dist": "^4.5.0"
 	},
 	"peerDependencies": {
-		"fastcar-core": "*"
+		"fastcar-core": "*",
+		"fastcar-server": "*"
 	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/williamDazhangyu/fast-car.git"
+	},
+	"scripts": {
+		"build": "tsc"
 	}
 }

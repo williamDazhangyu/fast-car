@@ -1,23 +1,6 @@
 import * as koaBody from "koa-body";
 import * as bodyParser from "koa-bodyparser";
-
-export enum HttpProtocol {
-	http = "http",
-	http2 = "http2",
-	https = "https",
-}
-
-export type SSLConfig = {
-	key: string; //正式key 一般.pem结尾
-	cert: string; //证书  一般 .crt结尾
-};
-
-export type ServerConfig = {
-	port?: number; //默认80 https默认443
-	protocol?: HttpProtocol; //http  http2 或者 https 默认http
-	ssl?: SSLConfig;
-	hostname?: string; //当填写0.0.0.0时则不开启ipv6了
-};
+import { ServerConfig } from "fastcar-server";
 
 //和koa的约定配置
 export type KoaConfig = {

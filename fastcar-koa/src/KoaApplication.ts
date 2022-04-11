@@ -5,11 +5,9 @@ import * as Koa from "koa";
 import * as KoaRouter from "koa-router";
 import { MethodType } from "./type/MethodType";
 import { DesignMeta } from "./type/DesignMeta";
-import { HttpProtocol, KoaConfig, ServerConfig } from "./type/KoaConfig";
-import * as http from "http";
-import * as https from "https";
-import * as http2 from "http2";
 import { TypeUtil } from "fastcar-core/utils";
+import { KoaConfig } from "./type/KoaConfig";
+import { ServerApplication } from "fastcar-server";
 
 /***
  * @version 1.0 koa基础组件启动
@@ -24,12 +22,12 @@ export default class KoaApplication {
 	@Log("koa")
 	protected koaLogger!: Logger;
 
-	protected serverList: (http.Server | https.Server | http2.Http2SecureServer | http2.Http2Server)[];
-
 	protected koaApp: Koa;
 
+	@Autowired
+	private serverApplication!: ServerApplication;
+
 	constructor() {
-		this.serverList = Array.of();
 		this.koaApp = new Koa();
 	}
 
@@ -39,7 +37,7 @@ export default class KoaApplication {
 	 */
 	protected loadMiddleWare(list: Koa.Middleware | Koa.Middleware[]): void {
 		if (Array.isArray(list)) {
-			list.forEach(item => {
+			list.forEach((item) => {
 				if (TypeUtil.isFunction(item)) {
 					this.koaApp.use(item);
 				}
@@ -61,9 +59,9 @@ export default class KoaApplication {
 		let instanceList = this.app.getComponentByType(ComponentKind.Controller);
 
 		//查找绑定的url
-		instanceList.forEach(instance => {
+		instanceList.forEach((instance) => {
 			let routerMap: Map<string, MethodType> = Reflect.getMetadata(DesignMeta.ROUTER_MAP, instance);
-			routerMap.forEach(item => {
+			routerMap.forEach((item) => {
 				//去除ctx的影响
 				let callBack = async (ctx: any, next?: Function) => {
 					//进行参数的取值
@@ -83,7 +81,7 @@ export default class KoaApplication {
 					}
 
 					if (next) {
-						next();
+						await next();
 					}
 				};
 
@@ -95,73 +93,6 @@ export default class KoaApplication {
 		});
 
 		return router.routes();
-	}
-
-	/***
-	 * @version 1.0 创建服务器
-	 *
-	 */
-	createServer(config: ServerConfig, appCallBack: any): void {
-		if (!config.protocol) {
-			config.protocol = HttpProtocol.http;
-		}
-
-		if (!config.port) {
-			config.port = config.protocol ? 80 : 443;
-		}
-
-		let appName = this.app.getApplicationName();
-		let server: http.Server | https.Server | http2.Http2SecureServer | http2.Http2Server;
-
-		switch (config.protocol) {
-			case HttpProtocol.http: {
-				server = http.createServer(appCallBack);
-				break;
-			}
-			case HttpProtocol.https: {
-				if (!config.ssl) {
-					this.koaLogger.error(`https requires ssl config`);
-					process.exit();
-				}
-				server = https.createServer(
-					{
-						key: this.app.getFileContent(config.ssl?.key),
-						cert: this.app.getFileContent(config.ssl?.cert),
-					},
-					appCallBack
-				);
-				break;
-			}
-			case HttpProtocol.http2: {
-				if (!config.ssl) {
-					server = http2.createServer();
-				} else {
-					server = http2.createSecureServer(
-						{
-							key: this.app.getFileContent(config.ssl?.key),
-							cert: this.app.getFileContent(config.ssl?.cert),
-						},
-						appCallBack
-					);
-				}
-				break;
-			}
-			default: {
-				return;
-			}
-		}
-
-		let listentCallBack = () => {
-			this.koaLogger.info(`server ${appName} is running in ${config.port}`);
-		};
-
-		if (!!config.hostname) {
-			server.listen(config.port, config.hostname, listentCallBack);
-		} else {
-			server.listen(config.port, listentCallBack);
-		}
-
-		this.serverList.push(server);
 	}
 
 	start(): void {
@@ -191,26 +122,14 @@ export default class KoaApplication {
 
 		if (!!koaConfig.server) {
 			if (Array.isArray(koaConfig.server)) {
-				koaConfig.server.forEach(server => {
-					this.createServer(server, appCallback);
+				koaConfig.server.forEach((server) => {
+					this.serverApplication.createServer(server, appCallback);
 				});
 			} else {
-				this.createServer(koaConfig.server, appCallback);
+				this.serverApplication.createServer(koaConfig.server, appCallback);
 			}
 		}
 	}
 
-	async stop(): Promise<void> {
-		for (let server of this.serverList) {
-			server.close();
-		}
-
-		//等待一秒结束
-		await new Promise(resolve => {
-			setTimeout(() => {
-				this.koaLogger.info("koa server close");
-				resolve(0);
-			}, 1000);
-		});
-	}
+	async stop(): Promise<void> {}
 }
