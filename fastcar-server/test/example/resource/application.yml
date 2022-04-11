@@ -1,0 +1,12 @@
+application:
+  name: "simple"
+settings:
+  server:
+    - { port: 1234 } ##默认http请求
+    - {
+        port: 1235,
+        protocol: https,
+        ssl:
+          { key: "./ssl/localhost-key.pem", cert: "./ssl/localhost-cert.crt" },
+      }
+    - { port: 1236, protocol: net } #创建一个tcp请求

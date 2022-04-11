@@ -1,0 +1,39 @@
+{
+	"name": "fastcar-server",
+	"version": "0.0.1",
+	"description": "服务统一管理框架",
+	"main": "target/index.js",
+	"license": "MIT",
+	"types": "index.d.ts",
+	"exports": {
+		".": "./target/index.js"
+	},
+	"files": [
+		"src",
+		"target",
+		"test",
+		"index.d.ts",
+		"LICENSE"
+	],
+	"keywords": [
+		"server",
+		"https",
+		"tcp"
+	],
+	"engines": {
+		"node": ">=16"
+	},
+	"devDependencies": {
+		"fastcar-core": "^0.2.11"
+	},
+	"peerDependencies": {
+		"fastcar-core": "*"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/williamDazhangyu/fast-car.git"
+	},
+	"scripts": {
+		"build": "tsc"
+	}
+}
