@@ -13,6 +13,10 @@ export class ServerApplication {
 	createServer(config: ServerConfig, appCallBack?: any): ServerType | null;
 
 	getServer(port: number): ServerType | null;
+
+	start(): void;
+
+	stop(): void;
 }
 
 export function EnableServer(target: any): void;

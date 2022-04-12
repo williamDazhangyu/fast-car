@@ -133,5 +133,9 @@ export default class ServerApplication {
 				this.serverlogger.info(`server is stop in ${port}`);
 			});
 		}
+
+		setTimeout(() => {
+			this.serverMap.clear();
+		}, 1000);
 	}
 }
