@@ -27,7 +27,7 @@ export default class RpcClient implements MsgClientHookService {
 	constructor(config: SocketClientConfig, rpcAsyncService: RpcAsyncService, retry?: RetryConfig) {
 		let ClientClass = SocketClientFactory(config.type);
 		if (!ClientClass) {
-			this.rpcLogger.error(`Failed to create this client type by ${config.type}`);
+			this.getLogger().error(`Failed to create this client type by ${config.type}`);
 			throw new Error(`Failed to create this client type by ${config.type}`);
 		}
 		this.config = Object.assign(
@@ -47,6 +47,10 @@ export default class RpcClient implements MsgClientHookService {
 		this.checkStatus = false;
 		this.rpcAsyncService = rpcAsyncService;
 		this.checkConnectTimer = 0;
+	}
+
+	getLogger(): Logger {
+		return this.rpcLogger || console;
 	}
 
 	addSerialId(): number {
@@ -195,7 +199,7 @@ export default class RpcClient implements MsgClientHookService {
 	})
 	async checkMsg(diff: number, stop: boolean) {
 		if (this.checkStatus) {
-			this.rpcLogger.warn("Client message detection time is too long");
+			this.getLogger().warn("Client message detection time is too long");
 			return;
 		}
 
@@ -239,16 +243,16 @@ export default class RpcClient implements MsgClientHookService {
 				cleanIds.forEach((resp, id) => {
 					let item = this.msgQueue.get(id);
 					if (item) {
-						this.rpcLogger.error(resp);
-						this.rpcLogger.error(`${JSON.stringify(item.msg)}`);
+						this.getLogger().error(resp);
+						this.getLogger().error(`${JSON.stringify(item.msg)}`);
 						item.cb.done(resp, null);
 					}
 					this.msgQueue.delete(id);
 				});
 			}
 		} catch (e) {
-			this.rpcLogger.error("rpc client checkMsgQueue error");
-			this.rpcLogger.error(e);
+			this.getLogger().error("rpc client checkMsgQueue error");
+			this.getLogger().error(e);
 		} finally {
 			this.checkStatus = false;
 		}

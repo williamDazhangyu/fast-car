@@ -53,6 +53,8 @@ export class RpcClient implements MsgClientHookService {
 
 	constructor(config: SocketClientConfig, rpcService: RpcAsyncService, retry?: RetryConfig);
 
+	getLogger(): Logger;
+
 	addSerialId(): number;
 
 	start(): Promise<void>;
