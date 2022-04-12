@@ -1,3 +1,5 @@
+import { Logger } from "fastcar-core";
+import { Log } from "fastcar-core/annotation";
 import { DecodeDefault, EncodeDefault } from "../../constant/SocketCodingDefault";
 import { SocketEnum } from "../../constant/SocketEnum";
 import { DecodeMsg, EncodeMsg, SessionId, SocketClientConfig } from "../../types/SocketConfig";
@@ -13,6 +15,9 @@ export abstract class SocketClient {
 	config: SocketClientConfig;
 	manager: MsgClientHookService;
 	forceConnect: boolean; //是否为强制下线
+
+	@Log("socket")
+	protected logger!: Logger;
 
 	constructor(config: SocketClientConfig, manager: MsgClientHookService) {
 		this.sessionId = "";

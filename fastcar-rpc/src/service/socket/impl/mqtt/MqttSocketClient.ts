@@ -24,7 +24,7 @@ export default class MqttSocketClient extends SocketClient {
 			};
 		}
 
-		const io = mqtt.connect(this.config.url, Object.assign({ reconnecting: false }, this.config.extra, this.config.secure));
+		const io = mqtt.connect(this.config.url, Object.assign({ reconnecting: true }, this.config.extra, this.config.secure));
 
 		io.on(SocketEvents.CONNECT, () => {
 			this.connected = true;
@@ -42,9 +42,10 @@ export default class MqttSocketClient extends SocketClient {
 		io.on("error", (error: any) => {
 			// this.disconnect(packet.reasonCode?.toString());
 			let code = error.code;
-			if (code == "ECONNRESET") {
-				console.log("断线----");
-				this.connected = false;
+			if (this.connected) {
+				if (code == "ECONNRESET" || code == "ECONNREFUSED") {
+					this.connected = false;
+				}
 			}
 		});
 		this.io = io;
@@ -54,7 +55,7 @@ export default class MqttSocketClient extends SocketClient {
 	disconnect(reason?: string): void {
 		this.connected = false;
 		this.io.end();
-		this.manager.getLogger().warn(`client disconnect ${reason}`);
+		this.logger.warn(`client disconnect ${reason}`);
 	}
 
 	async sendMsg(msg: Object): Promise<boolean> {

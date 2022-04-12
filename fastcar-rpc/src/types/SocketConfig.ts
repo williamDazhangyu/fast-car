@@ -1,4 +1,5 @@
-import { SocketEnum, SocketServerEnum } from "../constant/SocketEnum";
+import { ServerConfig } from "fastcar-server";
+import { SocketEnum } from "../constant/SocketEnum";
 export type SessionId = string;
 export type ServerId = string;
 
@@ -22,7 +23,7 @@ export type SocketClientConfig = {
 export type SocketServerConfig = {
 	id: string; //编号名称
 	type: SocketEnum; //具体为哪一种型号的连接器
-	port: number;
+	server: ServerConfig;
 	extra?: any; //第三方拓展配置 用于灵活的调用第三方
 	serviceType: string; //服务器用途类型 用于表名是何种服务器
 	encode?: EncodeMsg; //编码解码

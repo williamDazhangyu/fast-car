@@ -1,5 +1,6 @@
 import { Logger } from "fastcar-core";
-import { SessionId, ServerId, ClientSession } from "../types/SocketConfig";
+import { SessionId, ClientSession } from "../types/SocketConfig";
+import { ServerConfig, ServerType } from "fastcar-server";
 
 //消息钩子
 export default interface MsgHookService {
@@ -21,4 +22,7 @@ export default interface MsgHookService {
 	deleteSession(sessionId: SessionId): void;
 
 	getClientSession(sessionId: SessionId): ClientSession | null;
+
+	//获取一个网络服务器
+	createNetServer(config: ServerConfig, cb?: any): ServerType;
 }

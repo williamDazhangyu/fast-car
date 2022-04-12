@@ -1,31 +1,37 @@
 import { SocketEnum } from "../../constant/SocketEnum";
-import IoSocketClient from "./impl/io/IoSocketClient";
-import IoSocketServer from "./impl/io/IoSocketServer";
-import MqttSocketClient from "./impl/mqtt/MqttSocketClient";
-import MqttSocketServer from "./impl/mqtt/MqttSocketServer";
+import { SocketServerConfig } from "../../types/SocketConfig";
+import MsgHookService from "../MsgHookService";
+import SocketServer from "./SocketServer";
 
-export function SocketServerFactory(type: SocketEnum) {
+interface SocketServerInterface<T> {
+	new (config: SocketServerConfig, manager: MsgHookService): T;
+}
+
+//仅按需加载模块
+export function SocketServerFactory(type: SocketEnum): SocketServerInterface<SocketServer> {
 	switch (type) {
 		case SocketEnum.SocketIO: {
-			return IoSocketServer;
+			return require("./impl/io/IoSocketServer").default;
 		}
 		case SocketEnum.MQTT: {
-			return MqttSocketServer;
+			return require("./impl/mqtt/MqttSocketServer").default;
+		}
+		case SocketEnum.WS: {
+			return require("./impl/ws/WsSocketServer").default;
 		}
 	}
-
-	return null;
 }
 
 export function SocketClientFactory(type: SocketEnum) {
 	switch (type) {
 		case SocketEnum.SocketIO: {
-			return IoSocketClient;
+			return require("./impl/io/IoSocketClient").default;
 		}
 		case SocketEnum.MQTT: {
-			return MqttSocketClient;
+			return require("./impl/mqtt/MqttSocketClient").default;
+		}
+		case SocketEnum.WS: {
+			return require("./impl/ws/WsSocketClient").default;
 		}
 	}
-
-	return null;
 }

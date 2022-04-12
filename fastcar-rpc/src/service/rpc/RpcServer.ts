@@ -29,7 +29,7 @@ import { SocketMsgStatus } from "../../constant/SocketMsgStatus";
 import RPCErrorService from "../RPCErrorService";
 
 //rpc 管理服务 用于和客户端进行同步异步消息发送
-@ApplicationStart(BootPriority.Lowest, "start")
+@ApplicationStart(BootPriority.Lowest * 10, "start") //落后于koa执行
 @ApplicationStop(BootPriority.Base, "stop")
 @EnableScheduling
 export default class RpcServer implements MsgCallbackService {
@@ -37,6 +37,7 @@ export default class RpcServer implements MsgCallbackService {
 	protected app!: FastCarApplication;
 	@Log("rpc")
 	private rpcLogger!: Logger;
+
 	protected socketManager: SocketManager; //socket管理
 	protected middleware: Middleware[]; //压缩后的组件方法
 	protected composeMiddleware!: (context: RpcContext) => void;
@@ -317,10 +318,15 @@ export default class RpcServer implements MsgCallbackService {
 	 *
 	 */
 	public async request(sessionId: SessionId, url: string, data?: Object, opts?: RetryConfig): Promise<RpcResponseType> {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
+			if (!this.socketManager.sessionOnline(sessionId)) {
+				resolve({ code: RpcResponseCode.disconnect, msg: "socket is disconnect" });
+				return;
+			}
+
 			let id = this.addSerialId();
 			if (id == -1) {
-				reject(new Error("msg too busy"));
+				resolve({ code: RpcResponseCode.busy, msg: "The message number has been used up" });
 				return;
 			}
 
@@ -514,7 +520,7 @@ export default class RpcServer implements MsgCallbackService {
 			this.rpcLogger.warn(`RPC Server list is empty`);
 			return;
 		}
-		this.socketManager.bind(this, this.rpcLogger);
+		this.socketManager.bind(this);
 		this.socketManager.start(serverList);
 
 		this.rpcConfig.list = serverList;

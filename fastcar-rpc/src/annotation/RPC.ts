@@ -3,7 +3,6 @@ import { FormatStr } from "fastcar-core/utils";
 import { MethodType, RpcUrl } from "../types/RpcConfig";
 import { RpcMetaData } from "../constant/RpcMetaData";
 
-//加载值头部的url
 export default function RPC(url?: string) {
 	return function (target: any) {
 		let tname = FormatStr.formatFirstToLow(target.name);

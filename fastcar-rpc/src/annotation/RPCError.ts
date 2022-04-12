@@ -2,7 +2,6 @@ import { BeanName, Component } from "fastcar-core/annotation";
 import { RpcMetaData } from "../constant/RpcMetaData";
 import { TypeUtil } from "fastcar-core/utils";
 
-//声明这是一个rpc验证服务
 export default function RPCError(target: any) {
 	if (!Reflect.has(target.prototype, "response")) {
 		throw new Error("rpc response method not implemented");

@@ -3,6 +3,7 @@ import SocketServer from "../../SocketServer";
 import { SocketEvents } from "../../../../types/SocketEvents";
 import MsgHookService from "../../../MsgHookService";
 import { Server, Client, PublishPacket, Aedes } from "aedes";
+import { Protocol } from "fastcar-server";
 import * as net from "net";
 
 type SocketMqttSession = {
@@ -13,7 +14,6 @@ type SocketMqttSession = {
 
 export default class MqttSocketServer extends SocketServer {
 	private server!: Aedes;
-	private tcpServer!: net.Server;
 	private sessionMap: Map<string, SessionId>;
 
 	constructor(config: SocketServerConfig, manager: MsgHookService) {
@@ -32,7 +32,6 @@ export default class MqttSocketServer extends SocketServer {
 			id: this.config.id,
 			authenticate: (client, username, password, callback) => {
 				//创建一个会话
-				console.log("id----", client.id);
 				let session: ClientSession = this.manager.createSession(this.id);
 				this.manager.auth(username, password.toString(), session).then((res: boolean) => {
 					if (!res) {
@@ -85,15 +84,18 @@ export default class MqttSocketServer extends SocketServer {
 			}
 		});
 
-		//监听放到最后  判断是否为ssl协议的
-		this.tcpServer = net.createServer(this.server.handle);
-		this.tcpServer.listen(this.config.port);
+		if (this.config.server.protocol == Protocol.http || this.config.server.protocol == Protocol.https) {
+			let httpServer = this.manager.createNetServer(this.config.server);
+			const ws = require("websocket-stream");
+			ws.createServer({ server: httpServer }, this.server.handle);
+		} else {
+			this.manager.createNetServer(this.config.server, this.server.handle);
+		}
 	}
 
 	async close(): Promise<void> {
 		await new Promise((resolve) => {
-			this.server.close();
-			this.tcpServer.close(() => {
+			this.server.close(() => {
 				resolve("OK");
 			});
 		});

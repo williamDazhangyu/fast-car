@@ -1,23 +1,17 @@
 import { SocketEnum } from "../../../../constant/SocketEnum";
 import { SocketClientConfig } from "../../../../types/SocketConfig";
-import { SocketClient } from "../../../socket/SocketClient";
-import * as ioClient from "socket.io-client";
 import MsgClientHookService from "../../../MsgClientHookService";
+import { SocketClient } from "../../SocketClient";
+import { WebSocket } from "ws";
 import { SocketEvents } from "../../../../types/SocketEvents";
 
-export default class IoSocketClient extends SocketClient {
+export default class WsSocketClient extends SocketClient {
 	type: SocketEnum;
-	io!: ioClient.Socket;
+	io!: WebSocket;
 
 	constructor(config: SocketClientConfig, manager: MsgClientHookService) {
 		super(config, manager);
-		config.extra = Object.assign({}, { forceNew: true, transports: ["websocket"] }, config.extra, {
-			query: {
-				username: config.secure?.username,
-				password: config.secure?.password,
-			},
-		});
-		this.type = SocketEnum.SocketIO;
+		this.type = SocketEnum.WS;
 	}
 
 	connect(): void {
@@ -25,17 +19,18 @@ export default class IoSocketClient extends SocketClient {
 			this.disconnect();
 		}
 
-		const io = ioClient.connect(this.config.url, this.config.extra);
-
-		io.on(SocketEvents.CONNECT_RECEIPT, (socketId: string) => {
-			this.sessionId = socketId;
-			this.connected = true;
-		});
-
-		io.on(SocketEvents.DISCONNECT, () => {
+		const io = new WebSocket(
+			this.config.url,
+			Object.assign({}, this.config.extra, {
+				headers: {
+					username: this.config.secure?.username || "",
+					password: this.config.secure?.password || "",
+				},
+			})
+		);
+		io.on(SocketEvents.CLOSE, () => {
 			if (this.connected) {
 				this.connected = false;
-				// this.disconnect();
 			}
 		});
 
@@ -54,17 +49,31 @@ export default class IoSocketClient extends SocketClient {
 	}
 
 	async sendMsg(msg: Object): Promise<boolean> {
-		if (!this.connected) {
+		if (!this.io || !this.connected) {
 			return false;
 		}
 
-		this.io.emit(SocketEvents.MESSAGE, this.encode(msg));
-		return true;
+		return new Promise((resolve) => {
+			this.io.send(this.encode(msg), (err?: Error) => {
+				if (err) {
+					this.logger.error("send msg fail");
+					this.logger.error(err);
+				}
+				resolve(!err);
+			});
+		});
 	}
 
 	receiveMsg(msg: string | Buffer): void {
-		//协议进行解析
-		this.manager.handleMsg(this.decode(msg));
+		let data: any = this.decode(msg);
+		if (!!data && data?.event) {
+			if (data.event == SocketEvents.CONNECT_RECEIPT) {
+				this.sessionId = data.socketId;
+				this.connected = true;
+				return;
+			}
+		}
+		this.manager.handleMsg(data);
 	}
 
 	offline(reason?: string): void {
@@ -72,10 +81,7 @@ export default class IoSocketClient extends SocketClient {
 			this.disconnect(reason);
 		}
 	}
-
 	close(): void {
-		if (this.io) {
-			this.disconnect();
-		}
+		this.offline();
 	}
 }

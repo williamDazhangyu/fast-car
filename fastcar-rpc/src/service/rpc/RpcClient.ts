@@ -1,7 +1,6 @@
 import { Logger } from "fastcar-core";
 import { InteractiveMode, RetryConfig, RpcClientConfig, RpcClientMsgBox, RpcClientRequestType, RpcMessage, RpcResponseCode, RpcResponseType } from "../../types/RpcConfig";
 import { SocketClientConfig } from "../../types/SocketConfig";
-import MsgHookService from "../MsgHookService";
 import { SocketClient } from "../socket/SocketClient";
 import { SocketClientFactory } from "../socket/SocketFactory";
 import { EnableScheduling, ScheduledInterval } from "fastcar-timer";
@@ -10,11 +9,11 @@ import { ValidationUtil } from "fastcar-core/utils";
 import RpcAsyncService from "../RpcAsyncService";
 import MsgClientHookService from "../MsgClientHookService";
 import { RpcUrlData } from "../../constant/RpcUrlData";
+import { Log } from "fastcar-core/annotation";
 
 //封装一个可用的rpc框架
 @EnableScheduling
 export default class RpcClient implements MsgClientHookService {
-	private rpcLogger!: Logger;
 	protected client: SocketClient;
 	protected msgQueue: Map<number, RpcClientMsgBox>; //序列号 消息队列
 	protected serialId: number; //序列号
@@ -22,14 +21,15 @@ export default class RpcClient implements MsgClientHookService {
 	protected checkStatus: boolean;
 	protected rpcAsyncService: RpcAsyncService;
 	protected checkConnectTimer: number;
+	@Log("rpc-client")
+	protected rpcLogger!: Logger;
 
-	constructor(config: SocketClientConfig, rpcLogger: Logger, rpcAsyncService: RpcAsyncService, retry?: RetryConfig) {
+	constructor(config: SocketClientConfig, rpcAsyncService: RpcAsyncService, retry?: RetryConfig) {
 		let ClientClass = SocketClientFactory(config.type);
 		if (!ClientClass) {
 			this.rpcLogger.error(`Failed to create this client type by ${config.type}`);
 			throw new Error(`Failed to create this client type by ${config.type}`);
 		}
-		this.rpcLogger = rpcLogger;
 		this.config = Object.assign(
 			{
 				retryCount: 3, //错误重试次数 默认三次
@@ -145,15 +145,15 @@ export default class RpcClient implements MsgClientHookService {
 		};
 		Object.assign(m, opts);
 
-		return new Promise((resolve, reject) => {
-			if (!this.client.connected) {
-				reject(new Error(`socket is disconnect`));
-				return;
-			}
+		return new Promise((resolve) => {
+			// if (!this.client.connected) {
+			// 	resolve({ code: RpcResponseCode.disconnect, msg: "socket is disconnect" });
+			// 	return;
+			// }
 
 			if (id == -1) {
 				//消息太多没有处理完
-				reject(new Error(`msg too busy`));
+				resolve({ code: RpcResponseCode.busy, msg: "The message number has been used up" });
 				return;
 			}
 
@@ -252,9 +252,5 @@ export default class RpcClient implements MsgClientHookService {
 		} finally {
 			this.checkStatus = false;
 		}
-	}
-
-	getLogger() {
-		return this.rpcLogger;
 	}
 }

@@ -122,11 +122,13 @@ export type RetryConfig = {
 
 export enum RpcResponseCode {
 	ok = 200,
+	noaccess = 403, //禁止访问
 	notfound = 404,
 	error = 500,
 	retryTimes = 502,
 	disconnect = 503,
 	timeout = 504,
+	busy = 505,
 }
 
 export type RpcResponseType = {

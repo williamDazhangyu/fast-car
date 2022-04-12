@@ -5,8 +5,17 @@ export const EncodeDefault: EncodeMsg = (msg: Object) => {
 };
 
 export const DecodeDefault: DecodeMsg = (msg: string | Buffer) => {
+	if (Buffer.isBuffer(msg)) {
+		msg = msg.toString();
+	}
+
 	if (typeof msg == "string") {
-		return JSON.parse(msg);
+		try {
+			let obj = JSON.parse(msg);
+			if (!!obj && typeof obj === "object") {
+				return obj;
+			}
+		} catch (e) {}
 	}
 
 	return msg;

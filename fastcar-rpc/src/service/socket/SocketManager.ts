@@ -1,14 +1,15 @@
-import { ValidationUtil } from "fastcar-core/utils";
 import { Logger } from "fastcar-core";
+import { ValidationUtil } from "fastcar-core/utils";
+import { CallDependency, Log } from "fastcar-core/annotation";
+import { ServerConfig, ServerType, ServerApplication, Protocol } from "fastcar-server";
 import SocketServer from "./SocketServer";
 import { ClientSession, ServerId, SessionId, SocketServerConfig, SocketSession } from "../../types/SocketConfig";
 import { SocketServerFactory } from "./SocketFactory";
 import MsgHookService from "../MsgHookService";
 import { SocketEnum } from "../../constant/SocketEnum";
 import MsgCallbackService from "../MsgCallbackService";
-import * as uuid from "uuid";
+import { nanoid } from "nanoid";
 import { SocketMsgStatus } from "../../constant/SocketMsgStatus";
-
 /***
  * @version 1.0 用于集成各个不同类型的socket和实现丰富的消息逻辑表达
  */
@@ -16,8 +17,14 @@ export default class SocketManager implements MsgHookService {
 	protected serverMap: Map<ServerId, SocketServer>; //key值用来表示是哪个通讯协议 干嘛的 sid
 	protected clientSessionMap: Map<SessionId, ClientSession>; //客户端的会话值 sessionId
 	protected msgCallBack!: MsgCallbackService;
+
+	@Log("socket")
 	protected logger!: Logger;
+
 	protected channels: Map<string, SessionId[]>;
+
+	@CallDependency
+	private netServer!: ServerApplication;
 
 	constructor() {
 		this.serverMap = new Map();
@@ -33,9 +40,8 @@ export default class SocketManager implements MsgHookService {
 		return await this.msgCallBack.auth(username, password, session);
 	}
 
-	bind(msgCallBack: MsgCallbackService, logger: Logger) {
+	bind(msgCallBack: MsgCallbackService) {
 		this.msgCallBack = msgCallBack;
-		this.logger = logger;
 	}
 
 	getLogger(): Logger {
@@ -99,6 +105,16 @@ export default class SocketManager implements MsgHookService {
 		}
 
 		return null;
+	}
+
+	//会话是否在线
+	sessionOnline(sessionId: string) {
+		let session = this.clientSessionMap.get(sessionId);
+		if (!session) {
+			return false;
+		}
+
+		return this.serverMap.has(session.serverId);
 	}
 
 	//发送消息
@@ -205,7 +221,21 @@ export default class SocketManager implements MsgHookService {
 				return false;
 			}
 
-			return ValidationUtil.isString(item.id) && ValidationUtil.isNumber(item.port);
+			if (!ValidationUtil.isString(item.id)) {
+				return false;
+			}
+
+			if (!item.server) {
+				item.server = {};
+			}
+
+			if (!item.extra) {
+				item.extra = {};
+			}
+
+			item.server = Object.assign({ port: 80, protocol: Protocol.http }, item.server);
+
+			return true;
 		});
 
 		if (!flag) {
@@ -226,10 +256,9 @@ export default class SocketManager implements MsgHookService {
 		socketConfig.forEach(async (item) => {
 			let SocketClass = SocketServerFactory(item.type);
 			if (SocketClass) {
-				Object.assign(item);
 				let server: SocketServer = new SocketClass(item, this);
 				await server.listen();
-				this.logger.info(`socket server [${item.id}] is running in ${item.port}`);
+				this.logger.info(`${item.type} server [${item.id}] is running in ${item.server.port}`);
 				this.serverMap.set(item.id, server);
 			} else {
 				this.logger.error(`This type [${item.type}] of connection is not supported`);
@@ -249,7 +278,7 @@ export default class SocketManager implements MsgHookService {
 
 	//创建一个初始的会话
 	createSession(serverId: string): ClientSession {
-		let id = uuid.v4().replace(/-/g, "");
+		let id = nanoid();
 		let session: ClientSession = {
 			sessionId: id,
 			serverId,
@@ -263,5 +292,18 @@ export default class SocketManager implements MsgHookService {
 	//销毁会话
 	deleteSession(sessionId: SessionId) {
 		this.clientSessionMap.delete(sessionId);
+	}
+
+	//获取一个网络服务器
+	createNetServer(config: ServerConfig, cb?: any): ServerType {
+		let server = this.netServer.createServer(config, cb);
+
+		if (!server) {
+			let err = new Error(`create net server fail by ${JSON.stringify(config)}`);
+			this.logger.error(err);
+			throw err;
+		}
+
+		return server;
 	}
 }

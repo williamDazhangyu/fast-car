@@ -1,7 +1,7 @@
 import { SocketDisConnect, SocketServerConfig, SocketSession, SessionId, EncodeMsg, DecodeMsg } from "../../types/SocketConfig";
-import * as uuid from "uuid";
 import MsgHookService from "../MsgHookService";
 import { DecodeDefault, EncodeDefault } from "../../constant/SocketCodingDefault";
+import { ServerType } from "fastcar-server";
 
 //这边主要做对于各个集成的socket的一个约定
 export default abstract class SocketServer {

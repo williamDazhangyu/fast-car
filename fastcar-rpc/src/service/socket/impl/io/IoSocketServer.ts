@@ -20,8 +20,8 @@ export default class IoSocketServer extends SocketServer {
 	}
 
 	async listen(): Promise<void> {
-		this.server = new Server(this.config.extra);
-		this.server.listen(this.config.port);
+		let netServer: any = this.manager.createNetServer(this.config.server);
+		this.server = new Server(netServer, Object.assign({ transports: ["websocket"] }, this.config.extra));
 
 		//预处理连接认证
 		this.server.use(async (socket: Socket, next) => {
@@ -50,7 +50,6 @@ export default class IoSocketServer extends SocketServer {
 
 		this.server.on(SocketEvents.CONNECT, (socket: Socket) => {
 			let socketId = this.sessionMap.get(socket.id) || "";
-			console.log("socket id", socket.id);
 			if (!socketId) {
 				socket.disconnect(true);
 				return;
@@ -74,7 +73,7 @@ export default class IoSocketServer extends SocketServer {
 		await new Promise((resolve) => {
 			this.server.close((err) => {
 				if (err) {
-					console.error(err);
+					this.manager.getLogger().error(err);
 				}
 				resolve("OK");
 			});

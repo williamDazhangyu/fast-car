@@ -5,4 +5,5 @@ export enum SocketEvents {
 	DISCONNECT = "disconnect",
 	MESSAGE = "message", //接收消息
 	SetSession = "setSession", //更新session回话
+	CLOSE = "close",
 }

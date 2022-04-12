@@ -14,8 +14,6 @@
     "strict": true, //启用严格模式
   },
   "include": [
-    "src/**/*",
-    "test/**/*",
-    "src/types/*.d.ts",
+    "src/**/*"
   ]
 }
