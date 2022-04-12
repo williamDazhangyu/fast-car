@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-rpc",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "rpc,socket集成",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "target/index.js",
@@ -49,7 +49,7 @@
 		"aedes": "*",
 		"fastcar-core": "*",
 		"fastcar-server": "*",
-		"fastcar-timer'": "*",
+		"fastcar-timer": "*",
 		"mqtt": "*",
 		"socket.io": "*",
 		"socket.io-client": "*",
