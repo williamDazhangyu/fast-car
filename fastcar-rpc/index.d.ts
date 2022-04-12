@@ -1,4 +1,3 @@
-import RpcService from "./src/service/RpcAsyncService";
 import {
 	Middleware,
 	RetryConfig,
@@ -14,7 +13,7 @@ import {
 	RpcServerRequestType,
 	RpcUrl,
 } from "./src/types/RpcConfig";
-import { SocketClientConfig, SessionId, ClientSession } from "./src/types/SocketConfig";
+import { SocketClientConfig, SessionId, ClientSession, SocketServerConfig } from "./src/types/SocketConfig";
 import MsgClientHookService from "./src/service/MsgClientHookService";
 import { SocketClient } from "./src/service/socket/SocketClient";
 import { Logger } from "fastcar-core";
@@ -25,14 +24,22 @@ import MsgCallbackService from "./src/service/MsgCallbackService";
 export * from "./src/types/RpcConfig";
 export * from "./src/types/SocketConfig";
 export * from "./src/types/SocketEvents";
-export * from "./src/service/RpcAuthService";
-export * from "./src/service/RPCErrorService";
-export * from "./src/service/RpcAsyncService";
-
 export * from "./src/constant/RpcMetaData";
 export * from "./src/constant/RpcUrlData";
 export * from "./src/constant/SocketEnum";
 export * from "./src/constant/SocketSymbol";
+
+export interface RpcAuthService {
+	auth(username: string, password: string, config: SocketServerConfig): Promise<boolean>;
+}
+
+export interface RPCErrorService {
+	response(): Middleware;
+}
+
+export interface RpcAsyncService {
+	handleMsg(url: string, data: Object): Promise<Object | void>;
+}
 
 export class RpcClient implements MsgClientHookService {
 	protected client: SocketClient;
@@ -40,11 +47,11 @@ export class RpcClient implements MsgClientHookService {
 	protected serialId: number; //序列号
 	protected config: RpcClientConfig; //消息配置
 	protected checkStatus: boolean;
-	protected rpcService: RpcService;
+	protected rpcService: RpcAsyncService;
 	protected checkConnectTimer: number;
 	protected rpcLogger: Logger;
 
-	constructor(config: SocketClientConfig, rpcService: RpcService, retry?: RetryConfig);
+	constructor(config: SocketClientConfig, rpcService: RpcAsyncService, retry?: RetryConfig);
 
 	addSerialId(): number;
 

@@ -1,4 +1,4 @@
-import { EnableRPC } from "../annotation";
+import EnableRPC from "./annotation/EnableRpc";
 import RPC from "./annotation/RPC";
 import RPCAuth from "./annotation/RPCAuth";
 import RPCError from "./annotation/RPCError";
