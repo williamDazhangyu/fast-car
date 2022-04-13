@@ -1,5 +1,6 @@
 import { CommonConstant } from "../../constant/CommonConstant";
 import FastCarApplication from "../../FastCarApplication";
+import Logger from "../../interface/Logger";
 
 //日志实例
 export default function Log(category?: string) {
@@ -7,9 +8,9 @@ export default function Log(category?: string) {
 		let m = category || propertyKey;
 
 		Reflect.defineProperty(target, propertyKey, {
-			get: () => {
+			get: (): Logger => {
 				let app: FastCarApplication = Reflect.get(global, CommonConstant.FastcarApp);
-				return app ? app.getLogger(m) : null;
+				return app ? app.getLogger(m) : console;
 			},
 		});
 	};
