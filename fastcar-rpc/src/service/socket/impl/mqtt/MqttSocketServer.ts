@@ -114,9 +114,6 @@ export default class MqttSocketServer extends SocketServer {
 		return new Promise((resolve) => {
 			//根据协议转成想要的服务
 			let content = this.encode(msg);
-			if (typeof content != "string") {
-				content = content.toString();
-			}
 			socket.client.publish(
 				{
 					topic: "message",

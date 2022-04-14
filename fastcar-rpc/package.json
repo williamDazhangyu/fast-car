@@ -38,12 +38,12 @@
 		"fastcar-server": "^0.0.2",
 		"fastcar-timer": "^0.1.1",
 		"mqtt": "^4.3.7",
+		"nanoid": "^3.3.2",
 		"socket.io": "^4.4.1",
 		"socket.io-client": "^4.4.1",
 		"typescript": "^4.4.2",
 		"websocket-stream": "^5.5.2",
-		"ws": "^8.5.0",
-		"nanoid": "^3.3.2"
+		"ws": "^8.5.0"
 	},
 	"peerDependencies": {
 		"aedes": "*",
@@ -51,11 +51,11 @@
 		"fastcar-server": "*",
 		"fastcar-timer": "*",
 		"mqtt": "*",
+		"nanoid": "*",
 		"socket.io": "*",
 		"socket.io-client": "*",
 		"websocket-stream": "*",
-		"ws": "*",
-		"nanoid": "*"
+		"ws": "*"
 	},
 	"repository": {
 		"type": "git",

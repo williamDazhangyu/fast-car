@@ -1,6 +1,6 @@
-import { RPCAuth } from "../../../../annotation";
 import { SocketServerConfig } from "../../../../src";
 import RpcAuthService from "../../../../src/service/RpcAuthService";
+import RPCAuth from "../../../../src/annotation/RPCAuth";
 
 @RPCAuth
 export default class Auth implements RpcAuthService {

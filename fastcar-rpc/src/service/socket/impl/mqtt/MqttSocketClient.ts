@@ -35,7 +35,7 @@ export default class MqttSocketClient extends SocketClient {
 				this.connected = true;
 				this.sessionId = message.toString();
 			} else {
-				this.receiveMsg(message.toString());
+				this.receiveMsg(message);
 			}
 		});
 
