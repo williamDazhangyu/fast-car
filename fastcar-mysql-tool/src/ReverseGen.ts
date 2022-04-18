@@ -201,7 +201,7 @@ class ReverseGenerate {
 
 		//求相对路径
 		let rp = path.relative(mapperDir, modelDir);
-		rp = rp.replace(/\\/g, "/"); //系统不一致时 分隔符替换
+		rp = rp.replace(/\\/g, "/") || "."; //系统不一致时 分隔符替换
 
 		for (let name of tables) {
 			let res = await dbres.query(DESCSQL, [name, dbConfig.database]);
