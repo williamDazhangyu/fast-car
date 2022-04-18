@@ -24,11 +24,11 @@ export default class ClassLoader {
 		//可能不止一个方法
 		const modulesMap = new Map<string, Object>();
 		//进行方法加载
-		let moduleClass = require.cache?.filePath || require(filePath);
+		let moduleClass = require(filePath);
 		let keys = Object.keys(moduleClass);
 		let fileName = FileUtil.getFileName(filePath);
 
-		keys.forEach(key => {
+		keys.forEach((key) => {
 			let instance = moduleClass[key];
 
 			if (TypeUtil.isFunction(instance)) {
@@ -50,9 +50,8 @@ export default class ClassLoader {
 		}
 
 		//添加热更方法
-		fs.watch(fp, function(event, filename) {
+		fs.watch(fp, function (event, filename) {
 			if (event === "change") {
-				console.log("热更加载----", filename);
 				context.emit("reload", fp);
 			}
 		});

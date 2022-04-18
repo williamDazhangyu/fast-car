@@ -1,4 +1,5 @@
 import * as Events from "events";
+import { SYSConfig } from "./src/config/SysConfig";
 import { ComponentKind } from "./src/constant/ComponentKind";
 import { LifeCycleModule } from "./src/constant/LifeCycleModule";
 import { ProcessType } from "./src/type/ProcessType";
@@ -9,23 +10,15 @@ declare type FIELDTYPE = {
 	compare?: Function;
 };
 
-declare type SYSConfig = {
-	application: ApplicationConfig; //应用配置
-	settings: Map<string | symbol, any>; //自定义设置项
-};
-
-declare type ApplicationConfig = {
-	name: string;
-	env: string;
-	version: string;
-	hotter?: boolean;
-};
-
 declare type ComponentDesc = {
 	id: string;
 	name: string;
 	path: string;
 };
+
+export * from "./src/config/SysConfig";
+
+export * from "./src/config/ApplicationConfig";
 
 export * from "./src/constant/LifeCycleModule";
 

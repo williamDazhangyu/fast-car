@@ -14,7 +14,6 @@ export const SYSDefaultConfig: SYSConfig = {
 		name: "app",
 		env: "development",
 		version: "1.0.0",
-		hotter: false,
 	},
 	settings: new Map<string, Object>(), //自定义配置
 };

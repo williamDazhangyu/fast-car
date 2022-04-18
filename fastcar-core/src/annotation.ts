@@ -40,6 +40,7 @@ import Log from "./annotation/stereotype/Log";
 import BaseFilePath from "./annotation/env/BaseFilePath";
 import BasePath from "./annotation/env/BasePath";
 import CallDependency from "./annotation/Calldependency";
+import Hotter from "./annotation/scan/Hotter";
 
 //注解暴露出去
 export {
@@ -49,6 +50,7 @@ export {
 	ComponentScanExclusion,
 	Component,
 	ComponentInjection,
+	Hotter,
 	BeanName,
 	Configure,
 	Controller,

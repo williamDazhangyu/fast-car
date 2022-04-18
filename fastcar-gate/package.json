@@ -1,0 +1,41 @@
+{
+	"name": "fastcar-gate",
+	"version": "0.0.1",
+	"description": "网关适配器",
+	"main": "index.js",
+	"author": "william_zhong",
+	"license": "MIT",
+	"private": false,
+	"types": "index.d.ts",
+	"exports": {
+		".": "./target/index.js",
+		"./annotation": "./target/annotation.js"
+	},
+	"files": [
+		"src",
+		"target",
+		"test",
+		"index.d.ts",
+		"annotation.d.ts",
+		"LICENSE"
+	],
+	"keywords": [
+		"gate",
+		"fastcar-core",
+		"fastcar-koa"
+	],
+	"engines": {
+		"node": ">=16"
+	},
+	"peerDependencies": {
+		"fastcar-core": "*",
+		"fastcar-rpc": "*"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/williamDazhangyu/fast-car.git"
+	},
+	"scripts": {
+		"build": "tsc"
+	}
+}

@@ -38,6 +38,8 @@ Component 标注为组件
 
 ComponentInjection  自定义组件入口
 
+Hotter 指定热更新类 0.2.13 版本生效
+
 BeanName 指明组件名称(每个组件具有一个系统生成id为"类名:16位随机值",为了便于调用可自定义逻辑名)
 
 Configure 表明为配置组件
@@ -244,6 +246,21 @@ export default class CallService {
 
  sayHello() {
   return this.hello.say();
+ }
+}
+```
+
+```ts
+//指定文件热更新
+@Controller
+@Hotter //实例会被热更新或者在sesttings配置中配置 hotter为true
+export default class IndexController {
+ @Autowired
+ private exampleService!: ExampleService;
+
+ @GET("/")
+ index() {
+  return Result.ok("hello world");
  }
 }
 ```

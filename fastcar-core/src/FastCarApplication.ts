@@ -22,6 +22,7 @@ import Logger from "./interface/Logger";
 import { ComponentDesc } from "./type/ComponentDesc";
 import DateUtil from "./utils/DateUtil";
 import { ProcessType } from "./type/ProcessType";
+import { FileHotterDesc } from "./type/FileHotterDesc";
 
 @Component
 class FastCarApplication extends Events {
@@ -34,6 +35,7 @@ class FastCarApplication extends Events {
 	protected sysLogger!: winston.Logger;
 	protected componentDeatils: Map<string | symbol, ComponentDesc>; //读取路径  名称
 	protected liveTime: number;
+	protected watchFiles: Map<string, FileHotterDesc[]>;
 
 	constructor() {
 		super();
@@ -43,6 +45,7 @@ class FastCarApplication extends Events {
 		this.componentDeatils = new Map();
 		this.applicationStatus = AppStatusEnum.READY;
 		this.liveTime = Date.now();
+		this.watchFiles = new Map();
 
 		this.loadSelf();
 		this.addHot();
@@ -79,9 +82,10 @@ class FastCarApplication extends Events {
 			}
 
 			let moduleClass = ClassLoader.loadModule(fp, true);
+			this.sysLogger.info("hot update---" + fp);
 			if (moduleClass != null) {
-				moduleClass.forEach((func, name) => {
-					this.convertInstance(func, name);
+				moduleClass.forEach((func) => {
+					this.convertInstance(func, fp);
 				});
 			}
 		});
@@ -263,6 +267,19 @@ class FastCarApplication extends Events {
 		}
 	}
 
+	getInjectionUniqueKeyByFilePath(fp: string, name: string): string | symbol | null {
+		let list = this.watchFiles.get(fp);
+		if (list) {
+			for (let item of list) {
+				if (item.name == name) {
+					return item.key;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	/***
 	 * @version 1.0 转成实例对象
 	 * @version 1.0.1 新增加载时识别载入配置选项
@@ -272,15 +289,19 @@ class FastCarApplication extends Events {
 		//只有依赖注入的组件才能被实例化
 		let instanceKey = Reflect.getMetadata(FastCarMetaData.InjectionUniqueKey, classZ);
 		if (!!instanceKey) {
-			let beforeInstance = this.componentMap.get(instanceKey);
-			if (!!beforeInstance) {
-				MixTool.assign(beforeInstance, classZ);
-				return;
+			let iname = classZ?.name || FileUtil.getFileName(fp);
+			let beforeKey = this.getInjectionUniqueKeyByFilePath(fp, iname);
+
+			if (beforeKey) {
+				let beforeInstance = this.componentMap.get(beforeKey);
+				if (!!beforeInstance) {
+					MixTool.assign(beforeInstance, classZ);
+					return;
+				}
 			}
 
 			//判断是否需要加载对应配置
 			let cp = Reflect.getMetadata(LifeCycleModule.LoadConfigure, classZ);
-
 			if (cp) {
 				let rfp = path.join(this.getResourcePath(), cp);
 				let tmpConfig = FileUtil.getResource(rfp);
@@ -317,7 +338,18 @@ class FastCarApplication extends Events {
 
 			//判断是否需要热更加载
 			if (this.isHotter() || Reflect.getMetadata(FastCarMetaData.Hotter, instance)) {
-				ClassLoader.watchServices(fp, this);
+				let fpObj = this.watchFiles.get(fp);
+				let fpdesc = {
+					key: instanceKey,
+					name: iname,
+				};
+				if (!fpObj) {
+					fpObj = [fpdesc];
+					ClassLoader.watchServices(fp, this);
+					this.watchFiles.set(fp, fpObj);
+				} else {
+					fpObj.push(fpdesc);
+				}
 			}
 		}
 	}

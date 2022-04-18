@@ -38,6 +38,7 @@ export function ApplicationStop(order?: number, exec?: string): Ret;
 export function ComponentScan(...names: string[]): Ret;
 export function ComponentScanExclusion(...names: string[]): Ret;
 export function ComponentInjection(target: any, ...names: string[]): void;
+export function Hotter(target: any): void;
 
 /***
  * 用于描述不同组件的作用类
