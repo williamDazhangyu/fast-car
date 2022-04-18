@@ -201,10 +201,14 @@ class ReverseGenerate {
 
 		//求相对路径
 		let rp = path.relative(mapperDir, modelDir);
+		rp = rp.replace(/\\/g, "/"); //系统不一致时 分隔符替换
 
 		for (let name of tables) {
 			let res = await dbres.query(DESCSQL, [name, dbConfig.database]);
 			let row: any = res[0];
+			if (!row || !Array(row) || row.length == 0) {
+				throw new Error("The table does not exist or is empty");
+			}
 			ReverseGenerate.genModel(name, modelDir, row, style);
 			ReverseGenerate.genMapper(name, mapperDir, rp, style);
 		}
