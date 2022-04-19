@@ -115,7 +115,7 @@ class ReverseGenerate {
 						break;
 					}
 					case "boolean": {
-						tsValue = `${formatName}:${tsType}=${!!field.COLUMN_DEFAULT};`;
+						tsValue = `${formatName}:${tsType}=${!!parseInt(field.COLUMN_DEFAULT)};`;
 						break;
 					}
 					case "Date": {
