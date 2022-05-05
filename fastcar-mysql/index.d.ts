@@ -1,58 +1,10 @@
 import { FastCarApplication, Logger } from "fastcar-core";
 import * as mysql from "mysql2";
-import { DBMapper, OrderType, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "fastcar-core/db";
+import { DBMapper, MapperType, OrderType, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "fastcar-core/db";
 import { MySqlConfig } from "./src/type/SqlConfig";
 import { DataSourceManager } from "fastcar-core/db";
 
-export enum DataTypeEnum {
-	tinyint = "boolean", //这边做一个约定为tinyint的时候为boolean类型
-	smallint = "number",
-	mediumint = "number",
-	int = "number",
-	integer = "number",
-	bigint = "number",
-	float = "number",
-	double = "number",
-	decimal = "number",
-
-	date = "Date",
-	time = "string",
-	year = "string",
-	datetime = "Date",
-	timestamp = "Date",
-
-	char = "string",
-	varchar = "string",
-	tinyblob = "string",
-	tinytext = "string",
-	blob = "string",
-	text = "string",
-	mediumblob = "string",
-	mediumtext = "string",
-	longblob = "string",
-	longtext = "string",
-}
-
-export enum DesignMeta {
-	table = "db:table", //表名
-	field = "db:field", //列名
-	fieldMap = "db:fieldMap", //注入列名集合
-	dbType = "db:dbType", //数据类型
-	primaryKey = "db:primaryKey", //主键类型
-	entity = "db:entity", //实例化的数据库类
-	mapping = "db:mapping", //映射描述
-	dbFields = "db:fields", //数据库名-ts名
-	sqlSession = "SqlSession", //sql会话
-}
-
-declare type MapperType = {
-	name: string; //变量名称
-	type: string; //类型
-	field: string; //数据库列名
-	dbType: string; //数据类型
-	primaryKey?: boolean; //是否为主键 默认为false
-	serialize?: Function; //序列化对象方法
-};
+export * from "./src/type/DataTypeEnum";
 
 declare type SqlExecType = {
 	sql: string;
