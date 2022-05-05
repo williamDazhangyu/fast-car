@@ -248,10 +248,13 @@ export class ValidError {
 	message?: string;
 }
 
-export class DataMap<K, V extends Object> extends Map {
+export class DataMap<K, V extends Object> extends Map<K, V> {
 	toValues(): V[];
 
 	toKeys(): K[];
+
+	//构造一个字典对象
+	toObject(): { [key: number | string | symbol]: V };
 
 	//自定义排序 支持多个排序
 	sort(sorts?: FIELDTYPE[], list?: V[]): V[];
@@ -261,5 +264,5 @@ export class DataMap<K, V extends Object> extends Map {
 	 * @params atts代表属性键值对匹配
 	 *
 	 */
-	findByAtts(atts: { [key: string]: any }): V[];
+	findByAtts(atts: { [key: number | string | symbol]: any }): V[];
 }

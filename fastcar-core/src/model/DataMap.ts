@@ -4,7 +4,7 @@ export type FIELDTYPE = {
 	compare?: Function;
 };
 
-export default class DataMap<K, V extends Object> extends Map {
+export default class DataMap<K, V extends Object> extends Map<K, V> {
 	constructor() {
 		super();
 	}
@@ -15,6 +15,15 @@ export default class DataMap<K, V extends Object> extends Map {
 
 	toKeys(): K[] {
 		return [...this.keys()];
+	}
+
+	toObject(): { [key: number | string | symbol]: V } {
+		let o = {};
+		this.forEach((v, k: any) => {
+			Reflect.set(o, k, v);
+		});
+
+		return o;
 	}
 
 	//自定义排序 支持多个排序
@@ -58,15 +67,45 @@ export default class DataMap<K, V extends Object> extends Map {
 	 * @params atts代表属性键值对匹配
 	 *
 	 */
-	findByAtts(atts: { [key: string]: any }): V[] {
-		let list = this.toValues();
-		return list.filter(item => {
-			return Object.keys(atts).every(key => {
-				let v = Reflect.get(atts, key);
-				let itemV = Reflect.get(item, key);
+	findByAtts(atts: { [key: number | string | symbol]: any }): V[] {
+		let list: V[] = [];
+		let keys = Object.keys(atts);
 
-				return itemV == v;
+		this.forEach((item) => {
+			let flag = keys.every((key) => {
+				let v = Reflect.get(atts, key);
+
+				//这边判断 是不是一个复合属性
+				if (Reflect.has(item, key)) {
+					let itemV = Reflect.get(item, key);
+					return itemV == v;
+				} else {
+					let keyList = key.split(".");
+					if (keyList.length > 1) {
+						let tmpV: any = item;
+						let f = keyList.every((tk) => {
+							if (!Reflect.has(tmpV, tk)) {
+								return false;
+							}
+							tmpV = Reflect.get(tmpV, tk);
+							return true;
+						});
+
+						if (!f) {
+							return false;
+						}
+
+						return tmpV == v;
+					}
+				}
+
+				return false;
 			});
+			if (flag) {
+				list.push(item);
+			}
 		});
+
+		return list;
 	}
 }

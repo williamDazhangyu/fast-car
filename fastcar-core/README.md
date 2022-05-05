@@ -265,6 +265,56 @@ export default class IndexController {
 }
 ```
 
+```ts
+//改造一个好用的map-list数据链表
+import { DataMap } from "fastcar-core";
+
+describe("数据集合测试", () => {
+ it("数据集合", () => {
+      type User = {
+        uid: number;
+        name: string;
+        desc?: {
+          detail: string;
+        };
+      };
+
+      let n: DataMap<number, User> = new DataMap();
+      n.set(1, {
+        uid: 1,
+        name: "小明",
+      });
+      n.set(2, {
+        uid: 2,
+        name: "小王",
+        desc: {
+          detail: "住在隔壁",
+        },
+      });
+
+      let xiaoming = n.get(1);
+      console.log(xiaoming?.name == "小明"); //true
+
+      let oo: { [key: number]: User } = n.toObject(); //序列化为一个key-value的对象
+      console.log(oo[1]); // 小明
+
+      let searchList = n.findByAtts({ uid: 1 }); //查找单一对象
+      console.log(searchList);
+
+      let searchList2 = n.findByAtts({ "desc.detail": "住在隔壁" }); 
+      console.log(searchList2);
+
+      let sortList = n.sort([
+        {
+          field: "uid",
+          order: true, //true为倒序
+        },
+      ]);
+      console.log(sortList);  //支持多重fields的排序 越在前面排序优先级越高
+ });
+});
+```
+
 ## 更多用法
 
 参考项目git地址 fastcar-core/test 下的simple内

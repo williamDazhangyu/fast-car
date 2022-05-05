@@ -8,8 +8,8 @@ import ValidationUtil from "../../utils/ValidationUtil";
 export default function AddChildValid(target: any, name: string, value: { [key: string]: any }, index?: number) {
 	let childMap: Map<string, FormRuleModel>;
 
-	let alias = `${name}-${index}`;
 	let paramsFlag = ValidationUtil.isNumber(index);
+	let alias = paramsFlag ? `${name}-${index}` : name;
 	if (paramsFlag) {
 		childMap = Reflect.getMetadata(FastCarMetaData.ValidChildFormRules, target, alias);
 		if (!childMap) {
@@ -49,7 +49,7 @@ export default function AddChildValid(target: any, name: string, value: { [key: 
 	//自定义方法合并
 	if (Reflect.has(value, "filters")) {
 		if (Array.isArray(item.filters)) {
-			item.filters.forEach(f => {
+			item.filters.forEach((f) => {
 				value.filters.push(f);
 			});
 		}
