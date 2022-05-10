@@ -74,18 +74,19 @@ export default class ValidationUtil {
 			return false;
 		}
 
-		let UpType = FormatStr.formatFirstToUp(type);
-		let m = `is${UpType}`;
-
-		//如果没有该方法 则返回true
-		if (!Reflect.has(ValidationUtil, m)) {
-			return true;
+		//修正校验数组的错误
+		if (type.startsWith("array")) {
+			type = type.replace(/array/, "");
 		}
 
-		let checkFun = Reflect.get(ValidationUtil, m);
-		return param.every(item => {
-			return Reflect.apply(checkFun, ValidationUtil, [item]);
-		});
+		let checkFun: any = this.getCheckFun(type);
+		if (checkFun) {
+			return param.every((item) => {
+				return Reflect.apply(checkFun, ValidationUtil, [item]);
+			});
+		}
+
+		return true;
 	}
 
 	static getCheckFun(type: DataTypes | string): Function | null {

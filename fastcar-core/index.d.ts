@@ -254,7 +254,7 @@ export class DataMap<K, V extends Object> extends Map<K, V> {
 	toKeys(): K[];
 
 	//构造一个字典对象
-	toObject(): { [key: number | string | symbol]: V };
+	toObject(): { [key: string]: V };
 
 	//自定义排序 支持多个排序
 	sort(sorts?: FIELDTYPE[], list?: V[]): V[];
@@ -264,5 +264,5 @@ export class DataMap<K, V extends Object> extends Map<K, V> {
 	 * @params atts代表属性键值对匹配
 	 *
 	 */
-	findByAtts(atts: { [key: number | string | symbol]: any }): V[];
+	findByAtts(atts: { [key: string]: any }): V[];
 }

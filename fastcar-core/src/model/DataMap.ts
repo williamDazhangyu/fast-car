@@ -17,7 +17,7 @@ export default class DataMap<K, V extends Object> extends Map<K, V> {
 		return [...this.keys()];
 	}
 
-	toObject(): { [key: number | string | symbol]: V } {
+	toObject(): { [key: string]: V } {
 		let o = {};
 		this.forEach((v, k: any) => {
 			Reflect.set(o, k, v);
@@ -67,7 +67,7 @@ export default class DataMap<K, V extends Object> extends Map<K, V> {
 	 * @params atts代表属性键值对匹配
 	 *
 	 */
-	findByAtts(atts: { [key: number | string | symbol]: any }): V[] {
+	findByAtts(atts: { [key: string]: any }): V[] {
 		let list: V[] = [];
 		let keys = Object.keys(atts);
 
