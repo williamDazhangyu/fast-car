@@ -1,0 +1,17 @@
+{
+	"name": "fastcar-workerpool",
+	"version": "0.0.1",
+	"description": "工作线程方法包装",
+	"main": "index.js",
+	"author": "william_zhong",
+	"license": "MIT",
+	"devDependencies": {
+		"fastcar-core": "^0.2.14"
+	},
+	"peerDependencies": {
+		"fastcar-core": "*"
+	},
+	"scripts": {
+		"build": "tsc"
+	}
+}
