@@ -17,6 +17,14 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		super();
 	}
 
+	//修正关键词的别名需转义的错误
+	protected getFieldName(name: string): string {
+		let info = this.mappingMap.get(name);
+		let alias = info ? info.field : name;
+
+		return `\`${alias}\``;
+	}
+
 	//自动映射数据库字段
 	//兼容不小心传了数据的值
 	protected toDBValue(v: any, key: string, type: string): any {
@@ -41,7 +49,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			return "*";
 		}
 
-		let list = fields.map(item => {
+		let list = fields.map((item) => {
 			return this.getFieldName(item);
 		});
 		return list.join(",");
@@ -99,7 +107,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 				let clist: string[] = Array.of();
 				let alias = this.getFieldName(key);
 
-				Object.keys(ov).forEach(operatorKeys => {
+				Object.keys(ov).forEach((operatorKeys) => {
 					let operatorValue = Reflect.get(ov, operatorKeys);
 					let formatOperatorKeys = operatorKeys.toUpperCase();
 
@@ -162,7 +170,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	protected analysisGroups(groups: string[] = []): string {
 		if (groups.length > 0) {
 			let list: string[] = [];
-			groups.forEach(i => {
+			groups.forEach((i) => {
 				let key = i.toString();
 				let alias = this.getFieldName(key);
 				list.push(`${alias}`);
@@ -179,7 +187,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 		if (keys.length > 0) {
 			let list: string[] = [];
-			keys.forEach(i => {
+			keys.forEach((i) => {
 				let key = i.toString();
 				let alias = this.getFieldName(key);
 				list.push(`${alias} ${orders[key]}`);
@@ -193,7 +201,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 	protected analysisRow(row: RowData): RowType | null {
 		let str: string[] = [];
-		let args = Object.keys(row).map(key => {
+		let args = Object.keys(row).map((key) => {
 			let alias = this.getFieldName(key);
 			str.push(`${alias} = ?`);
 
@@ -247,7 +255,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 	protected setRows(rowDataList: Object[]): T[] {
 		let list: T[] = Array.of();
-		rowDataList.forEach(item => {
+		rowDataList.forEach((item) => {
 			list.push(this.setRow(item));
 		});
 
@@ -269,7 +277,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let afterKeys: string[] = Array.of();
 		let beforeKeys: string[] = Array.of();
 
-		this.mappingList.forEach(item => {
+		this.mappingList.forEach((item) => {
 			let fieldKey = `\`${item.field}\``;
 			beforeKeys.push(fieldKey);
 			if (!item.primaryKey) {
@@ -329,7 +337,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		}
 
 		let keys: string[] = Array.of();
-		this.mappingList.forEach(item => {
+		this.mappingList.forEach((item) => {
 			keys.push(`\`${item.field}\``);
 		});
 
@@ -343,7 +351,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			let args: any[] = [];
 
 			tpmList.forEach((row: T) => {
-				this.mappingList.forEach(item => {
+				this.mappingList.forEach((item) => {
 					args.push(this.toDBValue(row, item.name, item.type));
 				});
 				paramsList.push(`(${paramsStr})`);
@@ -536,7 +544,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 	async deleteByPrimaryKey(row: T, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		let conditions = {};
-		this.mappingList.forEach(item => {
+		this.mappingList.forEach((item) => {
 			if (item.primaryKey) {
 				let value = Reflect.get(row, item.name);
 				if (ValidationUtil.isNotNull(value)) {

@@ -4,10 +4,10 @@ import MysqlDataSource from "./MysqlDataSource";
 import { ApplicationStart, ApplicationStop, Autowired, Log } from "fastcar-core/annotation";
 import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
 import * as mysql from "mysql2/promise";
-import * as uuid from "uuid";
 import { EnableScheduling, ScheduledInterval, TimeUnit } from "fastcar-timer";
 import { BeanName } from "fastcar-core/annotation";
 import { DataSourceManager, SqlError } from "fastcar-core/db";
+import { nanoid } from "nanoid";
 
 const SELECT = "SELECT";
 const select = "select";
@@ -68,7 +68,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 
 	stop(): void {
 		//结束销毁
-		this.sourceMap.forEach(db => {
+		this.sourceMap.forEach((db) => {
 			db.close();
 		});
 		this.sourceMap.clear();
@@ -79,7 +79,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 			return;
 		}
 
-		this.config.dataSoucreConfig.forEach(item => {
+		this.config.dataSoucreConfig.forEach((item) => {
 			let source = item.source;
 			if (this.sourceMap.has(source)) {
 				return;
@@ -99,7 +99,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 
 			//将不必要的属性不要传给mysql了
 			let tmpConfig = Object.assign({}, item);
-			["source", "readDefault", "writeDefault", "default"].forEach(key => {
+			["source", "readDefault", "writeDefault", "default"].forEach((key) => {
 				Reflect.deleteProperty(tmpConfig, key);
 			});
 
@@ -118,7 +118,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 
 	//创建session会话 用于事务的管理
 	createSession(): string {
-		let sessionId = "SQL:" + uuid.v4().replace(/-/g, "");
+		let sessionId = "SQL:" + nanoid;
 		let connMap = new Map<string, mysql.PoolConnection[]>();
 		Reflect.set(this, sessionId, connMap);
 		this.sessionList.set(sessionId, Date.now());
@@ -140,7 +140,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 		if (connMap) {
 			for (let [ds, conns] of connMap) {
 				let db = this.getDataSoucreByName(ds);
-				conns.forEach(async conn => {
+				conns.forEach(async (conn) => {
 					status ? await db?.rollback(conn) : await db?.commit(conn);
 					db?.releaseConnection(conn);
 				});
@@ -292,7 +292,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 			}
 
 			if (cleanSessions.length > 0) {
-				cleanSessions.forEach(async sessionId => {
+				cleanSessions.forEach(async (sessionId) => {
 					this.sysLogger.error(`${sessionId}: The session was longer than ${sessionTimeOut} milliseconds`);
 					this.destorySession(sessionId, true);
 				});
