@@ -1,5 +1,4 @@
 import { DataTypes } from "../constant/DataTypes";
-import FormatStr from "./FormatStr";
 import TypeUtil from "./TypeUtil";
 //类型校验器
 export default class ValidationUtil {

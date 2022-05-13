@@ -1,0 +1,43 @@
+{
+	"name": "fastcar-cache",
+	"version": "0.0.1",
+	"homepage": "https://github.com/williamDazhangyu/fast-car",
+	"description": "应用内缓存",
+	"main": "target/index.js",
+	"author": "william_zhong",
+	"license": "MIT",
+	"types": "index.d.ts",
+	"exports": {
+		".": "./target/index.js"
+	},
+	"files": [
+		"src",
+		"target",
+		"test",
+		"index.d.ts",
+		"LICENSE"
+	],
+	"keywords": [
+		"fastcar-core",
+		"cache"
+	],
+	"engines": {
+		"node": ">=16"
+	},
+	"devDependencies": {
+		"fastcar-core": "^0.2.14",
+		"fastcar-mysql": "^0.1.11",
+		"fastcar-timer": "^0.1.1"
+	},
+	"peerDependencies": {
+		"fastcar-core": "*",
+		"fastcar-timer": "*"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/williamDazhangyu/fast-car.git"
+	},
+	"scripts": {
+		"build": "tsc"
+	}
+}
