@@ -124,7 +124,9 @@ class FastCarApplication extends Events {
 						let beforeConfig = this.sysConfig.settings.get(key);
 						if (beforeConfig) {
 							//对settings的属性进行覆盖
-							afterConfig = Object.assign(beforeConfig, afterConfig);
+							if (typeof beforeConfig == "object") {
+								afterConfig = Object.assign(beforeConfig, afterConfig);
+							}
 						}
 						this.sysConfig.settings.set(key, afterConfig);
 					});
