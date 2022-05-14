@@ -80,6 +80,30 @@ export default class CacheApplication {
 		return mapping.data.get(key);
 	}
 
+	delete(store: string, key: string): boolean {
+		let mapping = this.getStore(store);
+
+		if (!mapping) {
+			return false;
+		}
+
+		mapping.data.delete(key);
+
+		if (mapping.ttlMap.has(key)) {
+			mapping.ttlMap.delete(key);
+		}
+
+		if (mapping.syncMap?.has(key)) {
+			mapping.syncMap.delete(key);
+		}
+
+		if (mapping.dbClient) {
+			mapping.dbClient.mdelete([key]);
+		}
+
+		return true;
+	}
+
 	//获取是否存在key
 	has(store: string, key: string): boolean {
 		let mapping = this.getStore(store);

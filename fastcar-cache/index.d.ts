@@ -6,7 +6,7 @@ export * from "./src/CacheType";
 
 export function CacheMapping(target: CacheConfigTarget): Ret;
 
-export function EnableCache(target: any): Ret;
+export function EnableCache(target: any): void;
 
 export class FSClient implements DBClientService {
 	private filepath: string;
@@ -41,6 +41,9 @@ export default class CacheApplication {
 
 	//获取数据
 	get(store: string, key: string): null | any;
+
+	//删除数据
+	delete(store: string, key: string): boolean;
 
 	//获取是否存在key
 	has(store: string, key: string): boolean;
