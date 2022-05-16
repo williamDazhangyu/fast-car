@@ -17,7 +17,7 @@ export type DBItem = {
 export type Item = {
 	key: string;
 	value: any;
-	ttl: number;
+	ttl: number; //对外暴露为秒 放入程序中运行为ms
 };
 
 export interface CacheConfigTarget {

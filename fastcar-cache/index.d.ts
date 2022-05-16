@@ -1,10 +1,8 @@
-type Ret = (target: any) => void;
-
 import { CacheConfig, CacheConfigTarget, CacheSetOptions, DBItem, Item } from "./src/CacheType";
 
 export * from "./src/CacheType";
 
-export function CacheMapping(target: CacheConfigTarget): Ret;
+export function CacheMapping(target: CacheConfigTarget): void;
 
 export function EnableCache(target: any): void;
 
@@ -28,7 +26,7 @@ export interface DBClientService {
 	mdelete(keys: string[]): Promise<boolean>;
 }
 
-export default class CacheApplication {
+export class CacheApplication {
 	constructor();
 
 	//创造节点

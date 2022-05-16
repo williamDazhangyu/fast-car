@@ -237,7 +237,8 @@ export default class CacheApplication {
 					item.data.set(l.key, l.value);
 					if (l.ttl > 0) {
 						if (item.dbClient) {
-							item.ttlMap.set(l.key, l.ttl);
+							//由秒转化为毫秒
+							item.ttlMap.set(l.key, l.ttl * 1000);
 						}
 					}
 				});
