@@ -95,7 +95,7 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 	protected dsm: MysqlDataSourceManager;
 
 	//获取数据库别名通过代码内的名称
-	protected getFieldName(name: string): string;
+	getFieldName(name: string): string;
 
 	//自动映射数据库字段
 	protected toDBValue(v: any, key: string, type: string): any;

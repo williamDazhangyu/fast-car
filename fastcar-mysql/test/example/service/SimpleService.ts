@@ -104,6 +104,13 @@ class SimpleService {
 	async queryIds() {
 		return await this.myMapper.select({ where: { id: [2, 3] } });
 	}
+
+	//测试函数名的转义
+	async callFunction() {
+		return await this.myMapper.select({
+			fields: ["MAX(id) as id"],
+		});
+	}
 }
 
 export default SimpleService;
