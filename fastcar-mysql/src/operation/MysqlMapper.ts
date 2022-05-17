@@ -22,6 +22,11 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let info = this.mappingMap.get(name);
 		let alias = info ? info.field : name;
 
+		//转义不转换函数
+		if (alias.match(/\((.+?)\)/g)) {
+			return alias;
+		}
+
 		return `\`${alias}\``;
 	}
 
