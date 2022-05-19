@@ -41,11 +41,17 @@ import BaseFilePath from "./annotation/env/BaseFilePath";
 import BasePath from "./annotation/env/BasePath";
 import CallDependency from "./annotation/Calldependency";
 import Hotter from "./annotation/scan/Hotter";
+import ApplicationRunner from "./annotation/lifeCycle/ApplicationRunner";
+import ApplicationInit from "./annotation/lifeCycle/ApplicationInit";
+import ApplicationDestory from "./annotation/lifeCycle/ApplicationDestory";
 
 //注解暴露出去
 export {
 	ApplicationStart,
 	ApplicationStop,
+	ApplicationRunner,
+	ApplicationInit,
+	ApplicationDestory,
 	ComponentScan,
 	ComponentScanExclusion,
 	Component,

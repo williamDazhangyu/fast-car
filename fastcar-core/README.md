@@ -30,6 +30,12 @@ ApplicationStart 用于在程序启动后调用
 
 ApplicationStop 用于在程序停止前调用
 
+ApplicationRunner 用于声明程序是否在系统中启动
+
+ApplicationInit  用于在程序启动后调用
+
+ApplicationDestory 用于在程序停止前调用
+
 ComponentScan 用于需要扫描的路径
 
 ComponentScanExclusion 用于排除需要扫描的路径
@@ -176,6 +182,17 @@ export default class StartRunner {
     run() {
         console.info("服务启动后调用的方法");
     }
+}
+```
+
+```ts
+//声明周期内运行
+@ApplicationRunner
+export default class StartRunner {
+ @ApplicationInit() //可绑定多个方法
+ run() {
+  console.info("服务启动后调用的方法");
+ }
 }
 ```
 

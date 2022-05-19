@@ -23,6 +23,7 @@ import { ComponentDesc } from "./type/ComponentDesc";
 import DateUtil from "./utils/DateUtil";
 import { ProcessType } from "./type/ProcessType";
 import { FileHotterDesc } from "./type/FileHotterDesc";
+import { LifeCycleType } from "./annotation/lifeCycle/AddLifeCycleItem";
 
 @Component
 class FastCarApplication extends Events {
@@ -542,20 +543,20 @@ class FastCarApplication extends Events {
 	 * @version 1.0 自动调用方法
 	 */
 	async automaticRun(name: LifeCycleModule) {
-		let list = [];
-		for (let [key, item] of this.componentMap) {
+		let list: (LifeCycleType & { item: any })[] = [];
+		this.componentMap.forEach((item) => {
 			let runInfo = Reflect.hasMetadata(name, item);
 			if (runInfo) {
-				let { order, exec } = Reflect.getMetadata(name, item);
-				if (TypeUtil.isFunction(item[exec])) {
+				let childList: LifeCycleType[] = Reflect.getMetadata(name, item);
+				childList.forEach((citem) => {
 					list.push({
-						order,
-						exec,
+						order: citem.order,
+						exec: citem.exec,
 						item,
 					});
-				}
+				});
 			}
-		}
+		});
 
 		list.sort((a, b) => {
 			return a.order - b.order;

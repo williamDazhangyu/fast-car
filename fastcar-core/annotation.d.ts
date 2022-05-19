@@ -31,6 +31,9 @@ export function ENV(name: string): Ret;
  */
 export function ApplicationStart(order?: number, exec?: string): Ret;
 export function ApplicationStop(order?: number, exec?: string): Ret;
+export function ApplicationRunner(target: any): void;
+export function ApplicationInit(order?: number): MRet;
+export function ApplicationDestory(order?: number): MRet;
 
 /***
  * 组件模块扫描类

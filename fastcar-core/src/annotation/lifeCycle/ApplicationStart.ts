@@ -1,6 +1,7 @@
 import { BootPriority } from "../../constant/BootPriority";
 import { LifeCycleModule } from "../../constant/LifeCycleModule";
-import Component from "../stereotype/Component";
+import { AddLifeCycleItem } from "./AddLifeCycleItem";
+import ApplicationRunner from "./ApplicationRunner";
 
 /****
  * @version 1.0 在应用启动后自动执行
@@ -8,18 +9,15 @@ import Component from "../stereotype/Component";
  * @params exec 执行方法
  */
 export default function ApplicationStart(order: number = BootPriority.Sys, exec: string = "run") {
-	return function(target: any) {
+	return function (target: any) {
 		if (!Reflect.has(target.prototype, exec)) {
 			throw new Error(`${target.name} has no implementation ${exec} method`);
 		}
-		Component(target);
-		Reflect.defineMetadata(
-			LifeCycleModule.ApplicationStart,
-			{
-				order,
-				exec,
-			},
-			target.prototype
-		);
+
+		ApplicationRunner(target);
+		AddLifeCycleItem(target.prototype, LifeCycleModule.ApplicationStart, {
+			order,
+			exec,
+		});
 	};
 }
