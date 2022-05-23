@@ -37,7 +37,8 @@ function getFormValue(value: any, prop: string, defaultValue?: any) {
 
 function setFormValue(obj: any, prop: string, val: any) {
 	//查看是否校验子属性
-	if (ValidationUtil.isNotNull(obj)) {
+	if (ValidationUtil.isNotNull(obj) || TypeUtil.isObject(obj)) {
+		//修正为{}对象时无法赋值错误
 		if (TypeUtil.isObject(obj)) {
 			Reflect.set(obj, prop, val);
 		} else {
@@ -67,7 +68,7 @@ function delFormValue(value: any, prop: string) {
 export default function ValidForm(target: any, methodName: string, descriptor: PropertyDescriptor) {
 	let next = descriptor.value;
 
-	descriptor.value = function(...args: any[]) {
+	descriptor.value = function (...args: any[]) {
 		let rulesMap: Map<number, FormRuleType> = Reflect.getMetadata(FastCarMetaData.ValidFormRules, target, methodName);
 
 		if (rulesMap && rulesMap.size > 0) {
