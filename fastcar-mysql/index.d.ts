@@ -157,7 +157,7 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 	/***
 	 * @version 1.0 根据条件进行查找
 	 */
-	select(conditions: SqlQuery, ds?: string, sessionId?: string): Promise<T[]>;
+	select(conditions?: SqlQuery, ds?: string, sessionId?: string): Promise<T[]>;
 
 	/***
 	 * @version 1.0 查询单个对象

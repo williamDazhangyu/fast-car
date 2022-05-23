@@ -250,11 +250,17 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		return str;
 	}
 
+	//修正布尔值时的赋值错误
 	protected setRow(rowData: Object): T {
 		let t = new this.classZ();
 
 		this.mappingMap.forEach((item, key) => {
-			let value = Reflect.get(rowData, item.field) || Reflect.get(rowData, key);
+			let value = null;
+			if (Reflect.has(rowData, item.field)) {
+				value = Reflect.get(rowData, item.field);
+			} else if (Reflect.has(rowData, key)) {
+				value = Reflect.get(rowData, key);
+			}
 			if (value != null) {
 				let fvalue = DataFormat.formatValue(value, item.type);
 				Reflect.set(t, key, fvalue);
@@ -438,7 +444,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	/***
 	 * @version 1.0 根据条件进行查找
 	 */
-	async select(conditions: SqlQuery, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T[]> {
+	async select(conditions: SqlQuery = {}, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T[]> {
 		let fields = this.analysisFields(conditions.fields);
 		let whereC = this.analysisWhere(conditions.where);
 		let groupStr = this.analysisGroups(conditions.groups);
