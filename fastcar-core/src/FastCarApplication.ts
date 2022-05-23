@@ -290,7 +290,16 @@ class FastCarApplication extends Events {
 	 */
 	convertInstance(classZ: any, fp: string) {
 		//只有依赖注入的组件才能被实例化
+		let Target = classZ;
 		let instanceKey = Reflect.getMetadata(FastCarMetaData.InjectionUniqueKey, classZ);
+		if (!instanceKey) {
+			Target = Reflect.get(classZ, "__target__");
+			if (!Target) {
+				return;
+			}
+			instanceKey = Reflect.getMetadata(FastCarMetaData.InjectionUniqueKey, Target);
+		}
+
 		if (!!instanceKey) {
 			let iname = classZ?.name || FileUtil.getFileName(fp);
 			let beforeKey = this.getInjectionUniqueKeyByFilePath(fp, iname);
@@ -304,7 +313,7 @@ class FastCarApplication extends Events {
 			}
 
 			//判断是否需要加载对应配置
-			let cp = Reflect.getMetadata(LifeCycleModule.LoadConfigure, classZ);
+			let cp = Reflect.getMetadata(LifeCycleModule.LoadConfigure, Target);
 			if (cp) {
 				let rfp = path.join(this.getResourcePath(), cp);
 				let tmpConfig = FileUtil.getResource(rfp);
