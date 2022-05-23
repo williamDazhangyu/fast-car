@@ -52,7 +52,7 @@ function Scheduled(config: ScheduledConfig) {
 
 //开启定时任务 会在实例化的时候自动执行
 export function EnableScheduling(target: any) {
-	return new Proxy(target, {
+	let proxy = new Proxy(target, {
 		construct: (target: any, args: any) => {
 			let service = new target(...args);
 
@@ -69,6 +69,10 @@ export function EnableScheduling(target: any) {
 			return service;
 		},
 	});
+
+	//增加一个获取原对象的方法
+	proxy["__target__"] = target;
+	return proxy;
 }
 
 //定时处理间隔器
