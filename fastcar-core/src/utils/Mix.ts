@@ -45,9 +45,7 @@ export default class MixTool {
 			if (!BASETYPE.includes(key.toString())) {
 				let desc = Reflect.getOwnPropertyDescriptor(source, key);
 				if (!!desc) {
-					Reflect.defineProperty(target, key, {
-						value: desc.value,
-					});
+					Reflect.defineProperty(target, key, desc);
 				}
 			}
 		}
@@ -58,7 +56,7 @@ export default class MixTool {
 		Object.assign(target, source);
 		let keys = ClassUtils.getProtoType(source);
 
-		keys.forEach(key => {
+		keys.forEach((key) => {
 			let keyStr = key.toString();
 			if (!BASETYPE.includes(keyStr)) {
 				let desc = Object.getOwnPropertyDescriptor(source?.prototype, key);

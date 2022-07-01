@@ -19,11 +19,18 @@ export default function Application(target: any) {
 
 						if (Reflect.has(app, key) && TypeUtil.isFunction(afterFun) && TypeUtil.isFunction(beforeFun)) {
 							let mixFn = async (...args: any[]) => {
-								let res = await Promise.resolve(Reflect.apply(beforeFun, app, args));
-								await Promise.resolve(Reflect.apply(afterFun, appProxy, args));
+								let res: any;
+								if (TypeUtil.isPromise(beforeFun)) {
+									res = await Promise.resolve(Reflect.apply(beforeFun, app, args));
+								} else {
+									res = Reflect.apply(beforeFun, app, args);
+								}
+
+								TypeUtil.isPromise(afterFun) ? await Promise.resolve(Reflect.apply(afterFun, appProxy, args)) : Reflect.apply(afterFun, appProxy, args);
 								return res;
 							};
-							Reflect.defineProperty(app, key, { value: mixFn });
+
+							Reflect.defineProperty(app, key, Object.assign(desc, { value: mixFn }));
 						} else {
 							Reflect.defineProperty(app, key, desc);
 						}

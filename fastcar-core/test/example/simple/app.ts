@@ -6,15 +6,34 @@ import FastCarApplication from "../../../src/FastCarApplication";
 import AliasController from "./controller/AliasController";
 import BaseFilePath from "../../../src/annotation/env/BaseFilePath";
 import BasePath from "../../../src/annotation/env/BasePath";
+import ApplicationHook from "../../../src/interface/ApplicationHook";
+import Log from "../../../src/annotation/stereotype/Log";
+import Logger from "../../../src/interface/Logger";
+
 @Application
 @ENV("test") //设置环境变量
 @BasePath(__dirname) //直接运行ts文件时可不用
 @BaseFilePath(__filename)
-class APP {
+class APP implements ApplicationHook {
 	app!: FastCarApplication;
 
-	init() {
-		console.log("123");
+	@Log("app")
+	logger!: Logger;
+
+	beforeStartServer(): void {
+		this.logger.debug("beforeStartServer-----");
+	}
+
+	startServer(): void {
+		this.logger.debug("startServer------");
+	}
+
+	beforeStopServer(): void {
+		this.logger.debug("beforeStopServer-----");
+	}
+
+	stopServer(): void {
+		this.logger.debug("stopServer-----");
 	}
 }
 

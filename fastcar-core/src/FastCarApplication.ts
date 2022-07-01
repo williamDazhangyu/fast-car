@@ -24,6 +24,7 @@ import DateUtil from "./utils/DateUtil";
 import { ProcessType } from "./type/ProcessType";
 import { FileHotterDesc } from "./type/FileHotterDesc";
 import { LifeCycleType } from "./annotation/lifeCycle/AddLifeCycleItem";
+import { WinstonLoggerType } from "./type/WinstonLoggerType";
 
 @Component
 class FastCarApplication extends Events {
@@ -181,7 +182,7 @@ class FastCarApplication extends Events {
 		}
 	}
 
-	setSetting(key: string | symbol, value: any) {
+	setSetting(key: string | symbol, value: any): void {
 		this.sysConfig.settings.set(key, value);
 	}
 
@@ -481,7 +482,7 @@ class FastCarApplication extends Events {
 	 */
 	startLog() {
 		let logConfig = this.getSetting("log");
-		let defaultConfig = Object.assign({}, LogDefaultConfig, { rootPath: path.join(this.basePath, "../logs") });
+		let defaultConfig: WinstonLoggerType = Object.assign({}, LogDefaultConfig, { rootPath: path.join(this.basePath, "../logs") });
 		if (logConfig) {
 			Object.assign(defaultConfig, logConfig);
 		}

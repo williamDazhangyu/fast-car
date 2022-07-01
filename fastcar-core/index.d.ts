@@ -32,6 +32,9 @@ export * from "./src/constant/FastCarMetaData";
 //自定义常量模块
 export * from "./src/constant/CommonConstant";
 
+//生命周期约定
+export * from "./src/interface/ApplicationHook";
+
 export abstract class Logger {
 	abstract info(...args: any[]): void;
 
