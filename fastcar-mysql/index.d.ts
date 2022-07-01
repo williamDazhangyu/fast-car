@@ -114,6 +114,8 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 
 	protected analysisLimit(limit?: number, offest?: number): string;
 
+	protected analysisForceIndex(fileds?: string[]): string;
+
 	protected setRow(rowData: Object): T;
 
 	protected setRows(rowDataList: Object[]): T[];
@@ -140,13 +142,13 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 	 * @version 1.0 更新记录
 	 *
 	 */
-	update({ row, where, limit }: SqlUpdate, ds?: string, sessionId?: string): Promise<boolean>;
+	update({ row, where, limit, forceIndex }: SqlUpdate & { forceIndex?: string[] }, ds?: string, sessionId?: string): Promise<boolean>;
 
 	/****
 	 * @version 1.0 更新一条数据
 	 *
 	 */
-	updateOne(sqlUpdate: SqlUpdate, ds?: string, sessionId?: string): Promise<boolean>;
+	updateOne(sqlUpdate: SqlUpdate & { forceIndex?: string[] }, ds?: string, sessionId?: string): Promise<boolean>;
 
 	/***
 	 * @version 1.0 根据实体类的主键来更新数据
@@ -157,13 +159,13 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 	/***
 	 * @version 1.0 根据条件进行查找
 	 */
-	select(conditions?: SqlQuery, ds?: string, sessionId?: string): Promise<T[]>;
+	select(conditions?: SqlQuery & { forceIndex?: string[] }, ds?: string, sessionId?: string): Promise<T[]>;
 
 	/***
 	 * @version 1.0 查询单个对象
 	 *
 	 */
-	selectOne(conditions?: SqlQuery, ds?: string, sessionId?: string): Promise<T | null>;
+	selectOne(conditions?: SqlQuery & { forceIndex?: string[] }, ds?: string, sessionId?: string): Promise<T | null>;
 
 	/***
 	 * @version 1.0 通过主键查找对象
@@ -185,7 +187,7 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 	/***
 	 * @version 1.0 按照条件删除记录
 	 */
-	delete(conditions: SqlDelete, ds?: string, sessionId?: string): Promise<boolean>;
+	delete(conditions: SqlDelete & { forceIndex?: string[] }, ds?: string, sessionId?: string): Promise<boolean>;
 
 	/***
 	 * @version 1.0 删除某条记录

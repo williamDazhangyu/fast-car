@@ -38,7 +38,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 
 	async connExecute(conn: mysql.PoolConnection, sql: string, args: any[] = []) {
 		//打印sql
-		let finalSQL = mysql.format(sql, args);
+		let finalSQL = mysql.format(sql, args).replace(/  /g, " ");
 
 		if (this.config.printSQL) {
 			this.sysLogger.info(finalSQL);
@@ -118,7 +118,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 
 	//创建session会话 用于事务的管理
 	createSession(): string {
-		let sessionId = "SQL:" + nanoid;
+		let sessionId = "SQL:" + nanoid();
 		let connMap = new Map<string, mysql.PoolConnection[]>();
 		Reflect.set(this, sessionId, connMap);
 		this.sessionList.set(sessionId, Date.now());

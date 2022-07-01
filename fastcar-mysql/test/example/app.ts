@@ -30,8 +30,6 @@ describe("mysql测试", () => {
 	it("事务执行测试", async () => {
 		let service: TestTransactional = appInstance.app.getComponentByTarget(TestTransactional);
 		service.exec();
-
-		console.log("");
 		service
 			.work()
 			.then((res) => {
@@ -69,6 +67,12 @@ describe("mysql测试", () => {
 	it("调用方法测试", async () => {
 		let service: SimpleService = appInstance.app.getComponentByTarget(SimpleService);
 		let res = await service.callFunction();
+		console.log(res);
+	});
+
+	it("强制索引测试", async () => {
+		let service: SimpleService = appInstance.app.getComponentByTarget(SimpleService);
+		let res = await service.forceIndex();
 		console.log(res);
 	});
 });

@@ -1,4 +1,5 @@
 import { Autowired, Service } from "fastcar-core/annotation";
+import { OrderEnum } from "fastcar-core/db";
 import TestMapper from "../mapper/TestMapper";
 import Test from "../model/Test";
 
@@ -109,6 +110,15 @@ class SimpleService {
 	async callFunction() {
 		return await this.myMapper.select({
 			fields: ["MAX(id) as id"],
+		});
+	}
+
+	//测试索引信息
+	async forceIndex() {
+		return await this.myMapper.select({
+			forceIndex: ["caseTime"],
+			orders: { caseTime: OrderEnum.desc },
+			limit: 1,
 		});
 	}
 }

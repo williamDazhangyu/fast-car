@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-mysql",
-	"version": "0.1.13",
+	"version": "0.1.14",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "基于fastcar-core框架下对mysql的封装",
 	"main": "target/index.js",
@@ -36,7 +36,7 @@
 	"devDependencies": {
 		"@types/node": "^16.11.7",
 		"@types/reflect-metadata": "^0.1.0",
-		"fastcar-core": "^0.2.15",
+		"fastcar-core": "^0.2.19",
 		"fastcar-timer": "^0.1.1",
 		"nanoid": "^3.3.2",
 		"reflect-metadata": "^0.1.13"

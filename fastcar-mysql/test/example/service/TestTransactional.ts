@@ -34,7 +34,7 @@ class TestTransactional {
 			sessionId
 		);
 		let sql2 = "select * from noExistTable";
-		await this.myMapper.execute(sql2, [], sessionId);
+		await this.myMapper.execute(sql2, [], "", sessionId);
 		return res;
 	}
 

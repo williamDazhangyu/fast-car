@@ -250,6 +250,18 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		return str;
 	}
 
+	protected analysisForceIndex(fileds: string[] = []): string {
+		if (fileds.length == 0) {
+			return "";
+		}
+
+		let formatFileds = fileds.map((filed) => {
+			return this.getFieldName(filed);
+		});
+
+		return `FORCE INDEX (${formatFileds.join(",")})`;
+	}
+
 	//修正布尔值时的赋值错误
 	protected setRow(rowData: Object): T {
 		let t = new this.classZ();
@@ -385,15 +397,17 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	 * @version 1.0 更新记录
 	 *
 	 */
-	async update({ row, where, limit }: SqlUpdate, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
+	async update({ row, where, limit, forceIndex }: SqlUpdate & { forceIndex?: string[] }, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		let rowStr = this.analysisRow(row);
 		if (!rowStr) {
 			return Promise.reject(new Error("row is empty"));
 		}
 
+		let forceIndexStr = this.analysisForceIndex(forceIndex);
 		let whereC = this.analysisWhere(where);
 		let limitStr = this.analysisLimit(limit);
-		let sql = `UPDATE ${this.tableName} SET ${rowStr.sql} ${whereC.sql} ${limitStr}`;
+
+		let sql = `UPDATE ${this.tableName} ${forceIndexStr} SET ${rowStr.sql} ${whereC.sql} ${limitStr}`;
 
 		let [okPacket] = await this.dsm.exec({ sql, args: [...rowStr.args, ...whereC.args], ds, sessionId });
 
@@ -407,7 +421,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	 * @version 1.0 更新一条数据
 	 *
 	 */
-	async updateOne(sqlUpdate: SqlUpdate, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
+	async updateOne(sqlUpdate: SqlUpdate & { forceIndex?: string[] }, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		return await this.update(Object.assign({}, sqlUpdate, { limit: 1 }), ds, sessionId);
 	}
 
@@ -444,15 +458,16 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	/***
 	 * @version 1.0 根据条件进行查找
 	 */
-	async select(conditions: SqlQuery = {}, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T[]> {
+	async select(conditions: SqlQuery & { forceIndex?: string[] } = {}, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T[]> {
 		let fields = this.analysisFields(conditions.fields);
 		let whereC = this.analysisWhere(conditions.where);
 		let groupStr = this.analysisGroups(conditions.groups);
 		let orderStr = this.analysisOrders(conditions.orders);
 		let limitStr = this.analysisLimit(conditions?.limit, conditions?.offest);
+		let forceIndexStr = this.analysisForceIndex(conditions?.forceIndex);
 
 		let args = whereC.args;
-		let sql = `SELECT ${fields} FROM ${this.tableName} ${whereC.sql} ${groupStr} ${orderStr} ${limitStr}`;
+		let sql = `SELECT ${fields} FROM ${this.tableName} ${forceIndexStr} ${whereC.sql} ${groupStr} ${orderStr} ${limitStr}`;
 
 		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
 
@@ -467,7 +482,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	 * @version 1.0 查询单个对象
 	 *
 	 */
-	async selectOne(conditions?: SqlQuery, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T | null> {
+	async selectOne(conditions?: SqlQuery & { forceIndex?: string[] }, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T | null> {
 		let queryInfo = Object.assign({}, conditions, { limit: 1 });
 
 		let res = await this.select(queryInfo, ds, sessionId);
@@ -533,11 +548,12 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	/***
 	 * @version 1.0 按照条件删除记录
 	 */
-	async delete(conditions: SqlDelete, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
+	async delete(conditions: SqlDelete & { forceIndex?: string[] }, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
+		let forceIndexStr = this.analysisForceIndex(conditions?.forceIndex);
 		let whereC = this.analysisWhere(conditions.where);
 		let limitStr = this.analysisLimit(conditions.limit);
 
-		let sql = `DELETE FROM ${this.tableName} ${whereC.sql} ${limitStr}`;
+		let sql = `DELETE FROM ${this.tableName} ${forceIndexStr} ${whereC.sql} ${limitStr}`;
 
 		let [okPacket] = await this.dsm.exec({ sql, args: whereC.args, ds, sessionId });
 
