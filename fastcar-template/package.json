@@ -1,0 +1,44 @@
+{
+	"name": "fastcar-template",
+	"version": "0.0.0",
+	"description": "模板文件",
+	"homepage": "https://github.com/williamDazhangyu/fast-car",
+	"main": "target/index.js",
+	"author": "william_zhong",
+	"license": "MIT",
+	"types": "index.d.ts",
+	"exports": {
+		".": "./target/index.js",
+		"./annotation": "./target/annotation.js"
+	},
+	"files": [
+		"src",
+		"target",
+		"test",
+		"index.d.ts",
+		"annotation.d.ts",
+		"LICENSE"
+	],
+	"keywords": [],
+	"engines": {
+		"node": ">=16"
+	},
+	"devDependencies": {
+		"@types/mocha": "^9.0.0",
+		"@types/node": "^16.11.7",
+		"@types/reflect-metadata": "^0.1.0",
+		"fastcar-core": "^0.2.18",
+		"typescript": "^4.4.2"
+	},
+	"peerDependencies": {
+		"fastcar-core": "*"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/williamDazhangyu/fast-car.git"
+	},
+	"peerDependenciesMeta": {},
+	"scripts": {
+		"build": "tsc"
+	}
+}
