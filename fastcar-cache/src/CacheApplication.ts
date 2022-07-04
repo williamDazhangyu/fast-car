@@ -25,7 +25,7 @@ export default class CacheApplication {
 			return;
 		}
 
-		let beforeConfig = this._dataMapping.get(config.store);
+		let beforeConfig = this._dataMapping.get(config.store) || {};
 		this._dataMapping.set(config.store, Object.assign(beforeConfig, config));
 	}
 

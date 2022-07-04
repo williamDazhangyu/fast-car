@@ -17,7 +17,7 @@ npm install fastcar-cache
 * 开启缓存功能
 
 ```ts
-@EnableMysql
+@EnableCache
 class APP {
  app!: FastCarApplication;
 }
