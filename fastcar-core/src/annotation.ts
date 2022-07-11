@@ -44,6 +44,7 @@ import Hotter from "./annotation/scan/Hotter";
 import ApplicationRunner from "./annotation/lifeCycle/ApplicationRunner";
 import ApplicationInit from "./annotation/lifeCycle/ApplicationInit";
 import ApplicationDestory from "./annotation/lifeCycle/ApplicationDestory";
+import ApplicationSetting from "./annotation/env/ApplicationSetting";
 
 //注解暴露出去
 export {
@@ -95,4 +96,4 @@ export {
 	Transactional, //事务管理
 };
 
-export { ENV, BaseFilePath, BasePath };
+export { ENV, BaseFilePath, BasePath, ApplicationSetting };
