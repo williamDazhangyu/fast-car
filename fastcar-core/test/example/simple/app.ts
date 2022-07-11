@@ -9,11 +9,15 @@ import BasePath from "../../../src/annotation/env/BasePath";
 import ApplicationHook from "../../../src/interface/ApplicationHook";
 import Log from "../../../src/annotation/stereotype/Log";
 import Logger from "../../../src/interface/Logger";
+import ApplicationSetting from "../../../src/annotation/env/ApplicationSetting";
 
 @Application
 @ENV("test") //设置环境变量
 @BasePath(__dirname) //直接运行ts文件时可不用
 @BaseFilePath(__filename)
+@ApplicationSetting({
+	customHello: "customHello",
+})
 class APP implements ApplicationHook {
 	app!: FastCarApplication;
 
@@ -73,5 +77,8 @@ describe("程序应用测试", () => {
 	it("测试调用时加载时机才会注入方法", () => {
 		let callServerice = new CallService();
 		callServerice.sayHello();
+	});
+	it("程序内配置", () => {
+		console.log("配置", appInsatcne.app.getSetting("customHello"));
 	});
 });

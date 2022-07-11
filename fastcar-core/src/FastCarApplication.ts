@@ -169,6 +169,22 @@ class FastCarApplication extends Events {
 		//自定义环境变量设置
 		process.env.NODE_ENV = env;
 
+		//判断程序内是否有配置
+		let applicationSesstings: Map<string | symbol, any> = Reflect.getMetadata(CommonConstant.FastcarSetting, this);
+		if (applicationSesstings) {
+			applicationSesstings.forEach((value, key) => {
+				let afterConfig = value;
+				let beforeConfig = this.sysConfig.settings.get(key);
+				if (beforeConfig) {
+					//对settings的属性进行覆盖
+					if (typeof beforeConfig == "object") {
+						afterConfig = Object.assign(beforeConfig, afterConfig);
+					}
+				}
+				this.sysConfig.settings.set(key, afterConfig);
+			});
+		}
+
 		//读取app的必要信息 name和版本号 根据 package.json
 		let packagePath = path.join(this.basePath, "../", "package.json");
 		if (fs.existsSync(packagePath)) {
