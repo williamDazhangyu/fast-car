@@ -170,7 +170,7 @@ class FastCarApplication extends Events {
 		process.env.NODE_ENV = env;
 
 		//判断程序内是否有配置
-		let applicationSesstings: Map<string | symbol, any> = Reflect.getMetadata(CommonConstant.FastcarSetting, this);
+		let applicationSesstings: Map<string, any> = Reflect.getMetadata(CommonConstant.FastcarSetting, this);
 		if (applicationSesstings) {
 			applicationSesstings.forEach((value, key) => {
 				let afterConfig = value;
