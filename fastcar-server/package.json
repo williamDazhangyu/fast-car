@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-server",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "服务统一管理框架",
 	"main": "target/index.js",
 	"license": "MIT",
