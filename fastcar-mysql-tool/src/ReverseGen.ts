@@ -91,10 +91,11 @@ class ReverseGenerate {
 						num = Math.pow(10, length - field.NUMERIC_SCALE);
 						let scaleNum = Math.pow(10, field.NUMERIC_SCALE);
 						num += (scaleNum - 1) / scaleNum;
-					}
-					//太大了 没有意义提示
-					if (num < MAXBigNum) {
-						tmpFieldList.push(`@Size({ maxSize: ${num - 1} })`);
+
+						//太大了 没有意义提示
+						if (num < MAXBigNum) {
+							tmpFieldList.push(`@Size({ maxSize: ${num - 1} })`);
+						}
 					}
 				} else {
 					tmpFieldList.push(`@Size({ maxSize: ${length} })`);

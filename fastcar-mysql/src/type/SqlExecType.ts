@@ -3,4 +3,5 @@ export type SqlExecType = {
 	args?: any[];
 	ds?: string;
 	sessionId?: string;
+	useServerPrepStmts?: boolean;
 };

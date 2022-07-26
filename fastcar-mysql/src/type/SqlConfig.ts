@@ -13,6 +13,7 @@ export type MySqlConfig = {
 	maximumConnectionReleaseTime?: number; //连接可用最大时长，防止因为忘记释放而被占用 单位毫秒
 	printSQL: boolean; //是否打印sql
 	sessionTimeOut: number;
+	useServerPrepStmts: boolean;
 };
 
 export const MySqlConfigDefault = {
@@ -20,4 +21,5 @@ export const MySqlConfigDefault = {
 	maximumConnectionReleaseTime: 10000, //默认十秒
 	printSQL: false,
 	sessionTimeOut: 5000, //如果开启事务后5秒内仍不释放则主动释放
+	useServerPrepStmts: true, //是否使用预处理语句
 };

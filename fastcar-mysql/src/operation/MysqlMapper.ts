@@ -122,6 +122,10 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 					let operatorValue = Reflect.get(ov, operatorKeys);
 					let formatOperatorKeys = operatorKeys.toUpperCase();
 
+					if (ValidationUtil.isNull(operatorValue)) {
+						operatorValue = null;
+					}
+
 					switch (formatOperatorKeys) {
 						case OperatorEnum.isNUll: {
 							clist.push(`ISNULL(${alias})`);
@@ -217,6 +221,9 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			str.push(`${alias} = ?`);
 
 			let v = Reflect.get(row, key);
+			if (ValidationUtil.isNull(v)) {
+				v = null;
+			}
 
 			let originName = this.dbFields.get(alias);
 			if (originName) {

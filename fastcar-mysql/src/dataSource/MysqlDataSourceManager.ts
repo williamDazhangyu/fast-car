@@ -36,7 +36,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 		this.sessionList = new Map();
 	}
 
-	async connExecute(conn: mysql.PoolConnection, sql: string, args: any[] = []) {
+	async connExecute(conn: mysql.PoolConnection, sql: string, args: any[] = [], useServerPrepStmts: boolean = true) {
 		//打印sql
 		let finalSQL = mysql.format(sql, args).replace(/  /g, " ");
 
@@ -46,7 +46,9 @@ class MysqlDataSourceManager implements DataSourceManager {
 
 		//检查sql执行时间
 		let beforeTime = Date.now();
-		let res = await conn.execute(sql, args);
+		//这边做一个改变 如果没有传参则选用query
+		let sqlExec: "execute" | "query" = useServerPrepStmts && this.config.useServerPrepStmts && args.length > 0 ? "execute" : "query";
+		let res = await conn[sqlExec](sql, args);
 		let afterTime = Date.now();
 		let diff = afterTime - beforeTime;
 
@@ -164,7 +166,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 	}
 
 	//执行会话语句
-	async exec({ sql, args = [], ds, sessionId }: SqlExecType): Promise<any[]> {
+	async exec({ sql, args = [], ds, sessionId, useServerPrepStmts = true }: SqlExecType): Promise<any[]> {
 		if (!ds) {
 			ds = this.getDefaultSoucre(this.isReadBySql(sql));
 		}
@@ -183,23 +185,23 @@ class MysqlDataSourceManager implements DataSourceManager {
 					conns.push(conn);
 				}
 				if (conns.length > 0) {
-					let result = await this.connExecute(conns[0], sql, args);
+					let result = await this.connExecute(conns[0], sql, args, useServerPrepStmts);
 					return result;
 				}
 			}
 			throw new SqlError(`session ${sessionId} cannot be found `);
 		}
 
-		return await this.execute({ sql, args, ds });
+		return await this.execute({ sql, args, ds, useServerPrepStmts });
 	}
 
-	async query({ sql, args = [], ds, sessionId }: SqlExecType): Promise<any[]> {
+	async query({ sql, args = [], ds, sessionId, useServerPrepStmts = false }: SqlExecType): Promise<any[]> {
 		let querySql = mysql.format(sql, args);
-		return await this.exec({ sql: querySql, ds, sessionId });
+		return await this.exec({ sql: querySql, ds, sessionId, useServerPrepStmts });
 	}
 
 	//执行sql
-	async execute({ sql, args = [], ds }: SqlExecType): Promise<any[]> {
+	async execute({ sql, args = [], ds, useServerPrepStmts = true }: SqlExecType): Promise<any[]> {
 		return new Promise(async (resolve, reject) => {
 			if (!ds) {
 				ds = this.getDefaultSoucre(this.isReadBySql(sql));
@@ -212,7 +214,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 			let conn;
 			try {
 				let conn = await dataSoucre.getConnection();
-				let result = await this.connExecute(conn, sql, args);
+				let result = await this.connExecute(conn, sql, args, useServerPrepStmts);
 				dataSoucre.releaseConnection(conn);
 				return resolve(result);
 			} catch (e) {
@@ -251,7 +253,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 					connMap.set(ds, conn);
 				}
 
-				await this.connExecute(conn, task.sql, task.args);
+				await this.connExecute(conn, task.sql, task.args, task.useServerPrepStmts);
 			}
 		} catch (e) {
 			this.sysLogger.error(e);
@@ -263,8 +265,9 @@ class MysqlDataSourceManager implements DataSourceManager {
 				db?.releaseConnection(conn);
 			}
 			connMap.clear();
-			return !errFlag;
 		}
+
+		return !errFlag;
 	}
 
 	//获取一个可用的连接
