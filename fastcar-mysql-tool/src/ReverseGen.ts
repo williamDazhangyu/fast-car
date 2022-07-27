@@ -13,7 +13,7 @@ const MAXBigNum = Math.pow(2, 53);
 class ReverseGenerate {
 	//根据数据库名称生成
 	static formatType(dbtype: string): string {
-		return Reflect.get(DataTypeEnum, dbtype);
+		return Reflect.get(DataTypeEnum, dbtype) || "any";
 	}
 
 	static formatClassName(name: string): string {
@@ -120,7 +120,8 @@ class ReverseGenerate {
 						break;
 					}
 					case "Date": {
-						tsValue = `${formatName}:${tsType}=new Date('${field.COLUMN_DEFAULT}');`;
+						// tsValue = `${formatName}:${tsType}=new Date('${field.COLUMN_DEFAULT}');`;
+						tsValue = `${formatName}!:${tsType};`;
 						break;
 					}
 					default: {

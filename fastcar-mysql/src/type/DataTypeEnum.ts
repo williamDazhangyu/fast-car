@@ -25,4 +25,5 @@ export enum DataTypeEnum {
 	mediumtext = "string",
 	longblob = "string",
 	longtext = "string",
+	varbinary = "string",
 }
