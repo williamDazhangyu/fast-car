@@ -16,6 +16,14 @@ class DataFormat {
 
 	static formatString(value: any): string | null {
 		if (typeof value != "string") {
+			if (typeof value == "number") {
+				return value + "";
+			}
+			if (typeof value == "object") {
+				if (Reflect.has(value, "toString")) {
+					return value.toString();
+				}
+			}
 			return null;
 		}
 
@@ -40,7 +48,7 @@ class DataFormat {
 
 			if (Array.isArray(value)) {
 				let ntype = type.replace(/array/, "");
-				value = value.map(item => {
+				value = value.map((item) => {
 					return DataFormat.formatValue(item, ntype);
 				});
 
