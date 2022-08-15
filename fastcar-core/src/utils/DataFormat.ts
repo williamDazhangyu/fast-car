@@ -32,7 +32,7 @@ class DataFormat {
 
 	static formatBoolean(value: any): boolean {
 		if (typeof value == "string") {
-			if ((value = "false")) {
+			if (value == "false") {
 				return false;
 			}
 		}
