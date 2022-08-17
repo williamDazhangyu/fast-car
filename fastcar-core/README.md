@@ -44,7 +44,7 @@ Component 标注为组件
 
 ComponentInjection  自定义组件入口
 
-Hotter 指定热更新类 0.2.13 版本生效
+Hotter 指定热更新类 0.2.13 版本生效(当我们修改代码后,可以自动热加载文件)
 
 BeanName 指明组件名称(每个组件具有一个系统生成id为"类名:16位随机值",为了便于调用可自定义逻辑名)
 
@@ -332,6 +332,36 @@ describe("数据集合测试", () => {
       console.log(sortList);  //支持多重fields的排序 越在前面排序优先级越高
  });
 });
+```
+
+```ts
+//根据启动应用的时机 加载自定义方法
+import { ApplicationHook, FastCarApplication, Logger } from "fastcar-core";
+import { Application } from "fastcar-core/annotation";
+
+@Application
+class APP implements ApplicationHook {
+ app!: FastCarApplication;
+
+ @Log("app")
+ logger!: Logger;
+
+ beforeStartServer(): void {
+  this.logger.debug("beforeStartServer-----");
+ }
+
+ startServer(): void {
+  this.logger.debug("startServer------");
+ }
+
+ beforeStopServer(): void {
+  this.logger.debug("beforeStopServer-----");
+ }
+
+ stopServer(): void {
+  this.logger.debug("stopServer-----");
+ }
+}
 ```
 
 ## 更多用法
