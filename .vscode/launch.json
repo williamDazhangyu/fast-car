@@ -69,18 +69,22 @@
             "name": "Run MysqlSimple",
             "type": "node",
             "request": "launch",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "stopOnEntry": false,
             "args": [
-                "${workspaceRoot}/fastcar-mysql/test/example/app.ts"
+                "${workspaceRoot}/fastcar-mysql/test/example/app.ts",
+                "--no-timeouts"
             ],
-            "cwd": "${workspaceRoot}/fastcar-mysql",
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": null,
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
+            },
             "protocol": "inspector",
             "runtimeArgs": [
                 "-r",
                 "ts-node/register"
-            ],
-            "env": {
-                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
-            }
+            ]
         },
         {
             "name": "Run RedisSimple",
@@ -141,6 +145,27 @@
             "stopOnEntry": false,
             "args": [
                 "${workspaceRoot}/fastcar-rpc/test/example/simple/app.ts",
+                "--no-timeouts"
+            ],
+            "cwd": "${workspaceRoot}/fastcar-rpc",
+            "runtimeExecutable": null,
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceRoot}/fastcar-rpc/tsconfig.json"
+            },
+            "protocol": "inspector",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ]
+        },
+        {
+            "name": "Run SocketClientSimple",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "stopOnEntry": false,
+            "args": [
+                "${workspaceRoot}/fastcar-rpc/test/example/simple/client.ts",
                 "--no-timeouts"
             ],
             "cwd": "${workspaceRoot}/fastcar-rpc",
