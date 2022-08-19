@@ -142,7 +142,7 @@ class ReverseGenerate {
 			}
 		});
 
-		body.push("constructor(...args: any[]) {\nObject.assign(this, ...args);\n}");
+		body.push(`constructor(args?: Partial<${className}>) {\nif(args) {Object.assign(this, args)};\n}`);
 		body.push(`toObject() {\nreturn{\n ${objectKeys} };\n}\n`);
 
 		//添加一个object的序列化
