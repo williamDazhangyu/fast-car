@@ -27,6 +27,8 @@ import MsgCallbackService from "../MsgCallbackService";
 import RpcAuthService from "../RpcAuthService";
 import { SocketMsgStatus } from "../../constant/SocketMsgStatus";
 import RPCErrorService from "../RPCErrorService";
+import { ProtoMeta } from "../../types/PBConfig";
+import ProtoBuffService from "../ProtoBuffService";
 
 //rpc 管理服务 用于和客户端进行同步异步消息发送
 @ApplicationStart(BootPriority.Lowest * 10, "start") //落后于koa执行
@@ -140,6 +142,10 @@ export default class RpcServer implements MsgCallbackService {
 			if (!routerMap || routerMap.size == 0) {
 				return;
 			}
+
+			//绑定具体的protobuff协议
+			let protoMeta: ProtoMeta = Reflect.getMetadata(RpcMetaData.ProtoDataConfig, instance);
+
 			routerMap.forEach((item, url) => {
 				const callBack = async (ctx: RpcContext) => {
 					let data = ctx.data || {};
@@ -151,6 +157,15 @@ export default class RpcServer implements MsgCallbackService {
 				};
 
 				this.rcpRouterMap.set(url, callBack);
+
+				if (!!protoMeta) {
+					ProtoBuffService.addUrlMapping({
+						url,
+						protoPath: protoMeta.protoPath,
+						service: protoMeta.service,
+						method: item.method,
+					});
+				}
 			});
 		});
 
@@ -366,10 +381,10 @@ export default class RpcServer implements MsgCallbackService {
 			data: { reason },
 			sessionId: sessionId,
 		});
-		setTimeout(() => {
+		queueMicrotask(() => {
 			//向客户端通知强制掉线
 			this.socketManager.disconnect(sessionId, reason, true);
-		}, 0);
+		});
 	}
 
 	//失败的消息处理

@@ -12,8 +12,8 @@ npm install fastcar-rpc
 
 ## 框架类型支持
 
-* 从第三方依赖库上来说支持socket.io,mqtt和ws三种
-* 从长连接通讯协议来说支持ws,wss,mqtt,mqtts等
+* 从第三方依赖库上来说支持socket.io,mqtt,ws和grpc
+* 从长连接通讯协议来说支持ws,wss,mqtt,mqtts,grpc等
 
 ## 第三方依赖包安装
 
@@ -22,6 +22,8 @@ npm install fastcar-rpc
 * 使用mqtt时,安装 aedes 和 mqtt，如果要支持ws协议还需要装websocket-stream
 
 * 使用ws时，安装 ws
+
+* 使用grpc时,安装@grpc/proto-loader和@grpc/grpc-js
 
 ## 消息通信配置说明
 
@@ -121,6 +123,23 @@ settings:
                       },
                   serviceType: "rpc",
               }
+            - {
+              id: "rpc-server-6",
+              type: grpc,
+              server: {
+                port: 1240,
+                ssl: {
+                  ca: "./cert/ca.crt",
+                  key: "./cert/server.key",
+                  cert: "./cert/server.crt",
+                },
+              },
+              serviceType: "rpc",
+              codeProtocol: "protobuf",
+              extra: {
+                checkClientCertificate: true,
+              },
+            }
 ```
 
 ## 消息使用示例说明
@@ -291,6 +310,17 @@ describe("rpc交互测试", () => {
 
 ```
 
+```ts
+ //优雅的调用请求
+  let result = await ClientRequestStatic<HelloPBRequest, HelloPBReply>({
+   url: "/pbhello",
+   data: {
+    message: "来自客户端的pb调用",
+   },
+   client: client1,
+  });
+```
+
 ## 常用功能集成说明
 
 * 会话的连接告知默认路由 /connect
@@ -388,6 +418,58 @@ export default class HeadController {
     };
   }
 }
+```
+
+* 编码默认协议支持json和protobuff。grpc仅支持pb协议
+
+```ts
+ it("protobuff格式传输示例", async () => {
+  let client1 = new RpcClient(
+   {
+    url: "local.dev.com:1240",
+    type: SocketEnum.Grpc,
+    codeProtocol: CodeProtocolEnum.PROTOBUF,
+    ssl: {
+     ca: path.join(__dirname, "../resource/cert/ca.crt"),
+     key: path.join(__dirname, "../resource/cert/client.key"),
+     cert: path.join(__dirname, "../resource/cert/client.crt"),
+    },
+    extra: {
+     options: {
+      "grpc.ssl_target_name_override": "example",
+      "grpc.default_authority": "example",
+     },
+    },
+   },
+   new NotifyHandle(),
+   {
+    retryCount: 0,
+   }
+  );
+
+  client1.addProtoBuf({
+   root: {
+    protoPath: path.join(__dirname, "../../demo.proto"), //这边为绝对路径依赖
+    service: "HelloPBController", //服务
+   },
+   // list: [
+   //  {
+   //   method: "pbhello",
+   //   url: "/pbhello",
+   //  },
+   // ],
+  });
+  await client1.start();
+  //优雅的调用请求
+  let result = await ClientRequestStatic<HelloPBRequest, HelloPBReply>({
+   url: "/pbhello",
+   data: {
+    message: "来自客户端的pb调用",
+   },
+   client: client1,
+  });
+  console.log("返回数据", result.data);
+ });
 ```
 
 ## 注解说明

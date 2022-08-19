@@ -6,4 +6,5 @@ export const RpcMetaData = {
 	RPCMethod: Symbol("RPC_Method"), //rpc路由
 	RPCErrorService: "RPC_ErrorService", //捕捉错误服务
 	RPCAuthService: "RPC_AuthService", //rpc连接验证
+	ProtoDataConfig: "PROTO_DATA_CONFIG", //proto协议配置对接
 };

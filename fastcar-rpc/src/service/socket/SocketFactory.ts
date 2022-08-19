@@ -1,10 +1,16 @@
 import { SocketEnum } from "../../constant/SocketEnum";
-import { SocketServerConfig } from "../../types/SocketConfig";
+import { SocketClientConfig, SocketServerConfig } from "../../types/SocketConfig";
+import MsgClientHookService from "../MsgClientHookService";
 import MsgHookService from "../MsgHookService";
+import { SocketClient } from "./SocketClient";
 import SocketServer from "./SocketServer";
 
 interface SocketServerInterface<T> {
 	new (config: SocketServerConfig, manager: MsgHookService): T;
+}
+
+interface SocketClientInterface<T> {
+	new (config: SocketClientConfig, manager: MsgClientHookService): T;
 }
 
 //仅按需加载模块
@@ -19,10 +25,16 @@ export function SocketServerFactory(type: SocketEnum): SocketServerInterface<Soc
 		case SocketEnum.WS: {
 			return require("./impl/ws/WsSocketServer").default;
 		}
+		case SocketEnum.Grpc: {
+			return require("./impl/grpc/GrpcServer").default;
+		}
+		default: {
+			throw new Error(`Unable to support ${type}`);
+		}
 	}
 }
 
-export function SocketClientFactory(type: SocketEnum) {
+export function SocketClientFactory(type: SocketEnum): SocketClientInterface<SocketClient> {
 	switch (type) {
 		case SocketEnum.SocketIO: {
 			return require("./impl/io/IoSocketClient").default;
@@ -32,6 +44,12 @@ export function SocketClientFactory(type: SocketEnum) {
 		}
 		case SocketEnum.WS: {
 			return require("./impl/ws/WsSocketClient").default;
+		}
+		case SocketEnum.Grpc: {
+			return require("./impl/grpc/GrpcClient").default;
+		}
+		default: {
+			throw new Error(`Unable to support ${type}`);
 		}
 	}
 }

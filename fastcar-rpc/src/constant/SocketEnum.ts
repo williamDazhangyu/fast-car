@@ -3,6 +3,7 @@ export enum SocketEnum {
 	SocketIO = "socket.io",
 	MQTT = "mqtt",
 	WS = "ws",
+	Grpc = "grpc",
 }
 
 //长连接类型

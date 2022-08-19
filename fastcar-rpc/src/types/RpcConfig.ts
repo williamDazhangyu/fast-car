@@ -6,16 +6,16 @@ export type RouteMethod = string;
 
 //请求方式
 export enum InteractiveMode {
-	request = 0, //向上发起请求
-	response = 1, //向下做出回应
-	notify = 2, //仅用于通知
+	request = 0, //向上发起请求  request
+	response = 1, //向下做出回应  response
+	notify = 2, //仅用于通知  只有回应 response
 }
 
 //请求数据
 export type RpcMessage = {
 	id?: number; //为发起端的id 如果是终端发起的无需通知的则没有id
 	url: string; //路由
-	data?: Object; //请求数据
+	data?: { [key: string]: any }; //请求数据
 	body?: Object; //回传数据
 	mode: InteractiveMode; //交互模式 request和response为同步模式的一问一答 notify则为异步通知
 };
@@ -24,7 +24,7 @@ export type RpcMessage = {
 export type RpcNotiyMessage = {
 	id?: number;
 	url: string;
-	data?: Object;
+	data?: { [key: string]: any };
 	channel?: string;
 	sessionId?: SessionId;
 	excludeIds?: SessionId[];

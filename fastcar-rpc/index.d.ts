@@ -28,6 +28,9 @@ export * from "./src/constant/RpcMetaData";
 export * from "./src/constant/RpcUrlData";
 export * from "./src/constant/SocketEnum";
 export * from "./src/constant/SocketSymbol";
+export * from "./src/constant/SocketCodingDefault";
+export * from "./src/types/CodeProtocolEnum";
+export * from "./src/types/PBConfig";
 
 export interface RpcAuthService {
 	auth(username: string, password: string, config: SocketServerConfig): Promise<boolean>;
@@ -144,3 +147,12 @@ export class RpcServer implements MsgCallbackService {
 
 	private setMiddleware(): void;
 }
+
+//封装客户端向服务端发起请求
+export function ClientRequestStatic<T, K>(res: { client: RpcClient; url: string; data?: T; opts?: RetryConfig }): Promise<K>;
+
+//封装服务端向客户端发起请求
+export function ServerRequestStatic<T, K>(res: { sessionId: SessionId; client: RpcServer; url: string; data?: T; opts?: RetryConfig }): Promise<K>;
+
+//导出pb工具类
+export * as ProtoBuffService from "./src/service/ProtoBuffService";

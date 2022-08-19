@@ -1,5 +1,5 @@
 import { Logger } from "fastcar-core";
-import { InteractiveMode, RetryConfig, RpcClientConfig, RpcClientMsgBox, RpcClientRequestType, RpcMessage, RpcResponseCode, RpcResponseType } from "../../types/RpcConfig";
+import { InteractiveMode, RetryConfig, RpcClientConfig, RpcClientMsgBox, RpcMessage, RpcResponseCode, RpcResponseType } from "../../types/RpcConfig";
 import { SocketClientConfig } from "../../types/SocketConfig";
 import { SocketClient } from "../socket/SocketClient";
 import { SocketClientFactory } from "../socket/SocketFactory";
@@ -10,6 +10,8 @@ import RpcAsyncService from "../RpcAsyncService";
 import MsgClientHookService from "../MsgClientHookService";
 import { RpcUrlData } from "../../constant/RpcUrlData";
 import { Log } from "fastcar-core/annotation";
+import { PBConfig, ProtoList } from "../../types/PBConfig";
+import ProtoBuffService from "../ProtoBuffService";
 
 //封装一个可用的rpc框架
 @EnableScheduling
@@ -27,7 +29,7 @@ export default class RpcClient implements MsgClientHookService {
 	constructor(config: SocketClientConfig, rpcAsyncService: RpcAsyncService, retry?: RetryConfig) {
 		let ClientClass = SocketClientFactory(config.type);
 		if (!ClientClass) {
-			this.getLogger().error(`Failed to create this client type by ${config.type}`);
+			this.rpcLogger.error(`Failed to create this client type by ${config.type}`);
 			throw new Error(`Failed to create this client type by ${config.type}`);
 		}
 		this.config = Object.assign(
@@ -49,8 +51,43 @@ export default class RpcClient implements MsgClientHookService {
 		this.checkConnectTimer = 0;
 	}
 
-	getLogger(): Logger {
-		return this.rpcLogger || console;
+	//初始化配置事件
+	addProtoBuf(p: ProtoList): void {
+		//先加载root节点
+		let root = ProtoBuffService.addProtoRoot(p.root.protoPath);
+
+		if (p.prefixUrl && !p.prefixUrl.startsWith("/")) {
+			p.prefixUrl = `/${p.prefixUrl}`;
+		}
+
+		let service = root.lookupService(p.root.service);
+
+		let methods: string[] = Object.keys(service.methods);
+		let pMap: Map<string, string> = new Map();
+
+		if (p?.list && p.list.length > 0) {
+			p.list.forEach((item) => {
+				pMap.set(item.method, item.url);
+			});
+		}
+
+		methods.forEach((m) => {
+			let pp: PBConfig = {
+				protoPath: p.root.protoPath,
+				service: p.root.service,
+				url: pMap.has(m) ? (pMap.get(m) as string) : `/${m}`,
+				method: m,
+			};
+			if (!pp.url.startsWith("/")) {
+				pp.url = "/" + pp.url;
+			}
+			if (p.prefixUrl) {
+				if (!pp.url.startsWith(p.prefixUrl)) {
+					pp.url = p.prefixUrl + pp.url;
+				}
+			}
+			ProtoBuffService.addUrlMapping(pp);
+		});
 	}
 
 	addSerialId(): number {
@@ -131,7 +168,7 @@ export default class RpcClient implements MsgClientHookService {
 				let repData = await this.rpcAsyncService.handleMsg(msg.url, msg.data || {});
 				this.client.sendMsg({
 					id: msg.id,
-					data: repData,
+					data: repData || {},
 					url: msg.url,
 					mode: InteractiveMode.response,
 				});
@@ -143,11 +180,28 @@ export default class RpcClient implements MsgClientHookService {
 	async request(url: string, data?: Object, opts?: RetryConfig): Promise<RpcResponseType> {
 		let id = this.addSerialId();
 
-		let m: RpcClientRequestType = {
-			url,
-			data,
-		};
-		Object.assign(m, opts);
+		let m: {
+			url: string;
+			data?: Object;
+			retryCount: number;
+			retryInterval: number;
+			timeout: number; //超时时间
+		} = Object.assign(
+			{
+				url,
+				data: data,
+			},
+			{
+				retryCount: this.config.retryCount,
+				retryInterval: this.config.retryInterval,
+				timeout: this.config.timeout, //超时时间
+			},
+			{
+				retryCount: opts?.retryCount,
+				retryInterval: opts?.retryInterval,
+				timeout: opts?.timeout, //超时时间
+			}
+		);
 
 		return new Promise((resolve) => {
 			// if (!this.client.connected) {
@@ -180,11 +234,11 @@ export default class RpcClient implements MsgClientHookService {
 				id,
 				msg,
 				retryCount: 0,
-				retryInterval: m.retryInterval || this.config.retryInterval,
+				retryInterval: m.retryInterval,
 				expiretime: Date.now() + timeout,
 				timeout,
-				maxRetryCount: m.retryCount || this.config.retryCount,
-				maxRetryInterval: m.retryInterval || this.config.retryInterval,
+				maxRetryCount: m.retryCount,
+				maxRetryInterval: m.retryInterval,
 				cb,
 			};
 
@@ -199,7 +253,7 @@ export default class RpcClient implements MsgClientHookService {
 	})
 	async checkMsg(diff: number, stop: boolean) {
 		if (this.checkStatus) {
-			this.getLogger().warn("Client message detection time is too long");
+			this.rpcLogger.warn("Client message detection time is too long");
 			return;
 		}
 
@@ -226,7 +280,7 @@ export default class RpcClient implements MsgClientHookService {
 					item.retryInterval -= diff;
 					if (item.retryInterval <= 0) {
 						//发送消息
-						if (item.retryCount >= this.config.retryCount) {
+						if (item.retryCount >= item.maxRetryCount) {
 							cleanIds.set(id, {
 								code: RpcResponseCode.retryTimes,
 								msg: `The message retries more than ${item.retryCount} times`,
@@ -236,23 +290,23 @@ export default class RpcClient implements MsgClientHookService {
 							item.retryCount++;
 							this.client.sendMsg(item.msg);
 						}
-						item.retryInterval = this.config.retryInterval;
+						item.retryInterval = item.maxRetryInterval;
 					}
 				});
 
 				cleanIds.forEach((resp, id) => {
 					let item = this.msgQueue.get(id);
 					if (item) {
-						this.getLogger().error(resp);
-						this.getLogger().error(`${JSON.stringify(item.msg)}`);
+						this.rpcLogger.error(resp);
+						this.rpcLogger.error(`${JSON.stringify(item.msg)}`);
 						item.cb.done(resp, null);
 					}
 					this.msgQueue.delete(id);
 				});
 			}
 		} catch (e) {
-			this.getLogger().error("rpc client checkMsgQueue error");
-			this.getLogger().error(e);
+			this.rpcLogger.error("rpc client checkMsgQueue error");
+			this.rpcLogger.error(e);
 		} finally {
 			this.checkStatus = false;
 		}

@@ -1,7 +1,9 @@
 import { Logger } from "fastcar-core";
 import { Log } from "fastcar-core/annotation";
-import { DecodeDefault, EncodeDefault } from "../../constant/SocketCodingDefault";
+import { DecodeDefault, DecodePBDefault, EncodeDefault, EncodePBDefault } from "../../constant/SocketCodingDefault";
 import { SocketEnum } from "../../constant/SocketEnum";
+import { CodeProtocolEnum } from "../../types/CodeProtocolEnum";
+import { RpcMessage } from "../../types/RpcConfig";
 import { DecodeMsg, EncodeMsg, SessionId, SocketClientConfig } from "../../types/SocketConfig";
 import MsgClientHookService from "../MsgClientHookService";
 
@@ -26,8 +28,27 @@ export abstract class SocketClient {
 		this.manager = manager;
 
 		//解码器赋值
-		this.encode = config.encode || EncodeDefault;
-		this.decode = config.decode || DecodeDefault;
+		switch (config.codeProtocol) {
+			case CodeProtocolEnum.PROTOBUF: {
+				this.encode = EncodePBDefault;
+				this.decode = DecodePBDefault;
+				break;
+			}
+			case CodeProtocolEnum.JSON:
+			default: {
+				this.encode = EncodeDefault;
+				this.decode = DecodeDefault;
+				break;
+			}
+		}
+
+		if (config.encode) {
+			this.encode = config.encode;
+		}
+
+		if (config.decode) {
+			this.decode = config.decode;
+		}
 		this.forceConnect = false;
 	}
 
@@ -40,10 +61,10 @@ export abstract class SocketClient {
 	abstract disconnect(reason: string): void;
 
 	//发送消息
-	abstract sendMsg(msg: Object): Promise<boolean>;
+	abstract sendMsg(msg: RpcMessage): Promise<boolean>;
 
 	//接收消息
-	abstract receiveMsg(msg: string | Buffer): void;
+	abstract receiveMsg(msg: string | Buffer | RpcMessage): void;
 
 	//客户端主动下线
 	abstract offline(reason?: string): void;

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package router;
+
+//请求数据
+message RpcMessage {
+    required string url = 1; //路由
+    required uint32 mode = 2;  //交互模式 request和response为同步模式的一问一答 notify则为异步通知
+	optional uint32 id = 3; //为发起端的id 如果是终端发起的无需通知的则没有id
+	repeated uint32 data = 4; //请求数据
+}
+
+service Router {  
+    rpc transferRoute(stream RpcMessage) returns (stream RpcMessage) {}
+}

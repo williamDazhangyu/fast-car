@@ -10,6 +10,7 @@ import { SocketEnum } from "../../constant/SocketEnum";
 import MsgCallbackService from "../MsgCallbackService";
 import { nanoid } from "nanoid";
 import { SocketMsgStatus } from "../../constant/SocketMsgStatus";
+import { InteractiveMode, RpcMessage, RpcNotiyMessage } from "../../types/RpcConfig";
 /***
  * @version 1.0 用于集成各个不同类型的socket和实现丰富的消息逻辑表达
  */
@@ -118,7 +119,7 @@ export default class SocketManager implements MsgHookService {
 	}
 
 	//发送消息
-	async sendMsg(sessionId: string, msg: Object = {}): Promise<SocketMsgStatus> {
+	async sendMsg(sessionId: string, msg: RpcMessage = { mode: InteractiveMode.notify, url: "" }): Promise<SocketMsgStatus> {
 		let server = this.getSocketServerBySessionId(sessionId);
 		if (server) {
 			let flag = await server.sendMsgBySessionId(sessionId, msg);
@@ -187,7 +188,7 @@ export default class SocketManager implements MsgHookService {
 		return list;
 	}
 
-	sendMsgByChannel(channel: string, msg: Object = {}, excludeIds: SessionId[] = []): void {
+	sendMsgByChannel(channel: string, msg: RpcMessage, excludeIds: SessionId[] = []): void {
 		let sessionIds = this.channels.get(channel);
 		if (!sessionIds || sessionIds.length == 0) {
 			return;

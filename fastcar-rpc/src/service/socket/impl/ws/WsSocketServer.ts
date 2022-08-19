@@ -3,7 +3,7 @@ import SocketServer from "../../SocketServer";
 import { WebSocketServer, WebSocket } from "ws";
 import { IncomingMessage } from "http";
 import { SocketEvents } from "../../../../types/SocketEvents";
-import { RpcResponseCode } from "../../../../types/RpcConfig";
+import { RpcResponseCode, RpcMessage, InteractiveMode } from "../../../../types/RpcConfig";
 
 type SocketIOSession = {
 	id: SessionId; //会话id
@@ -42,10 +42,16 @@ export default class WsSocketServer extends SocketServer {
 
 			let socketId = session.sessionId;
 			this.connect(socket, socketId, request.socket.remoteAddress || "0.0.0.0");
-			socket.send(JSON.stringify({ event: SocketEvents.CONNECT_RECEIPT, socketId }));
+			socket.send(
+				this.encode({
+					url: SocketEvents.CONNECT_RECEIPT,
+					mode: InteractiveMode.request,
+					data: { socketId },
+				})
+			);
 
 			socket.on(SocketEvents.MESSAGE, (data) => {
-				this.receiveMsg(socketId, data.toString());
+				this.receiveMsg(socketId, data);
 			});
 
 			socket.on("close", (code: number, reason: Buffer) => {
@@ -65,11 +71,12 @@ export default class WsSocketServer extends SocketServer {
 		});
 	}
 
-	async sendMsg(sessionId: string, msg: Object): Promise<boolean> {
+	async sendMsg(sessionId: string, msg: RpcMessage): Promise<boolean> {
 		let socket = this.getSession(sessionId);
 		if (!socket) {
 			return false;
 		}
+		console.debug("服务端发送消息模式", msg.mode);
 		socket.client.send(this.encode(msg));
 		return true;
 	}

@@ -4,6 +4,7 @@ import { SocketClient } from "../../../socket/SocketClient";
 import * as ioClient from "socket.io-client";
 import MsgClientHookService from "../../../MsgClientHookService";
 import { SocketEvents } from "../../../../types/SocketEvents";
+import { RpcMessage } from "../../../../types/RpcConfig";
 
 export default class IoSocketClient extends SocketClient {
 	type: SocketEnum;
@@ -53,7 +54,7 @@ export default class IoSocketClient extends SocketClient {
 		this.logger.warn(`client disconnect ${reason}`);
 	}
 
-	async sendMsg(msg: Object): Promise<boolean> {
+	async sendMsg(msg: RpcMessage): Promise<boolean> {
 		if (!this.connected) {
 			return false;
 		}

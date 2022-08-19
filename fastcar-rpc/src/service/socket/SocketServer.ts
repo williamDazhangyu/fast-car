@@ -1,7 +1,8 @@
 import { SocketDisConnect, SocketServerConfig, SocketSession, SessionId, EncodeMsg, DecodeMsg } from "../../types/SocketConfig";
 import MsgHookService from "../MsgHookService";
-import { DecodeDefault, EncodeDefault } from "../../constant/SocketCodingDefault";
-import { ServerType } from "fastcar-server";
+import { DecodeDefault, EncodeDefault, EncodePBDefault, DecodePBDefault } from "../../constant/SocketCodingDefault";
+import { RpcMessage } from "../../types/RpcConfig";
+import { CodeProtocolEnum } from "../../types/CodeProtocolEnum";
 
 //这边主要做对于各个集成的socket的一个约定
 export default abstract class SocketServer {
@@ -20,23 +21,42 @@ export default abstract class SocketServer {
 		this.state = false;
 		this.config = config;
 
-		this.encode = config.encode || EncodeDefault;
-		this.decode = config.decode || DecodeDefault;
+		switch (config.codeProtocol) {
+			case CodeProtocolEnum.PROTOBUF: {
+				this.encode = EncodePBDefault;
+				this.decode = DecodePBDefault;
+				break;
+			}
+			case CodeProtocolEnum.JSON:
+			default: {
+				this.encode = EncodeDefault;
+				this.decode = DecodeDefault;
+				break;
+			}
+		}
+
+		if (config.encode) {
+			this.encode = config.encode;
+		}
+
+		if (config.decode) {
+			this.decode = config.decode;
+		}
 	}
 
 	abstract listen(): Promise<void>;
 
 	abstract close(): Promise<void>;
 
-	abstract sendMsg(sessionId: string, msg: Object): Promise<boolean>; //发送消息
+	abstract sendMsg(sessionId: string, msg: RpcMessage): Promise<boolean>; //发送消息
 
 	abstract offline(session: SocketSession, reason?: string): void;
 
-	async sendMsgBySessionId(sessionId: string, msg: Object) {
+	async sendMsgBySessionId(sessionId: string, msg: RpcMessage) {
 		return await this.sendMsg(sessionId, msg);
 	}
 
-	receiveMsg(sessionId: string, msg: string | Buffer): void {
+	receiveMsg(sessionId: string, msg: string | Buffer | ArrayBuffer | Buffer[]): void {
 		this.manager.handleMsg(sessionId, this.decode(msg));
 	}
 

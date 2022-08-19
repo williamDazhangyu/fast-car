@@ -1,5 +1,7 @@
-import { ServerConfig } from "fastcar-server";
+import { ServerConfig, SSLConfig } from "fastcar-server";
 import { SocketEnum } from "../constant/SocketEnum";
+import { CodeProtocolEnum } from "./CodeProtocolEnum";
+import { RpcMessage } from "./RpcConfig";
 export type SessionId = string;
 export type ServerId = string;
 
@@ -17,6 +19,7 @@ export type SocketClientConfig = {
 	decode?: DecodeMsg;
 	disconnectInterval?: number;
 	secure?: SecureClientOptions;
+	ssl?: SSLConfig;
 } & { [key: string]: any };
 
 //服务端连接配置
@@ -28,6 +31,7 @@ export type SocketServerConfig = {
 	serviceType: string; //服务器用途类型 用于表名是何种服务器
 	encode?: EncodeMsg; //编码解码
 	decode?: DecodeMsg;
+	codeProtocol?: CodeProtocolEnum; //约定协议 json protobuf
 	secure?: SecureClientOptions;
 } & { [key: string]: any };
 
@@ -53,7 +57,7 @@ export type ClientSession = {
 };
 
 //压缩消息
-export type EncodeMsg = (msg: Object) => string | Buffer;
+export type EncodeMsg = (msg: RpcMessage) => string | Buffer;
 
 //解压消息
-export type DecodeMsg = (msg: string | Buffer) => Object;
+export type DecodeMsg = (msg: string | Buffer | ArrayBuffer | Buffer[]) => RpcMessage;

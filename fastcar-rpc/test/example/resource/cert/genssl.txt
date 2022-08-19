@@ -1,0 +1,21 @@
+生成grpc对应的认证信息
+
+openssl genrsa -passout pass:a1b1b4m8a0j1b5b6 -des3 -out ca.key 4096
+
+openssl req -passin pass:a1b1b4m8a0j1b5b6 -new -x509 -days 3650 -key ca.key -out ca.crt -subj "/C=CN/ST=ZheJiang/L=HangZhou/O=Test/OU=Test/CN=ca"
+
+openssl genrsa -passout pass:a1b1b4m8a0j1b5b6 -des3 -out server.key 4096
+
+openssl req -passin pass:a1b1b4m8a0j1b5b6 -new -key server.key -out server.csr -subj  "/C=CN/ST=ZheJiang/L=HangZhou/O=Test/OU=Server/CN=example"
+
+openssl x509 -req -passin pass:a1b1b4m8a0j1b5b6 -days 3650 -in server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt
+
+openssl rsa -passin pass:a1b1b4m8a0j1b5b6 -in server.key -out server.key
+
+openssl genrsa -passout pass:a1b1b4m8a0j1b5b6 -des3 -out client.key 4096
+
+openssl req -passin pass:a1b1b4m8a0j1b5b6 -new -key client.key -out client.csr -subj  "/C=CN/ST=ZheJiang/L=HangZhou/O=Test/OU=Client/CN=example"
+
+openssl x509 -passin pass:a1b1b4m8a0j1b5b6 -req -days 3650 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt
+
+openssl rsa -passin pass:a1b1b4m8a0j1b5b6 -in client.key -out client.key

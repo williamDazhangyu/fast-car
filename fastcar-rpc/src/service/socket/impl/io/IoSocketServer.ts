@@ -3,6 +3,7 @@ import SocketServer from "../../SocketServer";
 import { Server, Socket } from "socket.io";
 import { SocketEvents } from "../../../../types/SocketEvents";
 import MsgHookService from "../../../MsgHookService";
+import { RpcMessage } from "../../../../types/RpcConfig";
 
 type SocketIOSession = {
 	id: SessionId; //会话id
@@ -84,7 +85,7 @@ export default class IoSocketServer extends SocketServer {
 		return this.sessions.get(sessionId) as SocketIOSession;
 	}
 
-	async sendMsg(sessionId: string, msg: Object): Promise<boolean> {
+	async sendMsg(sessionId: string, msg: RpcMessage): Promise<boolean> {
 		let socket = this.getSession(sessionId);
 		if (!socket) {
 			return false;

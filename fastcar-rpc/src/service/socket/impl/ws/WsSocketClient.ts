@@ -4,6 +4,7 @@ import MsgClientHookService from "../../../MsgClientHookService";
 import { SocketClient } from "../../SocketClient";
 import { WebSocket } from "ws";
 import { SocketEvents } from "../../../../types/SocketEvents";
+import { RpcMessage } from "../../../../types/RpcConfig";
 
 export default class WsSocketClient extends SocketClient {
 	type: SocketEnum;
@@ -48,7 +49,7 @@ export default class WsSocketClient extends SocketClient {
 		this.logger.warn(`client disconnect ${reason}`);
 	}
 
-	async sendMsg(msg: Object): Promise<boolean> {
+	async sendMsg(msg: RpcMessage): Promise<boolean> {
 		if (!this.io || !this.connected) {
 			return false;
 		}
@@ -65,15 +66,13 @@ export default class WsSocketClient extends SocketClient {
 	}
 
 	receiveMsg(msg: string | Buffer): void {
-		let data: any = this.decode(msg);
-		if (!!data && data?.event) {
-			if (data.event == SocketEvents.CONNECT_RECEIPT) {
-				this.sessionId = data.socketId;
-				this.connected = true;
-				return;
-			}
+		let result: any = this.decode(msg);
+		if (!!result && result?.url == SocketEvents.CONNECT_RECEIPT) {
+			this.sessionId = result.data?.socketId;
+			this.connected = true;
+			return;
 		}
-		this.manager.handleMsg(data);
+		this.manager.handleMsg(result);
 	}
 
 	offline(reason?: string): void {

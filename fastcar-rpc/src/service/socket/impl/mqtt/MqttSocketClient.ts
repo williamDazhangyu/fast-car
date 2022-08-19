@@ -4,6 +4,7 @@ import { SocketClientConfig } from "../../../../types/SocketConfig";
 import MsgClientHookService from "../../../MsgClientHookService";
 import { SocketClient } from "../../SocketClient";
 import { SocketEvents } from "../../../../types/SocketEvents";
+import { RpcMessage } from "../../../../types/RpcConfig";
 
 export default class MqttSocketClient extends SocketClient {
 	type: SocketEnum;
@@ -58,7 +59,7 @@ export default class MqttSocketClient extends SocketClient {
 		this.logger.warn(`client disconnect ${reason}`);
 	}
 
-	async sendMsg(msg: Object): Promise<boolean> {
+	async sendMsg(msg: RpcMessage): Promise<boolean> {
 		if (!this.connected) {
 			return false;
 		}

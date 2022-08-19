@@ -5,6 +5,7 @@ import MsgHookService from "../../../MsgHookService";
 import { Server, Client, PublishPacket, Aedes } from "aedes";
 import { Protocol } from "fastcar-server";
 import * as net from "net";
+import { RpcMessage } from "../../../../types/RpcConfig";
 
 type SocketMqttSession = {
 	id: SessionId; //会话id
@@ -44,7 +45,7 @@ export default class MqttSocketServer extends SocketServer {
 			authorizePublish: (client: Client, packet: PublishPacket) => {
 				let sessionId = this.sessionMap.get(client.id);
 				if (sessionId) {
-					this.receiveMsg(sessionId, packet.payload.toString());
+					this.receiveMsg(sessionId, packet.payload);
 				}
 			},
 		});
@@ -105,7 +106,7 @@ export default class MqttSocketServer extends SocketServer {
 		return this.sessions.get(sessionId) as SocketMqttSession;
 	}
 
-	async sendMsg(sessionId: string, msg: Object): Promise<boolean> {
+	async sendMsg(sessionId: string, msg: RpcMessage): Promise<boolean> {
 		let socket = this.getSession(sessionId);
 		if (!socket) {
 			return false;
