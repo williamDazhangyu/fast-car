@@ -18,21 +18,24 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	}
 
 	//修正关键词的别名需转义的错误
+	//修正多列转义时错误
 	getFieldName(name: string): string {
 		let info = this.mappingMap.get(name);
 		let alias = info ? info.field : name;
-
 		//转义不转换函数
 		let list = alias.match(/\((.+?)\)/g);
 		if (list && list.length > 0) {
 			let tmpStr = alias;
 			list.forEach((item) => {
-				let word = `(\`${item.substring(1, item.length - 1)}\`)`;
+				let itemList = item.substring(1, item.length - 1).split(",");
+				itemList = itemList.map((citem) => {
+					return this.mappingMap.has(citem) ? `\`${this.mappingMap.get(citem)?.field}\`` : citem;
+				});
+				let word = `(${itemList.join(",")})`;
 				tmpStr = tmpStr.replace(item, word);
 			});
 			return tmpStr;
 		}
-
 		return `\`${alias}\``;
 	}
 
