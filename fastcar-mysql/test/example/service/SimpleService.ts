@@ -121,6 +121,13 @@ class SimpleService {
 			limit: 1,
 		});
 	}
+
+	//使用函数测试
+	async testFormat() {
+		return await this.myMapper.select({
+			fields: ['DATE_FORMAT( case_time, "%Y-%m-%d %H:%I:%s" ) as caseTime'],
+		});
+	}
 }
 
 export default SimpleService;

@@ -75,4 +75,10 @@ describe("mysql测试", () => {
 		let res = await service.forceIndex();
 		console.log(res);
 	});
+
+	it("函数测试", async () => {
+		let service: SimpleService = appInstance.app.getComponentByTarget(SimpleService);
+		let res = await service.testFormat();
+		console.log(res);
+	});
 });
