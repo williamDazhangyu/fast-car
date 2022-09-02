@@ -1,4 +1,4 @@
-import Autowired from "../../../../src/annotation/Autowired";
+import Autowired from "../../../../src/annotation/bind/Autowired";
 import Controller from "../../../../src/annotation/stereotype/Controller";
 import HelloConfig from "../config/HelloConfig";
 import HelloService from "../service/HelloService";

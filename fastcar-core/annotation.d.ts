@@ -149,3 +149,6 @@ export function BasePath(name: string): Ret;
 
 //自定义程序内配置
 export function ApplicationSetting(setting: { [key: string]: any }): Ret;
+
+//根据别名注入依赖组件
+export function AliasInjection(alias: string): PMRet;

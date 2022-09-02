@@ -1,12 +1,10 @@
 import "reflect-metadata";
 import { CommonConstant } from "../../constant/CommonConstant";
-import { FastCarMetaData } from "../../constant/FastCarMetaData";
 import FastCarApplication from "../../FastCarApplication";
 import DataSourceManager from "../../interface/DataSourceManager";
 import Logger from "../../interface/Logger";
 import { DesignMeta } from "../../type/DesignMeta";
 import SqlError from "../../type/SqlError";
-import AddRequireModule from "../AddRequireModule";
 
 /**
  * @version 1.0 事务管理 不建议多个事务的嵌套(避免长事务) 尽量做到一个方法一个事务
@@ -14,8 +12,6 @@ import AddRequireModule from "../AddRequireModule";
 export default function Transactional(driver: string = "MysqlDataSourceManager") {
 	return function (target: any, methodName: string, descriptor: PropertyDescriptor) {
 		const orignFunction = descriptor.value;
-		//注入app组件用于遍历组件
-		AddRequireModule(target, FastCarMetaData.APP, FastCarMetaData.APP);
 
 		//在初始化时就应该检测是否注入了sessionID
 		const paramsIndex = Reflect.getOwnMetadata(DesignMeta.sqlSession, target, methodName);

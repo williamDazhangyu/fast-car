@@ -1,5 +1,5 @@
 import Application from "./annotation/Application";
-import Autowired from "./annotation/Autowired";
+import Autowired from "./annotation/bind/Autowired";
 import ENV from "./annotation/env/ENV";
 import ExceptionMonitor from "./annotation/ExceptionMonitor";
 import ApplicationStart from "./annotation/lifeCycle/ApplicationStart";
@@ -16,7 +16,7 @@ import Controller from "./annotation/stereotype/Controller";
 import Injection from "./annotation/stereotype/Injection";
 import Service from "./annotation/stereotype/Service";
 import Repository from "./annotation/stereotype/Repository";
-import AddRequireModule from "./annotation/AddRequireModule";
+import AddRequireModule from "./annotation/bind/AddRequireModule";
 import DS from "./annotation/data/DS";
 import DSIndex from "./annotation/data/DSIndex";
 import AddChildValid from "./annotation/valid/AddChildValid";
@@ -39,12 +39,13 @@ import Transactional from "./annotation/data/Transactional";
 import Log from "./annotation/stereotype/Log";
 import BaseFilePath from "./annotation/env/BaseFilePath";
 import BasePath from "./annotation/env/BasePath";
-import CallDependency from "./annotation/Calldependency";
+import CallDependency from "./annotation/bind/CallDependency";
 import Hotter from "./annotation/scan/Hotter";
 import ApplicationRunner from "./annotation/lifeCycle/ApplicationRunner";
 import ApplicationInit from "./annotation/lifeCycle/ApplicationInit";
 import ApplicationDestory from "./annotation/lifeCycle/ApplicationDestory";
 import ApplicationSetting from "./annotation/env/ApplicationSetting";
+import AliasInjection from "./annotation/bind/AliasInjection";
 
 //注解暴露出去
 export {
@@ -67,6 +68,7 @@ export {
 	Application,
 	Autowired,
 	CallDependency,
+	AliasInjection,
 	ExceptionMonitor,
 	Deprecate,
 	NotImplemented,

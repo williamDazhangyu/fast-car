@@ -60,9 +60,11 @@ Injection 拥有指定注入组件
 
 Application 声明为一个应用
 
-Autowired 自动注入依赖的组件
+Autowired 自动注入依赖的组件,现在等同为CallDependency
 
 CallDependency 调用时注入组件(调用对象可以不是组件 可以是一个普通类) 0.2.11版本以上生效
+
+AliasInjection 根据别名注入组件
 
 ExceptionMonitor 声明异常监听
 

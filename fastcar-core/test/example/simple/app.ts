@@ -46,6 +46,7 @@ let appInsatcne = new APP();
 //引用记得放在app扫描后进行
 import EnvConfig from "./config/EnvConfig";
 import CallService from "./service/CallService";
+import NotFoundController from "./controller/NotFoundController";
 
 describe("程序应用测试", () => {
 	it("获取配置", () => {
@@ -80,5 +81,19 @@ describe("程序应用测试", () => {
 	});
 	it("程序内配置", () => {
 		console.log("配置", appInsatcne.app.getSetting("customHello"));
+	});
+	it("查找一个不存在的注入", () => {
+		let notFound: NotFoundController = appInsatcne.app.getComponentByTarget(NotFoundController);
+		try {
+			notFound.getNotFound();
+		} catch (e) {
+			appInsatcne.app.getLogger().error(e);
+		}
+
+		try {
+			notFound.getAutoNotFound();
+		} catch (e) {
+			appInsatcne.app.getLogger().error(e);
+		}
 	});
 });

@@ -1,5 +1,5 @@
-import { FastCarMetaData } from "../constant/FastCarMetaData";
 import "reflect-metadata";
+import { FastCarMetaData } from "../../constant/FastCarMetaData";
 
 /***
  * @version 1.0 依赖模块注入

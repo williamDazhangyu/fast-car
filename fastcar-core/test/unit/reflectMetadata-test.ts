@@ -1,4 +1,3 @@
-import Autowired from "../../src/annotation/Autowired";
 import "reflect-metadata";
 
 class Test {}

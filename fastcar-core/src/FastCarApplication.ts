@@ -387,48 +387,49 @@ class FastCarApplication extends Events {
 	 * @version 1.0 装配模块
 	 * @version 1.0 装配日志模块
 	 * @version 1.1 移除装配日志模块 改为随用随取
+	 * @deprecated 弃用系统自动装配
 	 */
-	injectionModule(instance: any, instanceName: string | symbol): void {
-		let relyname = FastCarMetaData.IocModule;
-		let moduleList: Map<string, string> = Reflect.getMetadata(relyname, instance);
-		let detailInfo = this.componentDeatils.get(instanceName);
+	// injectionModule(instance: any, instanceName: string | symbol): void {
+	// 	let relyname = FastCarMetaData.IocModule;
+	// 	let moduleList: Map<string, string> = Reflect.getMetadata(relyname, instance);
+	// 	let detailInfo = this.componentDeatils.get(instanceName);
 
-		if (moduleList && moduleList.size > 0) {
-			moduleList.forEach((name: string, propertyKey: string) => {
-				let func = this.componentMap.get(name);
+	// 	if (moduleList && moduleList.size > 0) {
+	// 		moduleList.forEach((name: string, propertyKey: string) => {
+	// 			let func = this.componentMap.get(name);
 
-				//如果等于自身则进行注入
-				if (name === FastCarApplication.name || name === FastCarMetaData.APP) {
-					func = this;
-				} else {
-					if (!this.componentMap.has(name)) {
-						//找不到依赖项
-						let injectionError = new Error(`Unsatisfied dependency expressed through [${propertyKey}] in ${detailInfo?.path} `);
-						this.sysLogger.error(injectionError.message);
-						throw injectionError;
-					}
-				}
+	// 			//如果等于自身则进行注入
+	// 			if (name === FastCarApplication.name || name === FastCarMetaData.APP) {
+	// 				func = this;
+	// 			} else {
+	// 				if (!this.componentMap.has(name)) {
+	// 					//找不到依赖项
+	// 					let injectionError = new Error(`Unsatisfied dependency expressed through [${propertyKey}] in ${detailInfo?.path} `);
+	// 					this.sysLogger.error(injectionError.message);
+	// 					throw injectionError;
+	// 				}
+	// 			}
 
-				Reflect.set(instance, propertyKey, func);
-			});
-		}
-	}
+	// 			Reflect.set(instance, propertyKey, func);
+	// 		});
+	// 	}
+	// }
 
 	/**
 	 * @version 1.0 加载需要注入的类
 	 */
-	loadInjectionModule() {
-		this.componentMap.forEach((instance, instanceName) => {
-			//补充实例找不到时 不能被注解
-			if (!instance) {
-				let insatnceError = new Error(`instance not found by ${instanceName.toString()}`);
-				this.sysLogger.error(insatnceError.message);
-				throw insatnceError;
-			}
+	// loadInjectionModule() {
+	// 	this.componentMap.forEach((instance, instanceName) => {
+	// 		//补充实例找不到时 不能被注解
+	// 		if (!instance) {
+	// 			let insatnceError = new Error(`instance not found by ${instanceName.toString()}`);
+	// 			this.sysLogger.error(insatnceError.message);
+	// 			throw insatnceError;
+	// 		}
 
-			this.injectionModule(instance, instanceName);
-		});
-	}
+	// 		this.injectionModule(instance, instanceName);
+	// 	});
+	// }
 
 	/***
 	 * @version 1.0 根据类型获取组件
@@ -457,6 +458,13 @@ class FastCarApplication extends Events {
 	 */
 	getComponentByName(name: string | symbol): any {
 		return this.componentMap.get(name);
+	}
+
+	/***
+	 * @version 1.0 判断是否拥有组件名称
+	 */
+	hasComponentByName(name: string | symbol): any {
+		return this.componentMap.has(name);
 	}
 
 	/***
@@ -613,9 +621,9 @@ class FastCarApplication extends Events {
 		this.loadClass();
 		this.sysLogger.info("Complete component scan");
 
-		this.sysLogger.info("Start component injection");
-		this.loadInjectionModule();
-		this.sysLogger.info("Complete component injection");
+		// this.sysLogger.info("Start component injection");
+		// this.loadInjectionModule();
+		// this.sysLogger.info("Complete component injection");
 	}
 
 	/***

@@ -107,7 +107,7 @@ export class FastCarApplication extends Events {
 
 	/***
 	 * @version 1.0 装配单个模块
-	 *
+	 * @deprecated 修改为主动查找时装配
 	 */
 	injectionModule(instance: any, instanceName: string | symbol): void;
 
@@ -125,6 +125,7 @@ export class FastCarApplication extends Events {
 
 	/**
 	 * @version 1.0 加载需要注入的类
+	 * @deprecated 修改为主动查找时装配
 	 */
 	loadInjectionModule(): void;
 
