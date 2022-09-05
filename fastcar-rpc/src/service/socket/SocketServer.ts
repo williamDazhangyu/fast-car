@@ -13,6 +13,7 @@ export default abstract class SocketServer {
 	protected config: SocketServerConfig;
 	protected encode: EncodeMsg;
 	protected decode: DecodeMsg;
+	protected maxConnections: number;
 
 	constructor(config: SocketServerConfig, manager: MsgHookService) {
 		this.id = config.id;
@@ -20,6 +21,7 @@ export default abstract class SocketServer {
 		this.manager = manager;
 		this.state = false;
 		this.config = config;
+		this.maxConnections = config.maxConnections || 1024;
 
 		switch (config.codeProtocol) {
 			case CodeProtocolEnum.PROTOBUF: {
@@ -68,6 +70,15 @@ export default abstract class SocketServer {
 		};
 
 		this.sessions.set(id, session);
+
+		if (this.maxConnections < this.sessions.size) {
+			//掉线拒绝
+			this.kickConnect({
+				sessionId: id,
+				reason: "connections too many",
+			});
+			return;
+		}
 		this.manager.connect(id);
 	}
 

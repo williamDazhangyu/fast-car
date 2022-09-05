@@ -33,6 +33,7 @@ export type SocketServerConfig = {
 	decode?: DecodeMsg;
 	codeProtocol?: CodeProtocolEnum; //约定协议 json protobuf
 	secure?: SecureClientOptions;
+	maxConnections?: number; //最大连接数 默认1024
 } & { [key: string]: any };
 
 //客户端连接至服务的会话
