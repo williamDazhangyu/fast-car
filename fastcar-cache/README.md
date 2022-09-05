@@ -80,10 +80,11 @@ export default class FileClientMapping implements CacheConfig {
 @CacheMapping
 export default class MySqlClientMapping implements CacheConfig {
  store: string = "mysqlStore";
- initSync: boolean = true;
- syncTimer: number = 10;
- ttl: number = 60; //60秒后过期
+ initSync: boolean = true; //是否进行初始化读取数据
+ syncTimer: number = 10;  //同步间隔
+ ttl: number = 60; //60秒后过期 0为永久有效
  dbClient: DBClientService;
+ failNum: number; //持久化失败后重试次数 默认三次
 
  @CallDependency
  private cacheMapper!: CacheMapper;

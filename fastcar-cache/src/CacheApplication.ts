@@ -1,6 +1,6 @@
 import { ApplicationStart, ApplicationStop, Log } from "fastcar-core/annotation";
 import { BootPriority, DataMap, Logger } from "fastcar-core";
-import { CacheConfig, CacheConfigTarget, CacheMappingSymbol, CacheSetOptions, DBItem, Item, Store } from "./CacheType";
+import { CacheConfig, CacheConfigTarget, CacheMappingSymbol, CacheSetOptions, DBItem, Item, QueueItem, Store } from "./CacheType";
 import { EnableScheduling, ScheduledInterval } from "fastcar-timer";
 
 @ApplicationStart(BootPriority.Common, "start")
@@ -50,19 +50,27 @@ export default class CacheApplication {
 		}
 		ttl = ttl || 0;
 
-		//如果不存在过期
+		//如果不存在过期 更新时长
 		if (!ttl) {
 			if (mapping.ttlMap.has(key)) {
 				mapping.ttlMap.delete(key);
 			}
 		} else {
-			mapping.ttlMap.set(key, ttl * 1000);
+			mapping.ttlMap.set(key, {
+				ttl: ttl * 1000,
+				interval: ttl * 1000,
+				failNum: mapping.failNum,
+			});
 		}
 
 		//针对数据同步的处理
 		if (mapping.dbClient) {
 			if (!mapping.syncMap?.has(key) || options.flush) {
-				mapping.syncMap?.set(key, options.flush ? 0 : mapping.syncTimer * 1000);
+				mapping.syncMap?.set(key, {
+					ttl: options.flush ? 0 : mapping.syncTimer * 1000,
+					interval: mapping.syncTimer * 1000,
+					failNum: mapping.failNum,
+				});
 			}
 		}
 
@@ -123,9 +131,9 @@ export default class CacheApplication {
 			return 0;
 		}
 
-		let time = mapping.ttlMap.get(key);
-		if (time) {
-			return Math.ceil(time / 1000);
+		let item = mapping.ttlMap.get(key);
+		if (item) {
+			return Math.ceil(item.ttl / 1000);
 		}
 
 		return 0;
@@ -159,15 +167,17 @@ export default class CacheApplication {
 
 					this._syncStatus.set(store, true);
 					let syncList: Item[] = [];
-					let newSyncMap = new DataMap<string, number>();
+					let newSyncMap = new DataMap<string, QueueItem>();
+					let syncPendingMap = new DataMap<string, QueueItem>();
 					syncMap.forEach((t, key) => {
-						t -= diff;
-						if (t <= 0) {
+						t.ttl -= diff;
+						if (t.ttl <= 0) {
 							syncList.push({
 								key,
 								value: data.get(key),
 								ttl: this.getTTL(store, key),
 							});
+							syncPendingMap.set(key, t);
 						} else {
 							newSyncMap.set(key, t);
 						}
@@ -180,15 +190,27 @@ export default class CacheApplication {
 						try {
 							flag = await mapping.dbClient.mset(syncList);
 						} catch (e: any) {
-							this.logger.error(`sync  ${store} data error`);
+							this.logger.error(`sync  ${store} update data error`);
 							this.logger.error(e);
 						} finally {
 							if (!flag) {
 								//重新塞入 下次再读取
 								syncList.forEach((item) => {
-									newSyncMap.set(item.key, 0);
+									let citem = syncPendingMap.get(item.key);
+									if (citem) {
+										citem.failNum--;
+										if (citem.failNum > 0) {
+											mapping?.syncMap?.set(item.key, {
+												failNum: citem.failNum,
+												interval: citem.interval,
+												ttl: citem.interval,
+											});
+										}
+									}
 								});
+								this.logger.error(`${mapping.store} mset fail in [${JSON.stringify(syncList)}]`);
 							}
+							syncPendingMap.clear();
 						}
 					}
 
@@ -198,31 +220,55 @@ export default class CacheApplication {
 
 			let ttlMap = mapping.ttlMap;
 			if (ttlMap.size > 0) {
-				let newTllMap = new DataMap<string, number>();
+				let newTllMap = new DataMap<string, QueueItem>();
+				let ttlPendingMap = new DataMap<string, QueueItem>();
 				let ttlKeys: string[] = [];
 				ttlMap.forEach((t, key) => {
-					t -= diff;
-					if (t <= 0 && !syncMap?.has(key)) {
+					t.ttl -= diff;
+					if (t.ttl <= 0 && !syncMap?.has(key)) {
 						//当同步未结束时也不能进行删除
 						ttlKeys.push(key);
+						ttlPendingMap.set(key, t);
 					} else {
 						newTllMap.set(key, t);
 					}
 				});
+				mapping.ttlMap = newTllMap;
 
 				let flag: boolean = true;
 				if (ttlKeys.length > 0) {
 					if (mapping.dbClient) {
-						flag = await mapping.dbClient.mdelete(ttlKeys);
+						try {
+							flag = await mapping.dbClient.mdelete(ttlKeys);
+						} catch (e) {
+							this.logger.error(`sync  ${store} delete data error`);
+							this.logger.error(e);
+						} finally {
+							//修改为不再重复删除节点
+							if (!flag) {
+								this.logger.error(`${mapping.store} mdelete fail in [${ttlKeys.join(",")}]`);
+
+								ttlKeys.forEach((key) => {
+									let citem = ttlPendingMap.get(key);
+									if (citem) {
+										citem.failNum--;
+										if (citem.failNum > 0) {
+											mapping.ttlMap.set(key, {
+												failNum: citem.failNum,
+												interval: citem.interval,
+												ttl: citem.interval,
+											});
+										}
+									}
+								});
+							}
+							ttlPendingMap.clear();
+						}
 					}
 
 					ttlKeys.forEach((key) => {
 						mapping.data.delete(key);
 					});
-				}
-
-				if (flag) {
-					mapping.ttlMap = newTllMap;
 				}
 			}
 		});
@@ -238,7 +284,11 @@ export default class CacheApplication {
 					if (l.ttl > 0) {
 						if (item.dbClient) {
 							//由秒转化为毫秒
-							item.ttlMap.set(l.key, l.ttl * 1000);
+							item.ttlMap.set(l.key, {
+								ttl: l.ttl * 1000,
+								interval: l.ttl * 1000,
+								failNum: item.failNum,
+							});
 						}
 					}
 				});
@@ -291,6 +341,7 @@ export default class CacheApplication {
 			ttlMap: new DataMap(), //过期需删除的key值
 			dbClient: item.dbClient, //持久化存储的客户端
 			syncMap: new DataMap(), //需要同步持久化的key
+			failNum: item?.failNum || 3,
 		});
 	}
 }

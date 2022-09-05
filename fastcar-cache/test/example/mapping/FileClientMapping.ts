@@ -1,4 +1,4 @@
-import path = require("path");
+import * as path from "path";
 import CacheMapping from "../../../src/annotation/CacheMapping";
 import { CacheConfig } from "../../../src/CacheType";
 import DBClientService from "../../../src/dbclient/DBClientService";
