@@ -46,6 +46,7 @@ import ApplicationInit from "./annotation/lifeCycle/ApplicationInit";
 import ApplicationDestory from "./annotation/lifeCycle/ApplicationDestory";
 import ApplicationSetting from "./annotation/env/ApplicationSetting";
 import AliasInjection from "./annotation/bind/AliasInjection";
+import ResourcePath from "./annotation/env/ResourcePath";
 
 //注解暴露出去
 export {
@@ -84,6 +85,7 @@ export {
 	ValidCustom,
 	ValidForm,
 	Rule,
+	ResourcePath,
 };
 
 export {

@@ -38,6 +38,7 @@ class FastCarApplication extends Events {
 	protected componentDeatils: Map<string | symbol, ComponentDesc>; //读取路径  名称
 	protected liveTime: number;
 	protected watchFiles: Map<string, FileHotterDesc[]>;
+	protected resourcePath: string = ""; //资源路径
 
 	constructor() {
 		super();
@@ -97,7 +98,11 @@ class FastCarApplication extends Events {
 	 * @version 1.0 获取资源路径
 	 */
 	getResourcePath(): string {
+		if (!!this.resourcePath) {
+			return this.resourcePath;
+		}
 		let resourcePath = path.join(this.basePath, "../", CommonConstant.Resource);
+		this.resourcePath = resourcePath;
 		return resourcePath;
 	}
 

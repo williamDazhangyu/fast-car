@@ -152,3 +152,6 @@ export function ApplicationSetting(setting: { [key: string]: any }): Ret;
 
 //根据别名注入依赖组件
 export function AliasInjection(alias: string): PMRet;
+
+//自定义资源路径
+export function ResourcePath(name: string): Ret;
