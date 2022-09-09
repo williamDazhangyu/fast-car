@@ -1,4 +1,5 @@
 import FastCarApplication from "../FastCarApplication";
+import ClassUtils from "../utils/ClassUtils";
 import TypeUtil from "../utils/TypeUtil";
 
 //基础服务的应用
@@ -9,10 +10,10 @@ export default function Application(target: any) {
 			let appProxy = new target(...args);
 			Reflect.set(appProxy, "app", app);
 
-			let keys = Reflect.ownKeys(target.prototype);
+			let keys = ClassUtils.getProtoType(target);
 			for (let key of keys) {
 				if (key != "constructor") {
-					let desc = Object.getOwnPropertyDescriptor(target.prototype, key);
+					let desc = ClassUtils.getProtoDesc(target, key);
 					if (desc) {
 						let beforeFun = Object.getOwnPropertyDescriptor(FastCarApplication.prototype, key)?.value;
 						let afterFun = desc.value;
