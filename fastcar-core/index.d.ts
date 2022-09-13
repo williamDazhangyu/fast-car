@@ -1,4 +1,5 @@
 import * as Events from "events";
+import { ApplicationConfig } from "./src/config/ApplicationConfig";
 import { SYSConfig } from "./src/config/SysConfig";
 import { ComponentKind } from "./src/constant/ComponentKind";
 import { LifeCycleModule } from "./src/constant/LifeCycleModule";
@@ -74,13 +75,6 @@ export class FastCarApplication extends Events {
 	getBasePath(): string;
 
 	/**
-	 * @version 1.0 更新系统配置
-	 * @param sysConfig
-	 * @param configName
-	 */
-	updateSysConfig(sysConfig: SYSConfig, configName: string): void;
-
-	/**
 	 * @version 1.0 加载系统配置 加载顺序为 default json < yaml < env
 	 *
 	 */
@@ -98,7 +92,7 @@ export class FastCarApplication extends Events {
 	 * @version 1.0 获取应用配置
 	 * @return
 	 */
-	getapplicationConfig(): /* !this.sysConfig.application */ any;
+	getapplicationConfig(): ApplicationConfig;
 
 	/**
 	 * @version 1.0 扫描组件

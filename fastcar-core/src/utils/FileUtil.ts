@@ -1,6 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as yaml from "yaml";
+import { SYSConfig, SYSDefaultConfig } from "../config/SysConfig";
+import { CommonConstant, FileResSuffix } from "../constant/CommonConstant";
+import MixTool from "./Mix";
 
 const fileResSuffix = ["json", "yml", "js"]; //文件资源后缀名
 const bytesUnit = ["B", "K", "M", "G"];
@@ -117,5 +120,49 @@ export default class FileUtil {
 
 		let maxL = bytesUnit.length - 1;
 		return `${(n / Math.pow(1024, maxL)).toFixed(2)}(${bytesUnit[maxL]})`;
+	}
+
+	//获取加载配置项
+	static getApplicationConfig(resPath: string, configName: string, sysConfig: SYSConfig = SYSDefaultConfig): SYSConfig {
+		const replaceSetting = (property: string, fileContent: object) => {
+			let addConfig = Reflect.get(fileContent, property);
+			if (addConfig) {
+				let currConfig = Reflect.get(sysConfig, property);
+				Reflect.deleteProperty(fileContent, property);
+				if (CommonConstant.Settings == property) {
+					Object.keys(addConfig).forEach((key) => {
+						let afterConfig = addConfig[key];
+						let beforeConfig = sysConfig.settings.get(key);
+						if (beforeConfig) {
+							//对settings的属性进行覆盖
+							if (typeof beforeConfig == "object") {
+								afterConfig = Object.assign(beforeConfig, afterConfig);
+							}
+						}
+						sysConfig.settings.set(key, afterConfig);
+					});
+				} else {
+					Object.assign(currConfig, addConfig);
+				}
+			}
+		};
+
+		FileResSuffix.forEach((suffix) => {
+			let fileContent = FileUtil.getResource(path.join(resPath, `${configName}.${suffix}`));
+			if (fileContent) {
+				replaceSetting(CommonConstant.Settings, fileContent);
+
+				replaceSetting(CommonConstant.Application, fileContent);
+
+				//将application和sesstings进行删除
+				Reflect.deleteProperty(fileContent, CommonConstant.Application);
+				Reflect.deleteProperty(fileContent, CommonConstant.Settings);
+
+				//追加自定的属性
+				MixTool.copyProperties(sysConfig, fileContent);
+			}
+		});
+
+		return sysConfig;
 	}
 }

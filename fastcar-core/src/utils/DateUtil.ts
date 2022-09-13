@@ -19,64 +19,42 @@ export default class DateUtil {
 
 	static toDay(datetime: number | string | Date = Date.now(), format: string = "YYYY-MM-DD") {
 		let desc = DateUtil.toDateDesc(datetime);
-		let ymd = format
-			.replace(/YYYY/, desc.YYYY)
-			.replace(/MM/, desc.MM)
-			.replace(/DD/, desc.DD);
+		let ymd = format.replace(/YYYY/, desc.YYYY).replace(/MM/, desc.MM).replace(/DD/, desc.DD);
 		return ymd;
 	}
 
 	static toHms(datetime: number | string | Date = Date.now(), format: string = "hh:mm:ss") {
 		let desc = DateUtil.toDateDesc(datetime);
-		let hms = format
-			.replace(/hh/, desc.hh)
-			.replace(/mm/, desc.mm)
-			.replace(/ss/, desc.ss);
+		let hms = format.replace(/hh/, desc.hh).replace(/mm/, desc.mm).replace(/ss/, desc.ss);
 
 		return hms;
 	}
 
-	static toDateTime(datetime: number | string | Date = Date.now(), format: string = "YYYY-MM-DD hh:mm:ss") {
+	static toDateTime(datetime: number | string | Date = Date.now(), format: string = "YYYY-MM-DD hh:mm:ss"): string {
 		let desc = DateUtil.toDateDesc(datetime);
-		let str = format
-			.replace(/YYYY/, desc.YYYY)
-			.replace(/MM/, desc.MM)
-			.replace(/DD/, desc.DD)
-			.replace(/hh/, desc.hh)
-			.replace(/mm/, desc.mm)
-			.replace(/ss/, desc.ss);
+		let str = format.replace(/YYYY/, desc.YYYY).replace(/MM/, desc.MM).replace(/DD/, desc.DD).replace(/hh/, desc.hh).replace(/mm/, desc.mm).replace(/ss/, desc.ss);
 
 		return str;
 	}
 
-	static toDateTimeMS(datetime: number | string | Date = Date.now(), format: string = "YYYY-MM-DD hh:mm:ss.sss") {
+	static toDateTimeMS(datetime: number | string | Date = Date.now(), format: string = "YYYY-MM-DD hh:mm:ss.sss"): string {
 		let desc = DateUtil.toDateDesc(datetime);
-		let str = format
-			.replace(/YYYY/, desc.YYYY)
-			.replace(/MM/, desc.MM)
-			.replace(/DD/, desc.DD)
-			.replace(/hh/, desc.hh)
-			.replace(/mm/, desc.mm)
-			.replace(/ss/, desc.ss)
-			.replace(/sss/, desc.ms);
+		let str = format.replace(/YYYY/, desc.YYYY).replace(/MM/, desc.MM).replace(/DD/, desc.DD).replace(/hh/, desc.hh).replace(/mm/, desc.mm).replace(/ss/, desc.ss).replace(/sss/, desc.ms);
 
 		return str;
 	}
 
-	static toCutDown(datetime: number, format: string = "hh:mm:ss") {
+	static toCutDown(datetime: number, format: string = "hh:mm:ss"): string {
 		let hours = Math.floor(datetime / 60 / 60);
 		let minutes = Math.floor((datetime - hours * 60 * 60) / 60);
 		let seconds = datetime - (hours * 60 + minutes) * 60;
 
-		let str = format
-			.replace(/hh/, hours.toString())
-			.replace(/mm/, minutes.toString())
-			.replace(/ss/, seconds.toString());
+		let str = format.replace(/hh/, hours.toString()).replace(/mm/, minutes.toString()).replace(/ss/, seconds.toString());
 
 		return str;
 	}
 
-	static getTimeStr(datetime: number) {
+	static getTimeStr(datetime: number): string {
 		let days = datetime / (1000 * 60 * 60 * 24);
 		if (days >= 1) {
 			return `${days.toFixed(2)}d`;

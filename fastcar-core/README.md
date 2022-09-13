@@ -98,6 +98,8 @@ Rule 校验规则开启
 
 ApplicationSetting 应用内配置设置 具有最高等级
 
+ResourcePath 自定义resource的位置
+
 ## 约定
 
 ### 配置文件约定

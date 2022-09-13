@@ -1,4 +1,5 @@
 import { BinaryToTextEncoding } from "crypto";
+import { SYSConfig } from "./src/config/SysConfig";
 
 //时间工具类
 export class DateUtil {
@@ -10,7 +11,15 @@ export class DateUtil {
 
 	static toDateTime(datetime?: number | string | Date, format?: string): string;
 
+	//default datetime = Date.now() format = YYYY-MM-DD hh:mm:ss.sss
+	static toDateTimeMS(datetime?: number | string | Date, format?: string): string;
+
+	//default format=hh:mm:ss
 	static toCutDown(datetime: number, format?: string): string;
+
+	static getDateTime(datetimeStr?: string | number): number;
+
+	static getTimeStr(datetime: number): string;
 
 	static getDateTime(datetimeStr?: string | number): number;
 }
@@ -57,6 +66,10 @@ export class FileUtil {
 	static getFileName(filePath: string): string;
 
 	static getResource(fp: string): object | null;
+
+	static formatBytes(n: number): string;
+
+	static getApplicationConfig(resPath: string, configName: string, sysConfig?: SYSConfig): SYSConfig;
 }
 
 export class TypeUtil {
@@ -73,6 +86,11 @@ export class TypeUtil {
 	static isPromise(f: Function): boolean;
 
 	static isArray(value: any): boolean;
+
+	static isDate(value: any): boolean;
+
+	//是否为基本类型
+	static isBasic(name: string): boolean;
 }
 
 export class ValidationUtil {

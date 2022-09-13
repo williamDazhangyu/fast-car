@@ -115,61 +115,15 @@ class FastCarApplication extends Events {
 	}
 
 	/***
-	 * @version 1.0 更新系统配置
-	 */
-	updateSysConfig(sysConfig: SYSConfig, configName: string) {
-		let resPath = this.getResourcePath();
-
-		const replaceSetting = (property: string, fileContent: object) => {
-			let addConfig = Reflect.get(fileContent, property);
-			if (addConfig) {
-				let currConfig = Reflect.get(sysConfig, property);
-				Reflect.deleteProperty(fileContent, property);
-				if (CommonConstant.Settings == property) {
-					Object.keys(addConfig).forEach((key) => {
-						let afterConfig = addConfig[key];
-						let beforeConfig = this.sysConfig.settings.get(key);
-						if (beforeConfig) {
-							//对settings的属性进行覆盖
-							if (typeof beforeConfig == "object") {
-								afterConfig = Object.assign(beforeConfig, afterConfig);
-							}
-						}
-						this.sysConfig.settings.set(key, afterConfig);
-					});
-				} else {
-					Object.assign(currConfig, addConfig);
-				}
-			}
-		};
-
-		FileResSuffix.forEach((suffix) => {
-			let fileContent = FileUtil.getResource(path.join(resPath, `${configName}.${suffix}`));
-			if (fileContent) {
-				replaceSetting(CommonConstant.Settings, fileContent);
-
-				replaceSetting(CommonConstant.Application, fileContent);
-
-				//将application和sesstings进行删除
-				Reflect.deleteProperty(fileContent, CommonConstant.Application);
-				Reflect.deleteProperty(fileContent, CommonConstant.Settings);
-
-				//追加自定的属性
-				MixTool.copyProperties(sysConfig, fileContent);
-			}
-		});
-	}
-
-	/***
 	 * @version 1.0 加载系统配置 加载顺序为 default json < yaml < env
 	 *
 	 */
 	loadSysConfig() {
-		this.updateSysConfig(this.sysConfig, CommonConstant.Application);
+		this.sysConfig = FileUtil.getApplicationConfig(this.getResourcePath(), CommonConstant.Application, this.sysConfig);
 
 		let env = Reflect.get(this, CommonConstant.ENV) || this.sysConfig.application.env;
 
-		this.updateSysConfig(this.sysConfig, `${CommonConstant.Application}-${env}`);
+		this.sysConfig = FileUtil.getApplicationConfig(this.getResourcePath(), `${CommonConstant.Application}-${env}`, this.sysConfig);
 
 		//自定义环境变量设置
 		process.env.NODE_ENV = env;
