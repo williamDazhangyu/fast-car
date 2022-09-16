@@ -97,6 +97,10 @@ export default class FileUtil {
 					}
 					case "js":
 					case "ts": {
+						if (Reflect.has(require.cache, fp)) {
+							Reflect.deleteProperty(require.cache, fp);
+						}
+
 						return require(fp);
 					}
 					default: {

@@ -1,6 +1,7 @@
 import TypeUtil from "./TypeUtil";
 import FileUtil from "./FileUtil";
 import * as fs from "fs";
+import * as path from "path";
 
 export default class ClassLoader {
 	/***
@@ -44,15 +45,22 @@ export default class ClassLoader {
 		return modulesMap;
 	}
 
-	static watchServices(fp: string, context: any) {
+	static watchServices(fp: string, context: any, eventName: string = "reload") {
 		if (typeof context.emit != "function") {
 			return false;
 		}
 
+		const currStats = fs.statSync(fp);
+		let fileFlag = currStats.isFile();
+
 		//添加热更方法
 		fs.watch(fp, function (event, filename) {
 			if (event === "change") {
-				context.emit("reload", fp);
+				if (!fileFlag) {
+					context.emit(eventName, path.join(fp, filename));
+				} else {
+					context.emit(eventName, fp);
+				}
 			}
 		});
 

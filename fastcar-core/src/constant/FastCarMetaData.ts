@@ -21,4 +21,5 @@ export enum FastCarMetaData {
 	InjectionUniqueKey = "injection_uniqueKey",
 	Alias = "alias", //别名
 	LoggerModule = "LoggerModule", //日志模块集合
+	HotterSysConfig = "hotterSysConfig", //支持热更系统配置
 }

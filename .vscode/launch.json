@@ -8,7 +8,6 @@
                 "${relativeFile}"
             ],
             "cwd": "${workspaceRoot}",
-            "protocol": "inspector",
             "runtimeArgs": [
                 "-r",
                 "ts-node/register"

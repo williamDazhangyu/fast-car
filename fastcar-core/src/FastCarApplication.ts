@@ -10,7 +10,7 @@ import { LogDefaultConfig, SYSConfig, SYSDefaultConfig } from "./config/SysConfi
 import { FastCarMetaData } from "./constant/FastCarMetaData";
 import { ApplicationConfig } from "./config/ApplicationConfig";
 import { ComponentKind } from "./constant/ComponentKind";
-import { CommonConstant, FileResSuffix } from "./constant/CommonConstant";
+import { CommonConstant } from "./constant/CommonConstant";
 import { LifeCycleModule } from "./constant/LifeCycleModule";
 import * as fs from "fs";
 import { AppStatusEnum } from "./constant/AppStatusEnum";
@@ -39,6 +39,8 @@ class FastCarApplication extends Events {
 	protected liveTime: number;
 	protected watchFiles: Map<string, FileHotterDesc[]>;
 	protected resourcePath: string = ""; //资源路径
+	protected delayHotIds: Map<string, { fp: string; loadType: number }>;
+	protected reloadTimerId: NodeJS.Timeout | null;
 
 	constructor() {
 		super();
@@ -49,6 +51,8 @@ class FastCarApplication extends Events {
 		this.applicationStatus = AppStatusEnum.READY;
 		this.liveTime = Date.now();
 		this.watchFiles = new Map();
+		this.delayHotIds = new Map();
+		this.reloadTimerId = null;
 
 		this.loadSelf();
 		this.addHot();
@@ -77,6 +81,7 @@ class FastCarApplication extends Events {
 
 	/***
 	 * @version 1.0 热更新组件
+	 * @version 1.1 热更新配置文件
 	 */
 	addHot() {
 		this.on("reload", (fp: string) => {
@@ -84,14 +89,56 @@ class FastCarApplication extends Events {
 				return;
 			}
 
-			let moduleClass = ClassLoader.loadModule(fp, true);
-			this.sysLogger.info("hot update---" + fp);
-			if (moduleClass != null) {
-				moduleClass.forEach((func) => {
-					this.convertInstance(func, fp);
-				});
+			this.addDelayHot(fp, 1);
+		});
+
+		this.on("sysReload", (fp: string) => {
+			if (fp.indexOf(CommonConstant.Application) != -1) {
+				this.addDelayHot(fp, 2);
 			}
 		});
+	}
+
+	addDelayHot(fp: string, loadType: number) {
+		if (this.delayHotIds.has(fp)) {
+			return;
+		}
+		this.delayHotIds.set(fp, {
+			fp,
+			loadType,
+		});
+		if (!this.reloadTimerId) {
+			this.reloadTimerId = setTimeout(() => {
+				this.reloadFiles();
+			}, 1000);
+		}
+	}
+
+	reloadFiles() {
+		this.delayHotIds.forEach(({ fp, loadType }) => {
+			switch (loadType) {
+				case 1: {
+					let moduleClass = ClassLoader.loadModule(fp, true);
+					this.sysLogger.info("hot update---" + fp);
+					if (moduleClass != null) {
+						moduleClass.forEach((func) => {
+							this.convertInstance(func, fp);
+						});
+					}
+					break;
+				}
+				case 2: {
+					this.sysLogger.info("sysConfig hot update----" + fp);
+					this.loadSysConfig();
+					break;
+				}
+				default: {
+				}
+			}
+		});
+
+		this.delayHotIds.clear();
+		this.reloadTimerId = null;
 	}
 
 	/***
@@ -573,6 +620,11 @@ class FastCarApplication extends Events {
 		//加载日志
 		this.loadSysConfig();
 
+		//监听系统配置
+		if (this.isHotterSysConfig()) {
+			ClassLoader.watchServices(this.getResourcePath(), this, "sysReload");
+		}
+
 		//开启日志
 		this.startLog();
 
@@ -656,6 +708,13 @@ class FastCarApplication extends Events {
 	 */
 	isHotter(): boolean {
 		return !!this.getSetting("hotter");
+	}
+
+	/***
+	 * @version 1.0 是否支持资源文件热更
+	 */
+	isHotterSysConfig(): boolean {
+		return !!this.getSetting(FastCarMetaData.HotterSysConfig);
 	}
 
 	/***
