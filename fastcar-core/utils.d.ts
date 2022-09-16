@@ -122,3 +122,25 @@ export class FormatStr {
 
 	static formatFirstToUpEnd(str: string): string;
 }
+
+export class ClassUtils {
+	static getProtoType(t: any): (string | symbol)[];
+
+	static getProtoDesc(t: any, key: string | symbol): PropertyDescriptor | null;
+}
+
+export class ClassLoader {
+	/***
+	 * @version 1.0 加载模块
+	 * @version 1.1 新增是否强制重载模块
+	 * @params force default false
+	 *
+	 */
+	static loadModule(filePath: string, force?: boolean): Map<string, any> | null;
+
+	/**
+	 * @version 1.0 监听某个文件或者文件夹
+	 * @params eventName default reload
+	 */
+	static watchServices(fp: string, context: any, eventName?: string): boolean;
+}

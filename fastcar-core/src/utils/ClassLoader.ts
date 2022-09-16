@@ -45,7 +45,10 @@ export default class ClassLoader {
 		return modulesMap;
 	}
 
-	static watchServices(fp: string, context: any, eventName: string = "reload") {
+	/**
+	 * @version 1.0 监听某个文件或者文件夹
+	 */
+	static watchServices(fp: string, context: any, eventName: string = "reload"): boolean {
 		if (typeof context.emit != "function") {
 			return false;
 		}

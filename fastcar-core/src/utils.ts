@@ -1,3 +1,5 @@
+import ClassLoader from "./utils/classLoader";
+import ClassUtils from "./utils/ClassUtils";
 import CryptoUtil from "./utils/CryptoUtil";
 import DataFormat from "./utils/DataFormat";
 import DateUtil from "./utils/DateUtil";
@@ -7,4 +9,4 @@ import TypeUtil from "./utils/TypeUtil";
 import ValidationUtil from "./utils/ValidationUtil";
 
 //实用工具集合类
-export { DateUtil, DataFormat, CryptoUtil, FileUtil, TypeUtil, ValidationUtil, FormatStr };
+export { DateUtil, DataFormat, CryptoUtil, FileUtil, TypeUtil, ValidationUtil, FormatStr, ClassUtils, ClassLoader };
