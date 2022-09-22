@@ -144,3 +144,18 @@ export class ClassLoader {
 	 */
 	static watchServices(fp: string, context: any, eventName?: string): boolean;
 }
+interface MixClass<T> {
+	new (): T;
+}
+
+export class MixTool {
+	static mix<T>(...mixins: any[]): MixClass<T>;
+
+	static copyProperties(target: any, source: any): void;
+
+	//仅仅改变属性的值
+	static copPropertyValue(target: any, source: any): void;
+
+	//多个对象赋值
+	static assign(target: any, source: any): void;
+}
