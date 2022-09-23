@@ -95,13 +95,13 @@ export default class GrpcClient extends SocketClient {
 		this.manager.handleMsg(result);
 	}
 
-	offline(reason?: string | undefined): void {
+	offline(reason: string = "offline"): void {
 		if (this.io && this.connected) {
 			this.disconnect(reason);
 		}
 	}
 
-	close(): void {
-		this.offline();
+	close(reason: string = "close"): void {
+		this.offline(reason);
 	}
 }

@@ -36,7 +36,7 @@ export default class RpcClient implements MsgClientHookService {
 			{
 				retryCount: 3, //错误重试次数 默认三次
 				retryInterval: 100, //重试间隔 默认一秒
-				maxMsgNum: 10000, //最大消息并发数
+				maxMsgNum: 10000, //最大消息瞬时并发数
 				timeout: 3000,
 				disconnectInterval: 100,
 			},

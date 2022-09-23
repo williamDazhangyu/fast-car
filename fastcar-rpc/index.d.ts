@@ -64,7 +64,7 @@ export class RpcClient implements MsgClientHookService {
 
 	stop(reason: string): void;
 
-	close(): void;
+	close(reasion?: string): void;
 
 	getClient(): SocketClient;
 

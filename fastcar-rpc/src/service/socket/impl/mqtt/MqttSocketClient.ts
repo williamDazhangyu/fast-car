@@ -75,15 +75,15 @@ export default class MqttSocketClient extends SocketClient {
 		this.manager.handleMsg(this.decode(msg));
 	}
 
-	offline(reason?: string): void {
+	offline(reason: string = "offline"): void {
 		if (this.io && this.connected) {
 			this.disconnect(reason);
 		}
 	}
 
-	close(): void {
+	close(reason: string = "close"): void {
 		if (this.io) {
-			this.disconnect();
+			this.disconnect(reason);
 		}
 	}
 }

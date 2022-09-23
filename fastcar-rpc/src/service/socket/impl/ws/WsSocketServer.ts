@@ -76,7 +76,7 @@ export default class WsSocketServer extends SocketServer {
 		if (!socket) {
 			return false;
 		}
-		console.debug("服务端发送消息模式", msg.mode);
+		// console.debug("服务端发送消息模式", msg.mode);
 		socket.client.send(this.encode(msg));
 		return true;
 	}

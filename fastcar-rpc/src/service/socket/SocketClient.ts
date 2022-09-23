@@ -69,5 +69,5 @@ export abstract class SocketClient {
 	//客户端主动下线
 	abstract offline(reason?: string): void;
 
-	abstract close(): void;
+	abstract close(reason?: string): void;
 }
