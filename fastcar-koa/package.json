@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-koa",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "fastcar框架下对koa的包装",
 	"main": "target/index.js",
@@ -50,7 +50,7 @@
 		"koa-router": "^10.1.1",
 		"koa-static": "^5.0.0",
 		"koa2-cors": "^2.0.6",
-		"swagger-ui-dist": "^4.5.0"
+		"swagger-ui-dist": "4.5.0"
 	},
 	"peerDependencies": {
 		"fastcar-core": "*",

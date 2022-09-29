@@ -59,3 +59,5 @@ export function KoaStatic(app: FastCarApplication): MiddleWareType;
 
 //支持api说明
 export function Swagger(app: FastCarApplication): MiddleWareType;
+
+export * from "./src/type/DesignMeta";

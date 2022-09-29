@@ -61,6 +61,10 @@ export default class KoaApplication {
 		//查找绑定的url
 		instanceList.forEach((instance) => {
 			let routerMap: Map<string, MethodType> = Reflect.getMetadata(DesignMeta.ROUTER_MAP, instance);
+			//移除空的map结构
+			if (!routerMap || routerMap.size == 0) {
+				return;
+			}
 			routerMap.forEach((item) => {
 				//去除ctx的影响
 				let callBack = async (ctx: any, next?: Function) => {
