@@ -6,7 +6,7 @@ import * as mysql from "mysql2/promise";
 import { DataTypeEnum } from "fastcar-mysql";
 import { FiledType } from "./FiledType";
 
-const DESCSQL = "SELECT * from information_schema.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ? ";
+const DESCSQL = "SELECT * from information_schema.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ? ORDER BY ordinal_position";
 const MAXBigNum = Math.pow(2, 53);
 
 //从数据库表逆向生成类
@@ -195,27 +195,31 @@ class ReverseGenerate {
 			parser: "typescript",
 		}
 	): Promise<void> {
-		//生成路径
-		ReverseGenerate.createDir(modelDir);
-		ReverseGenerate.createDir(mapperDir);
+		try {
+			//生成路径
+			ReverseGenerate.createDir(modelDir);
+			ReverseGenerate.createDir(mapperDir);
 
-		let dbres = await mysql.createConnection(dbConfig);
+			let dbres = await mysql.createConnection(dbConfig);
 
-		//求相对路径
-		let rp = path.relative(mapperDir, modelDir);
-		rp = rp.replace(/\\/g, "/") || "."; //系统不一致时 分隔符替换
+			//求相对路径
+			let rp = path.relative(mapperDir, modelDir);
+			rp = rp.replace(/\\/g, "/") || "."; //系统不一致时 分隔符替换
 
-		for (let name of tables) {
-			let res = await dbres.query(DESCSQL, [name, dbConfig.database]);
-			let row: any = res[0];
-			if (!row || !Array(row) || row.length == 0) {
-				throw new Error("The table does not exist or is empty");
+			for (let name of tables) {
+				let res = await dbres.query(DESCSQL, [name, dbConfig.database]);
+				let row: any = res[0];
+				if (!row || !Array(row) || row.length == 0) {
+					throw new Error("The table does not exist or is empty");
+				}
+				ReverseGenerate.genModel(name, modelDir, row, style);
+				ReverseGenerate.genMapper(name, mapperDir, rp, style);
 			}
-			ReverseGenerate.genModel(name, modelDir, row, style);
-			ReverseGenerate.genMapper(name, mapperDir, rp, style);
-		}
 
-		dbres.destroy();
+			dbres.destroy();
+		} catch (e) {
+			console.error(e);
+		}
 	}
 }
 
