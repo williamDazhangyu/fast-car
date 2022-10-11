@@ -40,7 +40,7 @@ type SqlExpression =
 export type SqlWhere = { [key: string]: SqlExpression | SqlWhere };
 
 export type RowData = {
-	[key: string]: any;
+	[key: string]: SqlValue | { operate: string; value: SqlValue };
 };
 
 export type OrderType = { [key: string]: OrderEnum };

@@ -41,8 +41,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 	//自动映射数据库字段
 	//兼容不小心传了数据的值
-	protected toDBValue(v: any, key: string, type: string): any {
-		let value = Reflect.get(v, key);
+	protected toDBValue(v: any, key: string, type: string, value: any = Reflect.get(v, key)): any {
 		//去数据库映射值
 		let info = this.mappingMap.get(key);
 		if (info) {
@@ -221,9 +220,15 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let str: string[] = [];
 		let args = Object.keys(row).map((key) => {
 			let alias = this.getFieldName(key);
-			str.push(`${alias} = ?`);
 
 			let v = Reflect.get(row, key);
+			if (TypeUtil.isObject(v) && Reflect.has(v, "operate") && Reflect.has(v, "value")) {
+				str.push(`${alias} ${v.operate} ?`);
+				v = v.value;
+			} else {
+				str.push(`${alias} = ?`);
+			}
+
 			if (ValidationUtil.isNull(v)) {
 				v = null;
 			}
@@ -233,7 +238,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 				let desc = this.mappingMap.get(originName);
 
 				if (desc) {
-					let dbValue = this.toDBValue(row, key, desc.type);
+					let dbValue = this.toDBValue(row, key, v);
 					return dbValue;
 				}
 			}
