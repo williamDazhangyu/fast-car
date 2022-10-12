@@ -25,7 +25,7 @@ export enum OrderEnum {
 	desc = "DESC",
 }
 
-export type SqlValue = number | string | number[] | string[] | boolean | boolean[] | null;
+export type SqlValue = number | string | number[] | string[] | boolean | boolean[] | null | Date;
 
 //where表达式
 type SqlExpression =
