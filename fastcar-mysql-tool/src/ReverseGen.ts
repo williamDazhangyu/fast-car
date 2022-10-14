@@ -220,7 +220,7 @@ class ReverseGenerate {
 				ReverseGenerate.genMapper(name, mapperDir, rp, style);
 			}
 
-			dbres.destroy();
+			dbres.end();
 		} catch (e) {
 			console.error(e);
 		}
