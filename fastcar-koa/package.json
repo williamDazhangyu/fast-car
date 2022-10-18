@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-koa",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "fastcar框架下对koa的包装",
 	"main": "target/index.js",
@@ -31,18 +31,22 @@
 	},
 	"devDependencies": {
 		"@types/koa": "^2.13.4",
+		"fastcar-core": "^0.2.10",
+		"fastcar-server": "^0.0.1",
+		"reflect-metadata": "^0.1.13"
+	},
+	"dependencies": {
+		"koa": "^2.13.1"
+	},
+	"peerDependencies": {
+		"fastcar-core": "*",
+		"fastcar-server": "*",
 		"@types/koa-bodyparser": "^4.3.3",
 		"@types/koa-mount": "^4.0.1",
 		"@types/koa-range": "^0.3.2",
 		"@types/koa-router": "^7.4.4",
 		"@types/koa-static": "^4.0.2",
 		"@types/koa2-cors": "^2.0.2",
-		"fastcar-core": "^0.2.10",
-		"fastcar-server": "^0.0.1",
-		"reflect-metadata": "^0.1.13"
-	},
-	"dependencies": {
-		"koa": "^2.13.1",
 		"koa-body": "^4.2.0",
 		"koa-bodyparser": "^4.3.0",
 		"koa-mount": "^4.0.0",
@@ -52,9 +56,49 @@
 		"koa2-cors": "^2.0.6",
 		"swagger-ui-dist": "4.5.0"
 	},
-	"peerDependencies": {
-		"fastcar-core": "*",
-		"fastcar-server": "*"
+	"peerDependenciesMeta": {
+		"@types/koa-bodyparser": {
+			"optional": true
+		},
+		"@types/koa-mount": {
+			"optional": true
+		},
+		"@types/koa-range": {
+			"optional": true
+		},
+		"@types/koa-router": {
+			"optional": true
+		},
+		"@types/koa-static": {
+			"optional": true
+		},
+		"@types/koa2-cors": {
+			"optional": true
+		},
+		"koa-body": {
+			"optional": true
+		},
+		"koa-bodyparser": {
+			"optional": true
+		},
+		"koa-mount": {
+			"optional": true
+		},
+		"koa-range": {
+			"optional": true
+		},
+		"koa-router": {
+			"optional": true
+		},
+		"koa-static": {
+			"optional": true
+		},
+		"koa2-cors": {
+			"optional": true
+		},
+		"swagger-ui-dist": {
+			"optional": true
+		}
 	},
 	"repository": {
 		"type": "git",
