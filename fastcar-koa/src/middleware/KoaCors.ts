@@ -12,8 +12,18 @@ export default function KoaCors(app: FastCarApplication) {
 			if (typeof corsConfig.origin == "string") {
 				let origins = corsConfig.origin.split(";");
 				corsConfig.origin = (ctx: Context) => {
+
+					let orign = ctx?.request?.header?.origin;
+					if(!orign) {
+						if(!origins.includes("*")) {
+							return false;
+						}
+		
+						return "*";
+					}
+					
 					for (let o of origins) {
-						if (ctx.url.startsWith(o) || o == "*") {
+						if (orign.startsWith(o) || o == "*") {
 							return o;
 						}
 					}
