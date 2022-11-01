@@ -259,7 +259,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 		let str = `LIMIT ${limit} `;
 		if (typeof offest == "number" && offest > 0) {
-			str = `LIMIT ${limit}, ${offest} `;
+			str = `LIMIT ${offest}, ${limit} `;
 		}
 
 		return str;
