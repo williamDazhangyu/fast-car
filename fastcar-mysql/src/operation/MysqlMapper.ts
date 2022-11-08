@@ -48,7 +48,11 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			//优先取数据库值
 			let dbValue = Reflect.get(v, info.field);
 			if (ValidationUtil.isNotNull(dbValue)) {
-				value = dbValue;
+				if (TypeUtil.isObject(dbValue) && Reflect.has(dbValue, "operate") && Reflect.has(dbValue, "value")) {
+					value = dbValue.value;
+				} else {
+					value = dbValue;
+				}
 			}
 		}
 
