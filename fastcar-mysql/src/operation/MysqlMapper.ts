@@ -233,14 +233,16 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 				v = null;
 			}
 
-			let originName = this.dbFields.get(alias);
-			if (originName) {
-				let desc = this.mappingMap.get(originName);
-
-				if (desc) {
-					let dbValue = this.toDBValue(row, key, v);
-					return dbValue;
+			let desc = this.mappingMap.get(key);
+			if (!desc) {
+				let dbKey = this.dbFields.get(key);
+				if (dbKey) {
+					desc = this.mappingMap.get(dbKey);
 				}
+			}
+			if (desc) {
+				let dbValue = this.toDBValue(row, key, desc.type, v);
+				return dbValue;
 			}
 
 			return v;
