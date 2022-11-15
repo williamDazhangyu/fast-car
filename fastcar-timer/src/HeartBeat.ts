@@ -47,6 +47,7 @@ export class Heartbeat {
 	constructor({ fixedRate = 1000, fixedRateString = TimeUnit.millisecond, initialDelay = 0, cron, timezone = "Asia/Shanghai" }: ScheduledConfig) {
 		this.status = false;
 		this.timezone = timezone;
+		this.initialDelay = initialDelay;
 
 		//优先采用cron
 		if (cron) {
@@ -64,7 +65,6 @@ export class Heartbeat {
 		} else {
 			//开启间隔时长模式
 			this.interval = this.getInterval(fixedRate, fixedRateString);
-			this.initialDelay = initialDelay;
 			this.originalConfig = {
 				fixedRate,
 				fixedRateString,
@@ -130,8 +130,10 @@ export class Heartbeat {
 		}
 
 		if (Reflect.has(this, "task")) {
-			this.task.stop();
-			Reflect.deleteProperty(this, "task");
+			process.nextTick(() => {
+				this.task.stop();
+				Reflect.deleteProperty(this, "task");
+			});
 		}
 
 		this.status = true;

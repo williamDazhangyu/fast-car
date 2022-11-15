@@ -32,7 +32,7 @@ function Scheduled(config: ScheduledConfig) {
 				if (funs.has(methodName)) {
 					let timerMap = Reflect.getMetadata(TimerMapModule, this);
 
-					if (!timerMap.has(timeId)) {
+					if (!timerMap.has(timeId) && !stop) {
 						//根据时间周期计算单位时间
 						let timer = new Heartbeat(config);
 						timer.start(fn, this);
