@@ -1,15 +1,9 @@
 import * as Events from "events";
 import { ApplicationConfig } from "./src/config/ApplicationConfig";
-import { SYSConfig } from "./src/config/SysConfig";
 import { ComponentKind } from "./src/constant/ComponentKind";
 import { LifeCycleModule } from "./src/constant/LifeCycleModule";
+import { FIELDTYPE } from "./src/model/DataMap";
 import { ProcessType } from "./src/type/ProcessType";
-
-declare type FIELDTYPE = {
-	field: string;
-	order?: boolean; //是否为倒序 order true为倒序
-	compare?: Function;
-};
 
 declare type ComponentDesc = {
 	id: string;
@@ -35,6 +29,8 @@ export * from "./src/constant/CommonConstant";
 
 //生命周期约定
 export * from "./src/interface/ApplicationHook";
+
+export { FIELDTYPE } from "./src/model/DataMap";
 
 export abstract class Logger {
 	abstract info(...args: any[]): void;

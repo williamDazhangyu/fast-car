@@ -29,36 +29,28 @@ export default class DataMap<K, V extends Object> extends Map<K, V> {
 	//自定义排序 支持多个排序
 	sort(sorts?: FIELDTYPE[], list?: V[]): V[] {
 		list = !list ? this.toValues() : list;
-
 		if (!sorts || sorts?.length == 0) {
 			return list;
 		}
-
 		let total = sorts.length;
 		list.sort((a, b) => {
 			let resultNum = 0;
 			sorts.some((f, index) => {
 				let field = f.field;
-
 				let aValue = Reflect.get(a, field);
 				let bValue = Reflect.get(b, field);
+				let flag = !!f.compare ? f.compare(aValue, bValue) : aValue > bValue;
+				resultNum = flag ? total - index : index - total;
 
-				let flag = !!f.compare ? f.compare(aValue, aValue) : aValue > bValue;
-				if (!!flag) {
-					resultNum = total - index;
-					//降序则倒着
-					if (f.order) {
-						resultNum = -resultNum;
-					}
-					return true;
+				//降序则倒着
+				if (f.order) {
+					resultNum = -resultNum;
 				}
 
-				return false;
+				return !!flag;
 			});
-
 			return resultNum;
 		});
-
 		return list;
 	}
 
