@@ -1,7 +1,7 @@
 export type FIELDTYPE = {
 	field: string;
 	order?: boolean; //是否为倒序 order true为倒序
-	compare?: Function;
+	compare?: (a: any, b: any) => boolean;
 };
 
 export default class DataMap<K, V extends Object> extends Map<K, V> {
@@ -39,7 +39,7 @@ export default class DataMap<K, V extends Object> extends Map<K, V> {
 				let field = f.field;
 				let aValue = Reflect.get(a, field);
 				let bValue = Reflect.get(b, field);
-				let flag = !!f.compare ? f.compare(aValue, bValue) : aValue > bValue;
+				let flag = f.compare ? f.compare(aValue, bValue) : aValue > bValue;
 				resultNum = flag ? total - index : index - total;
 
 				//降序则倒着
