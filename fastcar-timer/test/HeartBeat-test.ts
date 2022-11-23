@@ -13,4 +13,13 @@ describe("定时器测试", () => {
 			console.log("定时器销毁");
 		}, 10000);
 	});
+
+	it("cron测试", () => {
+		let cron = new Heartbeat({ cron: "* * * * * *" });
+		let result = cron.getCronSimulationResults({ count: 100 });
+
+		result.forEach((item) => {
+			console.log("运行时间---", item.toUTCString());
+		});
+	});
 });

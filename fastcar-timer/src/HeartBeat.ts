@@ -1,5 +1,5 @@
 import { Timezone } from "tz-offset";
-import * as nodeCron from "node-cron";
+import { Cron } from "croner";
 import { TimeUnit, TimeUnitNum } from "./ConstantTime";
 
 export type ScheduledConfig = {
@@ -27,7 +27,7 @@ export type TZ = Timezone;
 export class Heartbeat {
 	diff!: number; //间隔时长
 	timerId: any;
-	task!: nodeCron.ScheduledTask;
+	task!: Cron;
 	lastTime!: number; //间隔时长
 	status: boolean;
 
@@ -52,11 +52,8 @@ export class Heartbeat {
 		//优先采用cron
 		if (cron) {
 			//默认为cron格式
-			let valid = nodeCron.validate(cron);
-			if (!valid) {
-				throw new Error(`this corn: ${cron} is invalid`);
-			}
 			this.cron = cron;
+			this.task = new Cron(cron, { timezone });
 			this.originalConfig = {
 				initialDelay,
 				cron,
@@ -79,22 +76,12 @@ export class Heartbeat {
 		self.lastTime = Date.now();
 
 		if (this.cron) {
-			let task = nodeCron.schedule(
-				this.cron,
-				() => {
+			this.timerId = setTimeout(() => {
+				this.task.schedule(() => {
 					self.diff = Date.now() - self.lastTime;
 					self.lastTime = Date.now();
 					Reflect.apply(fn, context, [self.diff]);
-				},
-				{
-					scheduled: false,
-					timezone: this.timezone,
-				}
-			);
-
-			this.task = task;
-			this.timerId = setTimeout(() => {
-				task.start();
+				});
 			}, this.initialDelay);
 		} else {
 			self.pacemaker(fn, context, this.initialDelay);
@@ -145,5 +132,14 @@ export class Heartbeat {
 
 	getConfig(): ScheduledConfig {
 		return this.originalConfig;
+	}
+
+	//获取cron模拟测试结果
+	getCronSimulationResults({ cron = this.cron, count = 1 }: { cron?: string; count?: number }): Date[] {
+		if (!cron) {
+			return [];
+		}
+
+		return new Cron(this.cron).enumerate(count);
 	}
 }

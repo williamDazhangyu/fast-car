@@ -1,6 +1,6 @@
 {
 	"name": "fastcar-timer",
-	"version": "0.1.3",
+	"version": "0.1.5",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "./target/index.js",
 	"types": "index.d.ts",
@@ -25,12 +25,11 @@
 		"node": ">=16"
 	},
 	"dependencies": {
-		"node-cron": "^3.0.2",
+		"croner": "^5.3.4",
 		"reflect-metadata": "^0.1.13",
 		"tz-offset": "^0.0.2"
 	},
 	"devDependencies": {
-		"@types/node-cron": "^3.0.0",
 		"@types/reflect-metadata": "^0.1.0",
 		"@types/tz-offset": "^0.0.0"
 	},

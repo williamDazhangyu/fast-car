@@ -61,7 +61,7 @@ new TimerTest();
 
 * ScheduledCron 与 ScheduledInterval区别, 前者精度最小为1S 后者精度最小为5ms(具体看nodejs限制)
 
-* cron的实现方式是引用node-cron加以实现
+* cron的实现方式是引用croner加以实现(之前版本cron存在内存泄漏问题)
 
 ## 注解说明
 
