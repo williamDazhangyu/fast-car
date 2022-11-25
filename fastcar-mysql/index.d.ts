@@ -209,3 +209,29 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 	 */
 	query(sql: string, args?: any[], ds?: string, sessionId?: string): Promise<any>;
 }
+
+/**
+ * @version 1.0 where 条件辅助生成类
+ */
+export class WhereModel {
+	private where: {};
+
+	constructor(where?: { [key: string]: any }, info?: { field?: string[]; excludeField?: string[] });
+
+	/**
+	 * 过滤自身where内的空值
+	 */
+	filterNull(excludeField?: string[]): this;
+
+	/**
+	 *
+	 * @param where 添加条件值
+	 * @param info 添加信息值
+	 */
+	addFiled(where: { [key: string]: any }, info?: { field?: string[]; excludeField?: string[] }): this;
+
+	/**
+	 * 返回一个where对象
+	 */
+	toObject(): {};
+}
