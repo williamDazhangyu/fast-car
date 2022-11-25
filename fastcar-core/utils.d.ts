@@ -1,5 +1,6 @@
 import { BinaryToTextEncoding } from "crypto";
 import { SYSConfig } from "./src/config/SysConfig";
+import { DataTypes } from "./src/constant/DataTypes";
 
 //时间工具类
 export class DateUtil {
@@ -106,11 +107,15 @@ export class ValidationUtil {
 
 	static isDate(param: any): boolean;
 
+	static isObject(param: any): boolean;
+
 	static isNotMaxSize(param: any, value: number): boolean;
 
 	static isNotMinSize(param: any, value: number): boolean;
 
 	static isArray(param: any, type: string): boolean;
+
+	static getCheckFun(type: DataTypes | string): Function | null;
 
 	static checkType(param: any, type: string): boolean;
 }
