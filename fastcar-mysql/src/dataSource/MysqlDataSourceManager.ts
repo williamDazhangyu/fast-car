@@ -300,6 +300,8 @@ class MysqlDataSourceManager implements DataSourceManager {
 					this.destorySession(sessionId, true);
 				});
 			}
+
+			this.sessionList.clear();
 		}
 	}
 }
