@@ -50,4 +50,12 @@ describe("条件测试", () => {
 		let where = new WhereModel(obj).filterNull();
 		console.log(where);
 	});
+
+	it("数组值赋值", () => {
+		let where = new WhereModel({
+			list: [1, 2, 3, 4],
+		});
+
+		console.log(JSON.stringify(where.toObject()));
+	});
 });

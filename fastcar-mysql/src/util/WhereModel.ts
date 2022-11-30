@@ -30,7 +30,8 @@ export default class WhereModel {
 		for (let key in where) {
 			if (all || (field.length > 0 && field.includes(key)) || (field.length == 0 && !excludeField.includes(key))) {
 				let value = where[key];
-				if (ValidationUtil.isNotNull(value) && ValidationUtil.isObject(value)) {
+				//排除基础类型,数组和空对象
+				if (ValidationUtil.isNotNull(value) && ValidationUtil.isObject(value) && !ValidationUtil.isArray(value, "array")) {
 					let beforeObj = Reflect.get(this.where, key) || {};
 					Reflect.set(this.where, key, Object.assign({}, beforeObj, where[key]));
 				} else {
