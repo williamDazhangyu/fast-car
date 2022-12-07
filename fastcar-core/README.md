@@ -20,7 +20,7 @@
 
 ## 快速安装
 
-npm install fastcar-core
+npm install fastcar@core
 
 ## 常用注解引用
 
@@ -135,7 +135,7 @@ ResourcePath 自定义resource的位置
 
 ```ts
 //声明一个组件
-import { Service } from "fastcar-core/annotation";
+import { Service } from "@fastcar/core/annotation";
 
 @Service
 class HelloService {
@@ -149,7 +149,7 @@ export default HelloService;
 
 ```ts
 //声明一个别名组件
-import { Service, BeanName } from "fastcar-core/annotation";
+import { Service, BeanName } from "@fastcar/core/annotation";
 
 @Service
 @BeanName("HelloService")
@@ -164,7 +164,7 @@ export default HelloService;
 
 ```ts
 //引入依赖组件
-import { Controller, Autowired } from "fastcar-core/annotation";
+import { Controller, Autowired } from "@fastcar/core/annotation";
 
 @Controller
 class HelloController {
@@ -181,7 +181,7 @@ class HelloController {
 
 ```ts
 //生命周期内运行
-import { ApplicationStart } from "fastcar-core/annotation";
+import { ApplicationStart } from "@fastcar/core/annotation";
 
 @ApplicationStart()
 export default class StartRunner {
@@ -204,8 +204,8 @@ export default class StartRunner {
 
 ```ts
 //声明入口应用 这边有个约定 启动后会自动扫描所在文件夹下的文件 并进行注入
-import { FastCarApplication } from "fastcar-core";
-import { Application } from "fastcar-core/annotation";
+import { FastCarApplication } from "@fastcar/core";
+import { Application } from "@fastcar/core/annotation";
 
 @Application  //声明是一个应用
 @ENV("TEST")  //声明为TEST环境或者在resource下的application.yml内声明
@@ -217,7 +217,7 @@ class APP {
 
 ```ts
 //表单示例
-import { NotNull, Size, Rule, ValidForm } from "fastcar-core/annotation";
+import { NotNull, Size, Rule, ValidForm } from "@fastcar/core/annotation";
 
 class B {
     @NotNull
@@ -241,7 +241,7 @@ instance.test("a", { c: "c", d: 13 }); //校验失败
 
 ```ts
 //本地配置映射示例
-import { Configure } from "fastcar-core/annotation";
+import { Configure } from "@fastcar/core/annotation";
 
 //读取resource下的配置 如hello.yml中为hello: "world"
 @Configure("hello.yml")
@@ -259,7 +259,7 @@ class HelloConfig {
 ```ts
 //调用依赖版本示例
 import HelloService from "./HelloService";
-import { CallDependency } from "fastcar-core/annotation";
+import { CallDependency } from "@fastcar/core/annotation";
 
 export default class CallService {
 
@@ -290,7 +290,7 @@ export default class IndexController {
 
 ```ts
 //改造一个好用的map-list数据链表
-import { DataMap } from "fastcar-core";
+import { DataMap } from "@fastcar/core";
 
 describe("数据集合测试", () => {
  it("数据集合", () => {
@@ -340,8 +340,8 @@ describe("数据集合测试", () => {
 
 ```ts
 //根据启动应用的时机 加载自定义方法
-import { ApplicationHook, FastCarApplication, Logger } from "fastcar-core";
-import { Application } from "fastcar-core/annotation";
+import { ApplicationHook, FastCarApplication, Logger } from "@fastcar/core";
+import { Application } from "@fastcar/core/annotation";
 
 @Application
 class APP implements ApplicationHook {
@@ -370,7 +370,7 @@ class APP implements ApplicationHook {
 
 ## 更多用法
 
-参考项目git地址 fastcar-core/test 下的simple内
+参考项目git地址 @fastcar/core/test 下的simple内
 
 ## 项目开源地址
 
