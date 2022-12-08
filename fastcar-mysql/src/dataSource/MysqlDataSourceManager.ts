@@ -1,12 +1,12 @@
 import { MySqlConfig, MySqlConfigDefault } from "../type/SqlConfig";
 import { SqlExecType } from "../type/SqlExecType";
 import MysqlDataSource from "./MysqlDataSource";
-import { ApplicationStart, ApplicationStop, Autowired, Log } from "fastcar-core/annotation";
-import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
+import { ApplicationStart, ApplicationStop, Autowired, Log } from "@fastcar/core/annotation";
+import { BootPriority, FastCarApplication, Logger } from "@fastcar/core";
 import * as mysql from "mysql2/promise";
-import { EnableScheduling, ScheduledInterval, TimeUnit } from "fastcar-timer";
-import { BeanName } from "fastcar-core/annotation";
-import { DataSourceManager, SqlError } from "fastcar-core/db";
+import { EnableScheduling, ScheduledInterval, TimeUnit } from "@fastcar/timer";
+import { BeanName } from "@fastcar/core/annotation";
+import { DataSourceManager, SqlError } from "@fastcar/core/db";
 import { nanoid } from "nanoid";
 
 const SELECT = "SELECT";

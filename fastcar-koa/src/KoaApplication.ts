@@ -1,13 +1,13 @@
 import "reflect-metadata";
-import { ApplicationStart, ApplicationStop, Autowired, Log } from "fastcar-core/annotation";
-import { FastCarApplication, BootPriority, ComponentKind, Logger } from "fastcar-core";
+import { ApplicationStart, ApplicationStop, Autowired, Log } from "@fastcar/core/annotation";
+import { FastCarApplication, BootPriority, ComponentKind, Logger } from "@fastcar/core";
 import * as Koa from "koa";
 import * as KoaRouter from "koa-router";
 import { MethodType } from "./type/MethodType";
 import { DesignMeta } from "./type/DesignMeta";
-import { TypeUtil } from "fastcar-core/utils";
+import { TypeUtil } from "@fastcar/core/utils";
 import { KoaConfig } from "./type/KoaConfig";
-import { ServerApplication } from "fastcar-server";
+import { ServerApplication } from "@fastcar/server";
 
 /***
  * @version 1.0 koa基础组件启动

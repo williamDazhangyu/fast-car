@@ -2,19 +2,21 @@
 
 ## 目录结构说明
 
-* fastcar-core 核心框架，用于支持组件的依赖注入和整个程序的声明周期运行
+* @fastcar/core 核心框架，用于支持组件的依赖注入和整个程序的声明周期运行
 
-* fastcar-koa web组件，支持http/https/http2的协议，所有支持koa2的中间件，均可实现采用
+* @fastcar/koa web组件，支持http/https/http2的协议，所有支持koa2的中间件，均可实现采用
 
-* fastcar-timer 定时任务框架，支持间隔时间和cron的时间方式
+* @fastcar/timer 定时任务框架，支持间隔时间和cron的时间方式
 
-* fastcar-mysql mysql组件，支持常用的crud及事务的管理
+* @fastcar/mysql mysql组件，支持常用的crud及事务的管理
 
-* fastcar-mysql-tool mysql反向映射生成工具，支持从数据库反向映射成对应的ORM
+* @fastcar/mysql-tool mysql反向映射生成工具，支持从数据库反向映射成对应的ORM
 
-* fastcar-redis redis组件，支持常用的操作
+* @fastcar/redis redis组件，支持常用的操作
 
-* fastcar-mongo mongo组件，支持常用的crud
+* @fastcar/mongo mongo组件，支持常用的crud
+
+* @fastcar/cache cache组件, 支持缓存，用于频繁存储数据 减缓对数据库写操作的压力
 
 ## 代码风格约定
 

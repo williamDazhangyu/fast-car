@@ -1,12 +1,12 @@
 import "reflect-metadata";
-import { Autowired, DSIndex } from "fastcar-core/annotation";
-import { DBMapper, SqlDelete, SqlQuery, SqlUpdate, SqlWhere, MapperType, DesignMeta, JoinEnum, OperatorEnum, OrderType, OrderEnum } from "fastcar-core/db";
+import { Autowired, DSIndex } from "@fastcar/core/annotation";
+import { DBMapper, SqlDelete, SqlQuery, SqlUpdate, SqlWhere, MapperType, DesignMeta, JoinEnum, OperatorEnum, OrderType, OrderEnum } from "@fastcar/core/db";
 import MongoDataSourceManager from "../dataSource/MongoDataSourceManager";
-import { BaseMapper } from "fastcar-core/db";
-import { RowData } from "fastcar-core/db";
+import { BaseMapper } from "@fastcar/core/db";
+import { RowData } from "@fastcar/core/db";
 import { ObjectId } from "mongodb";
 import { OperationSet } from "../type/SqlExecType";
-import { TypeUtil, ValidationUtil } from "fastcar-core/utils";
+import { TypeUtil, ValidationUtil } from "@fastcar/core/utils";
 import { OperatorEnumMapping } from "../type/OperatorEnumMapping";
 
 class MongoMapper<T extends Object> extends BaseMapper<T> {
@@ -19,7 +19,7 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 		super();
 
 		this.primaryKey = "_id";
-		this.mappingList.some(item => {
+		this.mappingList.some((item) => {
 			if (item.primaryKey) {
 				this.primaryKey = item.name;
 				return true;
@@ -31,7 +31,7 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 
 	protected covertEntity(row: T): RowData {
 		let data: RowData = {};
-		this.mappingList.forEach(item => {
+		this.mappingList.forEach((item) => {
 			let value = Reflect.get(row, item.name);
 			if (ValidationUtil.isNotNull(value)) {
 				if (item.primaryKey) {
@@ -67,8 +67,8 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 			return null;
 		}
 
-		let d = {};
-		fields.forEach(item => {
+		let d: any = {};
+		fields.forEach((item) => {
 			let alias = this.getFieldName(item);
 			Reflect.set(d, alias, 1);
 		});
@@ -112,7 +112,7 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 				let alias = this.getFieldName(key);
 				let tmpv = {};
 
-				Object.keys(ov).forEach(operatorKeys => {
+				Object.keys(ov).forEach((operatorKeys) => {
 					let operatorValue = Reflect.get(ov, operatorKeys);
 
 					if (key == this.primaryKey || key == "_id") {
@@ -144,14 +144,14 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 
 		if (joinKey == "AND") {
 			let obj = {};
-			list.forEach(item => {
+			list.forEach((item) => {
 				let keys = Object.keys(item);
 				let firstKey = keys[0];
 				Reflect.set(obj, firstKey, item[firstKey]);
 			});
 			return obj;
 		} else {
-			return { $or: list };
+			return { $or: list as any };
 		}
 	}
 
@@ -166,14 +166,14 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 
 	protected analysisGroups(groups: string[] = []): RowData | null {
 		if (groups.length > 0) {
-			let ids = {};
-			groups.forEach(i => {
+			let ids: any = {};
+			groups.forEach((i) => {
 				let key = i.toString();
 				let alias = this.getFieldName(key);
 				Reflect.set(ids, key, `$${alias}`);
 			});
 
-			return { $group: { _id: ids } };
+			return { $group: { _id: ids } as any };
 		}
 
 		return null;
@@ -183,8 +183,8 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 		let keys = Object.keys(orders);
 
 		if (keys.length > 0) {
-			let o = {};
-			keys.forEach(i => {
+			let o: any = {};
+			keys.forEach((i) => {
 				let key = i.toString();
 				let alias = this.getFieldName(key);
 				let v = orders[key].toUpperCase();
@@ -217,7 +217,7 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 	protected analysisRow(row: RowData): RowData | null {
 		let o = {};
 
-		Object.keys(row).forEach(key => {
+		Object.keys(row).forEach((key) => {
 			let alias = this.getFieldName(key);
 			let v = Reflect.get(row, key);
 
@@ -257,7 +257,7 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 		let saveRows: T[] = [];
 		let updateRows: T[] = [];
 
-		rows.forEach(row => {
+		rows.forEach((row) => {
 			if (Reflect.has(row, this.primaryKey)) {
 				updateRows.push(row);
 			} else {

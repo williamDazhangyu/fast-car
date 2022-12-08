@@ -1,5 +1,5 @@
 {
-	"name": "fastcar-cache",
+	"name": "@fastcar/cache",
 	"version": "0.0.5",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "应用内缓存",
@@ -18,20 +18,22 @@
 		"LICENSE"
 	],
 	"keywords": [
-		"fastcar-core",
+		"@fastcar/core",
 		"cache"
 	],
 	"engines": {
 		"node": ">=16"
 	},
 	"devDependencies": {
-		"fastcar-core": "^0.2.14",
-		"fastcar-mysql": "^0.1.11",
-		"fastcar-timer": "^0.1.1"
+		"@fastcar/core": "^0.2.38",
+		"@fastcar/mysql": "^0.1.24",
+		"@fastcar/timer": "^0.1.6",
+		"tz-offset": "^0.0.2",
+		"@types/tz-offset": "^0.0.0"
 	},
 	"peerDependencies": {
-		"fastcar-core": "*",
-		"fastcar-timer": "*"
+		"@fastcar/core": "*",
+		"@fastcar/timer": "*"
 	},
 	"repository": {
 		"type": "git",
@@ -39,5 +41,6 @@
 	},
 	"scripts": {
 		"build": "tsc"
-	}
+	},
+	"dependencies": {}
 }

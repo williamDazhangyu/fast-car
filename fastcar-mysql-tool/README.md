@@ -1,13 +1,13 @@
-# 基于fastcar-core框架下的 mysql 逆向生成工具
+# 基于@fastcar/core框架下的 mysql 逆向生成工具
 
 ## 快速安装
 
-npm install fastcar-mysql-tool
+npm install @fastcar/mysql-tool
 
 ## 实例
 
 ```ts
-import { ReverseGenerate } from "fastcar-mysql-tool";
+import { ReverseGenerate } from "@fastcar/mysql-tool";
 import * as path from "path";
 
 let basePath = path.join(__dirname, "../", "src");
@@ -28,7 +28,7 @@ describe("逆向生成工具", () => {
 
 ## 更多用法
 
-参考项目git地址 fastcar-mysql-tool/test 下的simple内
+参考项目git地址 @fastcar/mysql-tool/test 下的simple内
 
 ## 项目开源地址
 

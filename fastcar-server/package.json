@@ -1,5 +1,5 @@
 {
-	"name": "fastcar-server",
+	"name": "@fastcar/server",
 	"version": "0.0.3",
 	"description": "服务统一管理框架",
 	"main": "target/index.js",
@@ -24,10 +24,10 @@
 		"node": ">=16"
 	},
 	"devDependencies": {
-		"fastcar-core": "^0.2.11"
+		"@fastcar/core": "^0.2.38"
 	},
 	"peerDependencies": {
-		"fastcar-core": "*"
+		"@fastcar/core": "*"
 	},
 	"repository": {
 		"type": "git",

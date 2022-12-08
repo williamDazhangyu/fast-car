@@ -1,4 +1,4 @@
-import { Table, Field, DBType, PrimaryKey } from "fastcar-core/annotation";
+import { Table, Field, DBType, PrimaryKey } from "@fastcar/core/annotation";
 import "reflect-metadata";
 
 @Table("cache")

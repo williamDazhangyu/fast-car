@@ -1,5 +1,5 @@
-import { Autowired, Service } from "fastcar-core/annotation";
-import { OrderEnum } from "fastcar-core/db";
+import { Autowired, Service } from "@fastcar/core/annotation";
+import { OrderEnum } from "@fastcar/core/db";
 import TestMapper from "../mapper/TestMapper";
 import Test from "../model/Test";
 

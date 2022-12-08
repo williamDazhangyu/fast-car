@@ -1,6 +1,6 @@
-import { BeanName, Component } from "fastcar-core/annotation";
+import { BeanName, Component } from "@fastcar/core/annotation";
 import { RpcMetaData } from "../constant/RpcMetaData";
-import { TypeUtil } from "fastcar-core/utils";
+import { TypeUtil } from "@fastcar/core/utils";
 
 export default function RPCError(target: any) {
 	if (!Reflect.has(target.prototype, "response")) {

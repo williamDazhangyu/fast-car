@@ -1,7 +1,7 @@
-import { Logger } from "fastcar-core";
-import { ValidationUtil } from "fastcar-core/utils";
-import { CallDependency, Log } from "fastcar-core/annotation";
-import { ServerConfig, ServerType, ServerApplication, Protocol } from "fastcar-server";
+import { Logger } from "@fastcar/core";
+import { ValidationUtil } from "@fastcar/core/utils";
+import { CallDependency, Log } from "@fastcar/core/annotation";
+import { ServerConfig, ServerType, ServerApplication, Protocol } from "@fastcar/server";
 import SocketServer from "./SocketServer";
 import { ClientSession, ServerId, SessionId, SocketServerConfig, SocketSession } from "../../types/SocketConfig";
 import { SocketServerFactory } from "./SocketFactory";

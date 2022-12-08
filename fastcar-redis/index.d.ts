@@ -1,4 +1,4 @@
-import { FastCarApplication, Logger } from "fastcar-core";
+import { FastCarApplication, Logger } from "@fastcar/core";
 import * as redis from "redis";
 
 export class RedisDataSource {

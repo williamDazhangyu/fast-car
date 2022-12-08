@@ -1,7 +1,7 @@
 import { DecodeMsg, EncodeMsg } from "../types/SocketConfig";
 import { RpcMessage, InteractiveMode } from "../types/RpcConfig";
 import ProtoBuffService from "../service/ProtoBuffService";
-import { ValidationUtil } from "fastcar-core/utils";
+import { ValidationUtil } from "@fastcar/core/utils";
 
 export const EncodeDefault: EncodeMsg = (msg: RpcMessage) => {
 	return JSON.stringify(msg);

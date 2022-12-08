@@ -1,5 +1,5 @@
-import { ComponentInjection } from "fastcar-core/annotation";
-import { EnableServer } from "fastcar-server";
+import { ComponentInjection } from "@fastcar/core/annotation";
+import { EnableServer } from "@fastcar/server";
 
 //开启koa应用
 export default function EnableKoa(target: any) {

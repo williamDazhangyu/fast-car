@@ -3,7 +3,7 @@ import * as prettier from "prettier";
 import * as fs from "fs";
 import * as path from "path";
 import * as mysql from "mysql2/promise";
-import { DataTypeEnum } from "fastcar-mysql";
+import { DataTypeEnum } from "@fastcar/mysql";
 import { FiledType } from "./FiledType";
 
 const DESCSQL = "SELECT * from information_schema.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ? ORDER BY ordinal_position";
@@ -151,9 +151,9 @@ class ReverseGenerate {
 
 		//添加一个object的序列化
 		if (parseDateFlag) {
-			importHead += "import { DateUtil } from 'fastcar-core/utils'\n";
+			importHead += "import { DateUtil } from '@fastcar/core/utils'\n";
 		}
-		importHead += `import { ${importCoreAnnotation.join(",")} } from "fastcar-core/annotation";`;
+		importHead += `import { ${importCoreAnnotation.join(",")} } from "@fastcar/core/annotation";`;
 
 		let content = `${importHead}\n\n @Table('${taleName}')\n class ${className} \{\n ${body.join("\n\n")} \n\}\n\n export default ${className}`;
 		//进行格式化
@@ -165,7 +165,7 @@ class ReverseGenerate {
 	//生成mapper层
 	static async genMapper(taleName: string, mapperDir: string, rp: string, style: prettier.Options): Promise<void> {
 		let modelName = ReverseGenerate.formatClassName(taleName);
-		let importHeadList = [`import \{ Repository, Entity \} from "fastcar-core/annotation";`, `import \{ MysqlMapper \} from "fastcar-mysql";`, `import ${modelName} from "${rp}/${modelName}";`];
+		let importHeadList = [`import \{ Repository, Entity \} from "@fastcar/core/annotation";`, `import \{ MysqlMapper \} from "@fastcar/mysql";`, `import ${modelName} from "${rp}/${modelName}";`];
 		let className = `${modelName}Mapper`;
 		let importHead = `${importHeadList.join("\n")}`;
 		let body = `@Entity(${modelName})\n\n@Repository\n\nclass ${className} extends MysqlMapper<${modelName}> \{ \}`;

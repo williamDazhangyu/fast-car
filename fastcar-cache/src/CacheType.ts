@@ -1,4 +1,4 @@
-import { DataMap } from "fastcar-core";
+import { DataMap } from "@fastcar/core";
 import DBClientService from "./dbclient/DBClientService";
 
 export type Store = string; //分类

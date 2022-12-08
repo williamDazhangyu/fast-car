@@ -1,5 +1,5 @@
-import { Service } from "fastcar-core/annotation";
-import { Autowired } from "fastcar-core/annotation";
+import { Service } from "@fastcar/core/annotation";
+import { Autowired } from "@fastcar/core/annotation";
 import TestRedisTemplate from "./TestRedisTemplate";
 
 @Service

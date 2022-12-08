@@ -2,7 +2,7 @@
 
 ## 快速安装
 
-npm install fastcar-timer
+npm install @fastcar/timer
 
 ## 使用场景
 
@@ -13,7 +13,7 @@ npm install fastcar-timer
 * 基于时间间隔的调用
 
 ```ts
-import { EnableScheduling, ScheduledInterval } from "fastcar-timer";
+import { EnableScheduling, ScheduledInterval } from "@fastcar/timer";
 
 //开启调度计划
 @EnableScheduling
@@ -38,7 +38,7 @@ class TimerTest {
 * 基于cron的调用
 
 ```ts
-import { EnableScheduling, ScheduledCron } from "fastcar-timer";
+import { EnableScheduling, ScheduledCron } from "@fastcar/timer";
 
 //开启调度计划
 @EnableScheduling
@@ -73,7 +73,7 @@ ScheduledCron 作用于具体方法上 任务按照cron表达式执行
 
 ## 更多用法
 
-参考项目git地址 fastcar-timer/test
+参考项目git地址 @fastcar/timer/test
 
 ## 项目开源地址
 

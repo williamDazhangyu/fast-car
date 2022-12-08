@@ -1,5 +1,5 @@
-import { Logger } from "fastcar-core";
-import { Log } from "fastcar-core/annotation";
+import { Logger } from "@fastcar/core";
+import { Log } from "@fastcar/core/annotation";
 import { DecodeDefault, DecodePBDefault, EncodeDefault, EncodePBDefault } from "../../constant/SocketCodingDefault";
 import { SocketEnum } from "../../constant/SocketEnum";
 import { CodeProtocolEnum } from "../../types/CodeProtocolEnum";

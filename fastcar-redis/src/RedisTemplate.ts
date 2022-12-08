@@ -1,6 +1,6 @@
-import { Autowired, DSIndex, Log } from "fastcar-core/annotation";
+import { Autowired, DSIndex, Log } from "@fastcar/core/annotation";
 import RedisDataSourceManager from "./RedisDataSourceManager";
-import { Logger } from "fastcar-core";
+import { Logger } from "@fastcar/core";
 
 /***
  * @version 1.0 redis操作模板

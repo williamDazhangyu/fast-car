@@ -16,7 +16,7 @@ import {
 import { SocketClientConfig, SessionId, ClientSession, SocketServerConfig } from "./src/types/SocketConfig";
 import MsgClientHookService from "./src/service/MsgClientHookService";
 import { SocketClient } from "./src/service/socket/SocketClient";
-import { Logger } from "fastcar-core";
+import { Logger } from "@fastcar/core";
 import SocketManager from "./src/service/socket/SocketManager";
 import { SocketMsgStatus } from "./src/constant/SocketMsgStatus";
 import MsgCallbackService from "./src/service/MsgCallbackService";

@@ -2,7 +2,7 @@
 
 ## 快速安装
 
-npm install fastcar-workerpool
+npm install @fastcar/workerpool
 
 ## 使用场景
 
@@ -11,7 +11,7 @@ npm install fastcar-workerpool
 ## 使用示例
 
 ``` ts
-import {WorkerPool} from "fastcar-workerpool";
+import {WorkerPool} from "@fastcar/workerpool";
 
 const total = 10000; //计算阶乘一直到一万次
 

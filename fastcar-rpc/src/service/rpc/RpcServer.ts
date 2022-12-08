@@ -1,5 +1,5 @@
-import { BootPriority, ComponentKind, FastCarApplication, Logger } from "fastcar-core";
-import { ApplicationStart, ApplicationStop, Autowired, Log } from "fastcar-core/annotation";
+import { BootPriority, ComponentKind, FastCarApplication, Logger } from "@fastcar/core";
+import { ApplicationStart, ApplicationStop, Autowired, Log } from "@fastcar/core/annotation";
 import {
 	Middleware,
 	RpcMessage,
@@ -20,7 +20,7 @@ import { ClientSession, SessionId } from "../../types/SocketConfig";
 import ComposeService from "../ComposeService";
 import SocketManager from "../socket/SocketManager";
 import TaskAsync from "../../model/TaskAsync";
-import { EnableScheduling, ScheduledInterval } from "fastcar-timer";
+import { EnableScheduling, ScheduledInterval } from "@fastcar/timer";
 import { RpcMetaData } from "../../constant/RpcMetaData";
 import { RpcUrlData } from "../../constant/RpcUrlData";
 import MsgCallbackService from "../MsgCallbackService";

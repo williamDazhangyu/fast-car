@@ -1,7 +1,7 @@
-import { ApplicationStart, ApplicationStop, Log } from "fastcar-core/annotation";
-import { BootPriority, DataMap, Logger } from "fastcar-core";
+import { ApplicationStart, ApplicationStop, Log } from "@fastcar/core/annotation";
+import { BootPriority, DataMap, Logger } from "@fastcar/core";
 import { CacheConfig, CacheConfigTarget, CacheMappingSymbol, CacheSetOptions, DBItem, Item, QueueItem, Store } from "./CacheType";
-import { EnableScheduling, ScheduledInterval } from "fastcar-timer";
+import { EnableScheduling, ScheduledInterval } from "@fastcar/timer";
 
 @ApplicationStart(BootPriority.Common, "start")
 @ApplicationStop(BootPriority.Common, "stop")

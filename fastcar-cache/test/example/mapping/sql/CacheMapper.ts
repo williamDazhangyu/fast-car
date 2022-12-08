@@ -1,5 +1,5 @@
-import { Entity, Repository } from "fastcar-core/annotation";
-import { MysqlMapper } from "fastcar-mysql";
+import { Entity, Repository } from "@fastcar/core/annotation";
+import { MysqlMapper } from "@fastcar/mysql";
 import CacheModel from "./CacheModel";
 
 @Entity(CacheModel)

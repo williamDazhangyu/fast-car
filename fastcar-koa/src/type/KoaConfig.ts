@@ -1,6 +1,6 @@
 import * as koaBody from "koa-body";
 import * as bodyParser from "koa-bodyparser";
-import { ServerConfig } from "fastcar-server";
+import { ServerConfig } from "@fastcar/server";
 
 //和koa的约定配置
 export type KoaConfig = {

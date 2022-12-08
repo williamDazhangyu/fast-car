@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import { DateUtil } from "fastcar-core/utils";
-import { Table, DBType, Field, PrimaryKey, Size, NotNull } from "fastcar-core/annotation";
+import { DateUtil } from "@fastcar/core/utils";
+import { Table, DBType, Field, PrimaryKey, Size, NotNull } from "@fastcar/core/annotation";
 
 @Table("test")
 class Test {

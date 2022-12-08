@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 import { Worker } from "worker_threads";
-import { Log } from "fastcar-core/annotation";
-import { Logger } from "fastcar-core";
+import { Log } from "@fastcar/core/annotation";
+import { Logger } from "@fastcar/core";
 import { TaskSyncType, TaskType } from "./type/TaskType";
 import WorkerPoolTask from "./WorkerPoolTask";
 

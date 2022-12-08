@@ -1,15 +1,15 @@
-import { Logger } from "fastcar-core";
+import { Logger } from "@fastcar/core";
 import { InteractiveMode, RetryConfig, RpcClientConfig, RpcClientMsgBox, RpcMessage, RpcResponseCode, RpcResponseType } from "../../types/RpcConfig";
 import { SocketClientConfig } from "../../types/SocketConfig";
 import { SocketClient } from "../socket/SocketClient";
 import { SocketClientFactory } from "../socket/SocketFactory";
-import { EnableScheduling, ScheduledInterval } from "fastcar-timer";
+import { EnableScheduling, ScheduledInterval } from "@fastcar/timer";
 import TaskAsync from "../../model/TaskAsync";
-import { ValidationUtil } from "fastcar-core/utils";
+import { ValidationUtil } from "@fastcar/core/utils";
 import RpcAsyncService from "../RpcAsyncService";
 import MsgClientHookService from "../MsgClientHookService";
 import { RpcUrlData } from "../../constant/RpcUrlData";
-import { Log } from "fastcar-core/annotation";
+import { Log } from "@fastcar/core/annotation";
 import { PBConfig, ProtoList } from "../../types/PBConfig";
 import ProtoBuffService from "../ProtoBuffService";
 

@@ -1,7 +1,7 @@
-import { Controller, Log } from "fastcar-core/annotation";
+import { Controller, Log } from "@fastcar/core/annotation";
 import RPCMethod from "../../../../src/annotation/RPCMethod";
 import ProtoData from "../../../../src/annotation/ProtoData";
-import { Logger } from "fastcar-core";
+import { Logger } from "@fastcar/core";
 import * as path from "path";
 
 @Controller

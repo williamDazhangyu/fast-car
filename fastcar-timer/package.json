@@ -1,6 +1,6 @@
 {
-	"name": "fastcar-timer",
-	"version": "0.1.5",
+	"name": "@fastcar/timer",
+	"version": "0.1.6",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "./target/index.js",
 	"types": "index.d.ts",
@@ -13,7 +13,7 @@
 		"timer",
 		"cron",
 		"node-cron",
-		"fastcar-timer"
+		"@fastcar/timer"
 	],
 	"files": [
 		"src",

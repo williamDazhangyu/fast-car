@@ -1,5 +1,5 @@
-import { Application } from "fastcar-core/annotation";
-import { FastCarApplication } from "fastcar-core";
+import { Application } from "@fastcar/core/annotation";
+import { FastCarApplication } from "@fastcar/core";
 import CrudService from "./service/CrudService";
 import EnableMongo from "../../../src/annotation/EnableMongo";
 import DSService from "./service/DSService";

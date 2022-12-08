@@ -1,4 +1,3 @@
-import { TimeUnit } from "./src/ConstantTime";
 import { ScheduledConfig, ScheduledConfigInterval, ScheduledConfigCron } from "./src/HeartBeat";
 
 type RetProperty = (target: any, methodName: string, descriptor: PropertyDescriptor) => void;
@@ -25,7 +24,11 @@ export class Heartbeat {
 	 */
 	private getInterval(fixedRate?: number, fixedRateString?: string): number;
 
-	constructor({ fixedRate = 1000, fixedRateString = TimeUnit.millisecond, initialDelay = 0, cron, timezone = "Asia/Shanghai" }: ScheduledConfig);
+	/***
+	 * @params ScheduledConfig
+	 * @params fixedRate = 1000, fixedRateString = TimeUnit.millisecond, initialDelay = 0, cron, timezone = "Asia/Shanghai"
+	 */
+	constructor({ fixedRate, fixedRateString, initialDelay, cron, timezone }: ScheduledConfig);
 
 	//开启任务
 	start(fn: Function, context: any): void;

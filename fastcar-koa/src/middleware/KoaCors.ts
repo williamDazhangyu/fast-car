@@ -1,4 +1,4 @@
-import { FastCarApplication } from "fastcar-core";
+import { FastCarApplication } from "@fastcar/core";
 import * as koa2Cors from "koa2-cors";
 import { KoaConfig } from "../type/KoaConfig";
 import { Context } from "koa";
@@ -11,17 +11,16 @@ export default function KoaCors(app: FastCarApplication) {
 			//兼容支持多个跨域
 			if (typeof corsConfig.origin == "string") {
 				let origins = corsConfig.origin.split(";");
-				corsConfig.origin = (ctx: Context) => {
-
+				Reflect.set(corsConfig, "origin", (ctx: Context): boolean | string => {
 					let orign = ctx?.request?.header?.origin;
-					if(!orign) {
-						if(!origins.includes("*")) {
+					if (!orign) {
+						if (!origins.includes("*")) {
 							return false;
 						}
-		
+
 						return "*";
 					}
-					
+
 					for (let o of origins) {
 						if (orign.startsWith(o) || o == "*") {
 							return o;
@@ -29,7 +28,7 @@ export default function KoaCors(app: FastCarApplication) {
 					}
 
 					return false;
-				};
+				});
 			}
 		}
 		return koa2Cors(corsConfig);

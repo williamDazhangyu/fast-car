@@ -1,5 +1,5 @@
-import { FastCarApplication } from "fastcar-core";
-import { Application } from "fastcar-core/annotation";
+import { FastCarApplication } from "@fastcar/core";
+import { Application } from "@fastcar/core/annotation";
 import EnableKoa from "../../src/annotation/EnableKoa";
 import KoaMiddleware from "../../src/annotation/KoaMiddleware";
 import KoaStatic from "../../src/middleware/KoaStatic";

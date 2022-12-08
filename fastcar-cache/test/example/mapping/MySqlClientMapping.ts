@@ -1,10 +1,10 @@
 import CacheMapping from "../../../src/annotation/CacheMapping";
 import { CacheConfig, Item } from "../../../src/CacheType";
 import DBClientService from "../../../src/dbclient/DBClientService";
-import { CallDependency } from "fastcar-core/annotation";
+import { CallDependency } from "@fastcar/core/annotation";
 import CacheMapper from "./sql/CacheMapper";
 import CacheModel from "./sql/CacheModel";
-import { DateUtil } from "fastcar-core/utils";
+import { DateUtil } from "@fastcar/core/utils";
 
 @CacheMapping
 export default class MySqlClientMapping implements CacheConfig {

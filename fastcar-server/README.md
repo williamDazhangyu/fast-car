@@ -1,14 +1,14 @@
-# fastcar-core框架下创建网络服务器
+# @fastcar/core框架下创建网络服务器
 
 ## 快速安装
 
-npm install fastcar-server
+npm install @fastcar/server
 
 ## 使用说明
 
 * 由应用手动创建服务，并放置ServerApplication下统一进行管理
 * 应用入口开启 @EnableServer
-* 新版本的fastcar-koa 和 fastcar-rpc均依赖于server创建服务
+* 新版本的@fastcar/koa 和 @fastcar/rpc均依赖于server创建服务
 * 生命周期，它的周期均为最后 每次启动或者停止均为最后
 * 支持创建 net http https http2 ssl服务
 
@@ -21,9 +21,9 @@ npm install fastcar-server
 
 ```ts
 import "reflect-metadata";
-import { FastCarApplication } from "fastcar-core";
-import { Application, BaseFilePath, BasePath } from "fastcar-core/annotation";
-import { EnableServer } from "fastcar-server";
+import { FastCarApplication } from "@fastcar/core";
+import { Application, BaseFilePath, BasePath } from "@fastcar/core/annotation";
+import { EnableServer } from "@fastcar/server";
 
 @Application
 @BasePath(__dirname)
@@ -92,7 +92,7 @@ EnableServer 作用于应用上 用于开启server组件
 
 ## 更多用法
 
-参考项目git地址 fastcar-server/test 下的example内
+参考项目git地址 @fastcar/server/test 下的example内
 
 ## 项目开源地址
 

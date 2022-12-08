@@ -1,6 +1,6 @@
 {
-	"name": "fastcar-koa",
-	"version": "0.1.9",
+	"name": "@fastcar/koa",
+	"version": "0.1.10",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "fastcar框架下对koa的包装",
 	"main": "target/index.js",
@@ -23,24 +23,24 @@
 		"koa",
 		"web",
 		"node",
-		"fastcar-core",
-		"fastcar-koa"
+		"@fastcar/core",
+		"@fastcar/koa"
 	],
 	"engines": {
 		"node": ">=16"
 	},
 	"devDependencies": {
-		"@types/koa": "^2.13.4",
-		"fastcar-core": "^0.2.10",
-		"fastcar-server": "^0.0.1",
+		"@fastcar/core": "^0.2.38",
+		"@fastcar/server": "^0.0.3",
+		"@types/koa": "^2.13.5",
 		"reflect-metadata": "^0.1.13"
 	},
 	"dependencies": {
 		"koa": "^2.13.1"
 	},
 	"peerDependencies": {
-		"fastcar-core": "*",
-		"fastcar-server": "*",
+		"@fastcar/core": "*",
+		"@fastcar/server": "*",
 		"@types/koa-bodyparser": "^4.3.3",
 		"@types/koa-mount": "^4.0.1",
 		"@types/koa-range": "^0.3.2",

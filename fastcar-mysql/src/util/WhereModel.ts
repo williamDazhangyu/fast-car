@@ -1,4 +1,4 @@
-import { ValidationUtil } from "fastcar-core/utils";
+import { ValidationUtil } from "@fastcar/core/utils";
 
 export default class WhereModel {
 	private where: {};

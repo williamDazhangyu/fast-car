@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { FormatStr } from "fastcar-core/utils";
+import { FormatStr } from "@fastcar/core/utils";
 import { MethodType, RpcUrl } from "../types/RpcConfig";
 import { RpcMetaData } from "../constant/RpcMetaData";
 

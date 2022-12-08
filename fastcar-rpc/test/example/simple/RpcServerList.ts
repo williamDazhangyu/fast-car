@@ -2,7 +2,7 @@ import { SocketEnum } from "../../../src/constant/SocketEnum";
 import { CodeProtocolEnum } from "../../../src/types/CodeProtocolEnum";
 import { SocketServerConfig } from "../../../src/types/SocketConfig";
 import * as path from "path";
-import { Protocol } from "fastcar-server";
+import { Protocol } from "@fastcar/server";
 
 const serverList: SocketServerConfig[] = [
 	{

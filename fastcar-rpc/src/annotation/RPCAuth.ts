@@ -1,6 +1,6 @@
-import { BeanName, Component } from "fastcar-core/annotation";
+import { BeanName, Component } from "@fastcar/core/annotation";
 import { RpcMetaData } from "../constant/RpcMetaData";
-import { TypeUtil } from "fastcar-core/utils";
+import { TypeUtil } from "@fastcar/core/utils";
 
 //声明这是一个rpc验证的服务
 export default function RPCAuth(target: any) {

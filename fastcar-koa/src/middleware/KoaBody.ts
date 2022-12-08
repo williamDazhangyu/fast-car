@@ -1,5 +1,5 @@
 import * as koaBody from "koa-body";
-import { FastCarApplication } from "fastcar-core";
+import { FastCarApplication } from "@fastcar/core";
 import { KoaConfig } from "../type/KoaConfig";
 
 //对于文件上传做限定

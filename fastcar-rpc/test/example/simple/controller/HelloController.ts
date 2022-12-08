@@ -1,4 +1,4 @@
-import { Controller } from "fastcar-core/annotation";
+import { Controller } from "@fastcar/core/annotation";
 import RPCMethod from "../../../../src/annotation/RPCMethod";
 
 @Controller

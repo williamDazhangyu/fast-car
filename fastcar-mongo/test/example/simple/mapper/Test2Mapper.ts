@@ -1,4 +1,4 @@
-import { DS, Entity, Repository } from "fastcar-core/annotation";
+import { DS, Entity, Repository } from "@fastcar/core/annotation";
 import Test from "../model/Test";
 import MongoMapper from "../../../../src/operation/MongoMapper";
 

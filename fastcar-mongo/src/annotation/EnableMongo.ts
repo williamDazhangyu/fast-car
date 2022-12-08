@@ -1,4 +1,4 @@
-import { ComponentInjection } from "fastcar-core/annotation";
+import { ComponentInjection } from "@fastcar/core/annotation";
 
 //开启数据库功能
 export default function EnableMongo(target: any) {

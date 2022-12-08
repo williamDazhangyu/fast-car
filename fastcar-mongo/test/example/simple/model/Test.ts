@@ -1,4 +1,4 @@
-import { Size, NotNull, Table, Field, DBType, PrimaryKey } from "fastcar-core/annotation";
+import { Size, NotNull, Table, Field, DBType, PrimaryKey } from "@fastcar/core/annotation";
 
 @Table("test")
 class Test {

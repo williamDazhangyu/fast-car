@@ -8,7 +8,7 @@ import { SocketEvents } from "../../../../types/SocketEvents";
 import { RpcMessage } from "../../../../types/RpcConfig";
 import ProtoBuffService from "../../../ProtoBuffService";
 import { DecodePBGrpcDefault, EncodePBGrpcDefault } from "../../../../constant/SocketCodingDefault";
-import { SSLConfig } from "fastcar-server";
+import { SSLConfig } from "@fastcar/server";
 import * as fs from "fs";
 
 export default class GrpcClient extends SocketClient {

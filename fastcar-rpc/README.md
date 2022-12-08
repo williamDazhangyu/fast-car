@@ -1,8 +1,8 @@
-# fastcar-core框架下整合的rpc框架
+# @fastcar/core框架下整合的rpc框架
 
 ## 快速安装
 
-npm install fastcar-rpc
+npm install @fastcar/rpc
 
 ## 框架说明
 
@@ -53,7 +53,7 @@ type RpcClientConfig = {
  type SocketServerConfig = {
  id: string; //编号名称
  type: SocketEnum; //具体为哪一种型号的连接器
- server: ServerConfig; //这边和fastcar-server的配置一致
+ server: ServerConfig; //这边和@fastcar/server的配置一致
  extra?: any; //第三方拓展配置 用于灵活的调用第三方
  serviceType: string; //服务器用途类型 用于表名是何种服务器
  encode?: EncodeMsg; //编码解码
@@ -488,7 +488,7 @@ export default class HeadController {
 
 ## 更多用法
 
-参考项目git地址 fastcar-rpc/test 下的example内
+参考项目git地址 @fastcar/rpc/test 下的example内
 
 ## 项目开源地址
 

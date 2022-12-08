@@ -1,5 +1,5 @@
-import { ApplicationStart, Autowired } from "fastcar-core/annotation";
-import { BootPriority, FastCarApplication } from "fastcar-core";
+import { ApplicationStart, Autowired } from "@fastcar/core/annotation";
+import { BootPriority, FastCarApplication } from "@fastcar/core";
 import ServerApplication from "../../../../src/ServerApplication";
 import { ServerConfig } from "../../../../src/type/ServerConfig";
 import { Protocol } from "../../../../src/type/Protocol";

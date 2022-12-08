@@ -1,6 +1,6 @@
 import { SocketEnum } from "../../../src/constant/SocketEnum";
 import RpcServer from "../../../src/service/rpc/RpcServer";
-import { ServerApplication } from "fastcar-server";
+import { ServerApplication } from "@fastcar/server";
 import { EncodePBDefault, DecodeDefault, DecodePBDefault } from "../../../src/constant/SocketCodingDefault";
 import { CodeProtocolEnum } from "../../../src/types/CodeProtocolEnum";
 import RpcClient from "../../../src/service/rpc/RpcClient";

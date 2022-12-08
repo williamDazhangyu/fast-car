@@ -1,4 +1,4 @@
-import { ServerConfig, SSLConfig } from "fastcar-server";
+import { ServerConfig, SSLConfig } from "@fastcar/server";
 import { SocketEnum } from "../constant/SocketEnum";
 import { CodeProtocolEnum } from "./CodeProtocolEnum";
 import { RpcMessage } from "./RpcConfig";

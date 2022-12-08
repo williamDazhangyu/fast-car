@@ -2,20 +2,20 @@
 
 ## 快速安装
 
-npm install fastcar-koa
+npm install fastcar@koa
 
 ## 基本原理
 
-* 采用fastcar-core框架，然后将koa包装成一个基础组件进行调用
+* 采用@fastcar/core框架，然后将koa包装成一个基础组件进行调用
 * 加载顺序为优先加载自定义中间件->加载自定义路由->启动http服务进行监听
 * 停止阶段 延迟一秒左右 将server进行关闭
 
 ## 如何使用
 
 ```ts
-import { FastCarApplication } from "fastcar-core";
-import { Application } from "fastcar-core/annotation";
-import { EnableKoa } from "fastcar-koa/annotation";
+import { FastCarApplication } from "@fastcar/core";
+import { Application } from "@fastcar/core/annotation";
+import { EnableKoa } from "@fastcar/koa/annotation";
 
 @Application //注入基础框架
 @EnableKoa //开启koa
@@ -29,8 +29,8 @@ export const app = new APP();
 ## 添加一个路由访问
 
 ```ts
-import { Controller } from "fastcar-core/annotation";
-import { GET } from "fastcar-koa/annotation";
+import { Controller } from "@fastcar/core/annotation";
+import { GET } from "@fastcar/koa/annotation";
 
 @Controller
 export default class HelloController {
@@ -56,9 +56,9 @@ function Example(): koa.Middleware {
 }
 
 //在主入口内添加
-import { FastCarApplication } from "fastcar-core";
-import { Application } from "fastcar-core/annotation";
-import { EnableKoa } from "fastcar-koa/annotation";
+import { FastCarApplication } from "@fastcar/core";
+import { Application } from "@fastcar/core/annotation";
+import { EnableKoa } from "@fastcar/koa/annotation";
 
 @Application //注入基础框架
 @EnableKoa //开启koa
@@ -101,7 +101,7 @@ export const app = new APP();
 
 ## 更多用法
 
-参考项目git地址 fastcar-koa/test下的simple内
+参考项目git地址 @fastcar/koa/test下的simple内
 
 ## 项目开源地址
 

@@ -10,7 +10,7 @@
 
 ## 快速安装
 
-npm install fastcar-cache
+npm install @fastcar/cache
 
 ## 使用案例
 
@@ -131,7 +131,7 @@ export default class MySqlClientMapping implements CacheConfig {
 
 ## 更多用法
 
-参考项目git地址 fastcar-cache/test 下的simple内
+参考项目git地址 @fastcar/cache/test 下的simple内
 
 ## 项目开源地址
 

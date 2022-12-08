@@ -1,8 +1,8 @@
 {
-	"name": "fastcar-mysql",
+	"name": "@fastcar/mysql",
 	"version": "0.1.24",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
-	"description": "基于fastcar-core框架下对mysql的封装",
+	"description": "基于@fastcar/core框架下对mysql的封装",
 	"main": "target/index.js",
 	"author": "william_zhong",
 	"license": "MIT",
@@ -23,8 +23,8 @@
 	"keywords": [
 		"mysql",
 		"mysql2",
-		"fastcar-mysql",
-		"fastcar-core",
+		"@fastcar/mysql",
+		"@fastcar/core",
 		"ORM"
 	],
 	"engines": {
@@ -34,16 +34,18 @@
 		"mysql2": "^2.3.3"
 	},
 	"devDependencies": {
+		"@fastcar/core": "*",
+		"@fastcar/timer": "*",
 		"@types/node": "^16.11.7",
 		"@types/reflect-metadata": "^0.1.0",
-		"fastcar-core": "^0.2.37",
-		"fastcar-timer": "^0.1.1",
-		"nanoid": "^3.3.2",
-		"reflect-metadata": "^0.1.13"
+		"@types/tz-offset": "^0.0.0",
+		"nanoid": "3.3.4",
+		"reflect-metadata": "^0.1.13",
+		"tz-offset": "^0.0.2"
 	},
 	"peerDependencies": {
-		"fastcar-core": "*",
-		"fastcar-timer": "*",
+		"@fastcar/core": "*",
+		"@fastcar/timer": "*",
 		"nanoid": "3.3.4"
 	},
 	"repository": {

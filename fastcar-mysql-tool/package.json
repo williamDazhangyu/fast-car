@@ -1,5 +1,5 @@
 {
-	"name": "fastcar-mysql-tool",
+	"name": "@fastcar/mysql-tool",
 	"version": "0.1.16",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "逆向生成对应的model和mapper",
@@ -18,19 +18,19 @@
 		"LICENSE"
 	],
 	"keywords": [
-		"fastcar-mysql",
-		"fastcar-core",
+		"@fastcar/mysql",
+		"@fastcar/core",
 		"ORM"
 	],
 	"engines": {
 		"node": ">=16"
 	},
 	"devDependencies": {
+		"@fastcar/core": "^0.2.38",
+		"@fastcar/mysql": "^0.1.24",
+		"@fastcar/timer": "^0.1.6",
 		"@types/camelcase": "^5.2.0",
-		"@types/prettier": "^2.4.2",
-		"fastcar-core": "^0.2.13",
-		"fastcar-mysql": "^0.1.11",
-		"fastcar-timer": "^0.1.1"
+		"@types/prettier": "^2.4.2"
 	},
 	"dependencies": {
 		"camelcase": "^6.2.1",
@@ -38,8 +38,8 @@
 		"prettier": "^2.5.1"
 	},
 	"peerDependencies": {
-		"fastcar-core": "*",
-		"fastcar-mysql": "*"
+		"@fastcar/core": "*",
+		"@fastcar/mysql": "*"
 	},
 	"repository": {
 		"type": "git",

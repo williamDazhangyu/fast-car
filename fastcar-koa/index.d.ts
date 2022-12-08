@@ -1,8 +1,8 @@
-import { FastCarApplication, Logger } from "fastcar-core";
+import { FastCarApplication, Logger } from "@fastcar/core";
 import * as Koa from "koa";
 import * as koaBody from "koa-body";
 import * as bodyParser from "koa-bodyparser";
-import { ServerConfig } from "fastcar-server";
+import { ServerConfig } from "@fastcar/server";
 
 type MiddleWareType = (...args: any) => Koa.Middleware | Koa.Middleware[];
 

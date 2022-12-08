@@ -1,8 +1,8 @@
-# 基于fastcar-core框架下对mysql的封装
+# 基于@fastcar/core框架下对mysql的封装
 
 ## 快速安装
 
-npm install fastcar-mysql
+npm install @fastcar/mysql
 
 ## 结构说明
 
@@ -22,7 +22,7 @@ npm install fastcar-mysql
 * 应用入口开启
 
 ```ts
-import { EnableMysql } from "fastcar-mysql/annotation";
+import { EnableMysql } from "@fastcar/mysql/annotation";
 
 @Application
 @EnableMysql  //开启mysql
@@ -33,10 +33,10 @@ class APP {
 export default = new APP();
 ```
 
-* 声明数据库映射文件(可以用fastcar-mysql-tool进行逆向生成)
+* 声明数据库映射文件(可以用@fastcar/mysql-tool进行逆向生成)
 
 ```ts
-import { Size, NotNull, Table, Field, DBType, PrimaryKey } from "fastcar-core/annotation";
+import { Size, NotNull, Table, Field, DBType, PrimaryKey } from "@fastcar/core/annotation";
 import "reflect-metadata";
 
 @Table("test")
@@ -81,8 +81,8 @@ export default Test;
 * 声明Mapper文件 便于curd操作
 
 ```ts
-import { Entity, Repository } from "fastcar-core/annotation";
-import { MysqlMapper } from "fastcar-mysql";
+import { Entity, Repository } from "@fastcar/core/annotation";
+import { MysqlMapper } from "@fastcar/mysql";
 import Test from "../model/Test";
 
 @Entity(Test) //绑定实体类
@@ -95,7 +95,7 @@ export default TestMapper;
 * 简单调用数据
 
 ```ts
-import { Autowired, Service } from "fastcar-core/annotation";
+import { Autowired, Service } from "@fastcar/core/annotation";
 import TestMapper from "../mapper/TestMapper";
 import Test from "../model/Test";
 
@@ -204,8 +204,8 @@ export default SimpleService;
 * 多数据源实例
 
 ```ts
-import { DS, Entity, Repository } from "fastcar-core/annotation";
-import { MysqlMapper } from "fastcar-mysql";
+import { DS, Entity, Repository } from "@fastcar/core/annotation";
+import { MysqlMapper } from "@fastcar/mysql";
 import Test from "../model/Test";
 
 @Entity(Test)
@@ -217,7 +217,7 @@ export default TestMapper2;
 ```
 
 ```ts
-import { Autowired, Service } from "fastcar-core/annotation";
+import { Autowired, Service } from "@fastcar/core/annotation";
 import TestMapper from "../mapper/TestMapper";
 import TestMapper2 from "../mapper/TestMapper2";
 import Test from "../model/Test";
@@ -257,8 +257,8 @@ export default class TestDS {
 * 事务实例
 
 ```ts
-import { Autowired, Service, SqlSession, Transactional } from "fastcar-core/annotation";
-import { MysqlDataSourceManager } from "fastcar-mysql";
+import { Autowired, Service, SqlSession, Transactional } from "@fastcar/core/annotation";
+import { MysqlDataSourceManager } from "@fastcar/mysql";
 import TestMapper from "../mapper/TestMapper";
 
 @Service
@@ -365,7 +365,7 @@ export default TestTransactional;
 
 ## 更多用法
 
-参考项目git地址 fastcar-mysql/test 下的example内
+参考项目git地址 @fastcar/mysql/test 下的example内
 
 ## 项目开源地址
 

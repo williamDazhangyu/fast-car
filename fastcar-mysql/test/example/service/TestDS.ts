@@ -1,4 +1,4 @@
-import { Autowired, Service } from "fastcar-core/annotation";
+import { Autowired, Service } from "@fastcar/core/annotation";
 import TestMapper from "../mapper/TestMapper";
 import TestMapper2 from "../mapper/TestMapper2";
 import Test from "../model/Test";

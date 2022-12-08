@@ -1,4 +1,4 @@
-import { Repository, DS } from "fastcar-core/annotation";
+import { Repository, DS } from "@fastcar/core/annotation";
 import RedisTemplate from "../../../src/RedisTemplate";
 
 //声明为redis操作模板

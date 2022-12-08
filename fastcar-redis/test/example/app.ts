@@ -1,5 +1,5 @@
-import { FastCarApplication } from "fastcar-core";
-import { Application } from "fastcar-core/annotation";
+import { FastCarApplication } from "@fastcar/core";
+import { Application } from "@fastcar/core/annotation";
 import EnableRedis from "../../src/annotation/EnableRedis";
 import SimpleService from "./service/SimpleService";
 

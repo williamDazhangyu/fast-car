@@ -1,4 +1,4 @@
-import { FastCarApplication, ValidError } from "fastcar-core";
+import { FastCarApplication, ValidError } from "@fastcar/core";
 
 //默认错误捕捉
 export default function ExceptionGlobalHandler(app: FastCarApplication) {

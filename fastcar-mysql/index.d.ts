@@ -1,8 +1,8 @@
-import { FastCarApplication, Logger } from "fastcar-core";
+import { FastCarApplication, Logger } from "@fastcar/core";
 import * as mysql from "mysql2";
-import { DBMapper, MapperType, OrderType, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "fastcar-core/db";
+import { DBMapper, MapperType, OrderType, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "@fastcar/core/db";
 import { MySqlConfig } from "./src/type/SqlConfig";
-import { DataSourceManager } from "fastcar-core/db";
+import { DataSourceManager } from "@fastcar/core/db";
 
 export * from "./src/type/DataTypeEnum";
 

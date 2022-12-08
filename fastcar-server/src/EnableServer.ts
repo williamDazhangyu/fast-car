@@ -1,4 +1,4 @@
-import { ComponentInjection } from "fastcar-core/annotation";
+import { ComponentInjection } from "@fastcar/core/annotation";
 
 export default function EnableServer(target: any) {
 	//手动注入实例

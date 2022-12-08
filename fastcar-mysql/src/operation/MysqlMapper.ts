@@ -1,10 +1,10 @@
 import "reflect-metadata";
-import { Autowired, DSIndex, SqlSession } from "fastcar-core/annotation";
+import { Autowired, DSIndex, SqlSession } from "@fastcar/core/annotation";
 import MysqlDataSourceManager from "../dataSource/MysqlDataSourceManager";
-import { DataFormat, TypeUtil, ValidationUtil } from "fastcar-core/utils";
+import { DataFormat, TypeUtil, ValidationUtil } from "@fastcar/core/utils";
 import SerializeUtil from "../util/SerializeUtil";
-import { BaseMapper, JoinEnum } from "fastcar-core/db";
-import { OrderType, OperatorEnum, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "fastcar-core/db";
+import { BaseMapper, JoinEnum } from "@fastcar/core/db";
+import { OrderType, OperatorEnum, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "@fastcar/core/db";
 
 /****
  * @version 1.0 采用crud方式进行数据操作

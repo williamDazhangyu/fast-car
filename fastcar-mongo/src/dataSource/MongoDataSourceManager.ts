@@ -1,10 +1,10 @@
 import { Db } from "mongodb";
 import MongoDataSource from "./MongoDataSource";
-import { ApplicationStart, ApplicationStop, Autowired, Log } from "fastcar-core/annotation";
-import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
+import { ApplicationStart, ApplicationStop, Autowired, Log } from "@fastcar/core/annotation";
+import { BootPriority, FastCarApplication, Logger } from "@fastcar/core";
 import { MongoConfig, MongoDefaultConfig } from "../type/SqlConfig";
 import { OperationSet, SqlExecType } from "../type/SqlExecType";
-import { DataSourceManager, SqlError } from "fastcar-core/db";
+import { DataSourceManager, SqlError } from "@fastcar/core/db";
 
 @ApplicationStart(BootPriority.Base, "start")
 @ApplicationStop(BootPriority.Lowest, "stop")
@@ -43,7 +43,7 @@ class MongoDataSourceManager implements DataSourceManager {
 
 	async connExecute(conn: Db, params: OperationSet[]): Promise<any> {
 		let finalSQL = params
-			.map(item => {
+			.map((item) => {
 				return `${item.method}(${JSON.stringify(item.args)})`;
 			})
 			.join(".");
@@ -141,7 +141,7 @@ class MongoDataSourceManager implements DataSourceManager {
 		throw new SqlError("createSession not implemented By mongo.");
 	}
 
-	destorySession(sessionId: string, status: boolean): void {
+	destorySession(sessionId: string, status: boolean): Promise<void> {
 		throw new SqlError("destorySession not implemented By mongo.");
 	}
 }

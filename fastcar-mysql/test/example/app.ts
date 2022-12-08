@@ -1,5 +1,5 @@
-import { FastCarApplication } from "fastcar-core";
-import { Application, BaseFilePath, BasePath } from "fastcar-core/annotation";
+import { FastCarApplication } from "@fastcar/core";
+import { Application, BaseFilePath, BasePath } from "@fastcar/core/annotation";
 import EnableMysql from "../../src/annotation/EnableMysql";
 import SimpleService from "./service/SimpleService";
 import TestDS from "./service/TestDS";

@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import { FastCarApplication } from "fastcar-core";
-import { Application, BaseFilePath, BasePath } from "fastcar-core/annotation";
+import { FastCarApplication } from "@fastcar/core";
+import { Application, BaseFilePath, BasePath } from "@fastcar/core/annotation";
 import EnableServer from "../../../src/EnableServer";
 
 @Application

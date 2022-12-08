@@ -1,5 +1,5 @@
 import { MongoClient, Db, MongoClientOptions } from "mongodb";
-import { BaseMapper, DataSourceManager, OrderType, RowData, SqlQuery, SqlUpdate, SqlWhere } from "fastcar-core/db";
+import { BaseMapper, DataSourceManager, OrderType, RowData, SqlQuery, SqlUpdate, SqlWhere } from "@fastcar/core/db";
 import { OperationSet, SqlExecType } from "./src/type/SqlExecType";
 
 export type SqlConfig = {
@@ -51,7 +51,7 @@ export class MongoDataSourceManager implements DataSourceManager {
 
 	createSession(): string;
 
-	destorySession(sessionId: string, status: boolean): void;
+	destorySession(sessionId: string, status: boolean): Promise<void>;
 }
 
 export class MongoMapper<T extends Object> extends BaseMapper<T> {

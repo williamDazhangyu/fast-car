@@ -1,8 +1,8 @@
-# 基于fastcar-core框架下对mongo的封装
+# 基于@fastcar/core框架下对mongo的封装
 
 ## 快速安装
 
-npm install fastcar-mongo
+npm install @fastcar/mongo
 
 ## 结构说明
 
@@ -22,7 +22,7 @@ npm install fastcar-mongo
 * 应用入口开启
 
 ```ts
-import { EnableMysql } from "fastcar-mongo/annotation";
+import { EnableMysql } from "@fastcar/mongo/annotation";
 
 @Application
 @EnableMongo  //开启mongo
@@ -36,7 +36,7 @@ export default = new APP();
 * 声明和mongo的映射文件
 
 ```ts
-import { Size, NotNull, Table, Field, DBType, PrimaryKey } from "fastcar-core/annotation";
+import { Size, NotNull, Table, Field, DBType, PrimaryKey } from "@fastcar/core/annotation";
 
 @Table("test")
 class Test {
@@ -79,8 +79,8 @@ export default Test;
 * 声明crud操作
 
 ```ts
-import { Entity, Repository } from "fastcar-core/annotation";
-import { MongoMapper } from "fastcar-mongo";
+import { Entity, Repository } from "@fastcar/core/annotation";
+import { MongoMapper } from "@fastcar/mongo";
 import Test from "../model/Test";
 
 @Entity(Test)
@@ -93,7 +93,7 @@ export default TestMapper;
 * curd 示例操作
 
 ```ts
-import { Autowired, Service } from "fastcar-core/annotation";
+import { Autowired, Service } from "@fastcar/core/annotation";
 import TestMapper from "../mapper/TestMapper";
 import Test from "../model/Test";
 
@@ -174,9 +174,9 @@ export default CrudService;
 * 多数据源操作
 
 ```ts
-import { DS, Entity, Repository } from "fastcar-core/annotation";
+import { DS, Entity, Repository } from "@fastcar/core/annotation";
 import Test from "../model/Test";
-import { MongoMapper } from "fastcar-mongo";
+import { MongoMapper } from "@fastcar/mongo";
 
 @Entity(Test)
 @Repository
@@ -188,7 +188,7 @@ export default Test2Mapper;
 ```
 
 ```ts
-import { Autowired, Service } from "fastcar-core/annotation";
+import { Autowired, Service } from "@fastcar/core/annotation";
 import Test2Mapper from "../mapper/Test2Mapper";
 import TestMapper from "../mapper/TestMapper";
 import Test from "../model/Test";
@@ -219,7 +219,7 @@ export default class DSService {
 
 ## 更多用法
 
-参考项目git地址 fastcar-mongo/test 下的example内
+参考项目git地址 @fastcar/mongo/test 下的example内
 
 ## 项目开源地址
 

@@ -1,6 +1,6 @@
-import { Logger } from "fastcar-core";
+import { Logger } from "@fastcar/core";
 import { SessionId, ClientSession } from "../types/SocketConfig";
-import { ServerConfig, ServerType } from "fastcar-server";
+import { ServerConfig, ServerType } from "@fastcar/server";
 
 //消息钩子
 export default interface MsgHookService {

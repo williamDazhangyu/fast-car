@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import { FastCarApplication } from "fastcar-core";
-import { Application, ApplicationSetting, BaseFilePath, BasePath, ComponentScanExclusion } from "fastcar-core/annotation";
+import { FastCarApplication } from "@fastcar/core";
+import { Application, ApplicationSetting, BaseFilePath, BasePath, ComponentScanExclusion } from "@fastcar/core/annotation";
 import EnableRPC from "../../../src/annotation/EnableRpc";
 import * as path from "path";
 import RpcServerList from "./RpcServerList";

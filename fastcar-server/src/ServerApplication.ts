@@ -1,8 +1,8 @@
-import { ApplicationStart, ApplicationStop, Autowired, Log } from "fastcar-core/annotation";
-import { BootPriority, Logger } from "fastcar-core";
+import { ApplicationStart, ApplicationStop, Autowired, Log } from "@fastcar/core/annotation";
+import { BootPriority, Logger } from "@fastcar/core";
 import { ServerConfig } from "./type/ServerConfig";
 import { Protocol } from "./type/Protocol";
-import { FastCarApplication } from "fastcar-core";
+import { FastCarApplication } from "@fastcar/core";
 import { ServerType } from "./type/ServerType";
 
 type port = number;

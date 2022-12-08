@@ -1,4 +1,4 @@
-import { Autowired, Controller } from "fastcar-core/annotation";
+import { Autowired, Controller } from "@fastcar/core/annotation";
 import RPCMethod from "../../../../src/annotation/RPCMethod";
 import RpcServer from "../../../../src/service/rpc/RpcServer";
 import { ClientSession } from "../../../../src/types/SocketConfig";

@@ -1,4 +1,4 @@
-import { DataFormat, DateUtil } from "fastcar-core/utils";
+import { DataFormat, DateUtil } from "@fastcar/core/utils";
 
 export default class SerializeUtil {
 	static serialize(value: any, type: string): any {

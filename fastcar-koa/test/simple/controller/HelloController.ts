@@ -1,4 +1,4 @@
-import { Controller, Rule, ValidForm } from "fastcar-core/annotation";
+import { Controller, Rule, ValidForm } from "@fastcar/core/annotation";
 import GetMapping from "../../../src/annotation/router/GetMapping";
 import PostMapping from "../../../src/annotation/router/PostMapping";
 import RequestMapping from "../../../src/annotation/router/RequestMapping";

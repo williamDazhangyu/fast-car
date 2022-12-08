@@ -1,5 +1,5 @@
 {
-	"name": "fastcar-template",
+	"name": "@fastcar/server",
 	"version": "0.0.0",
 	"description": "模板文件",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
@@ -27,11 +27,11 @@
 		"@types/mocha": "^9.0.0",
 		"@types/node": "^16.11.7",
 		"@types/reflect-metadata": "^0.1.0",
-		"fastcar-core": "^0.2.18",
+		"@fastcar/core": "^0.2.18",
 		"typescript": "^4.4.2"
 	},
 	"peerDependencies": {
-		"fastcar-core": "*"
+		"@fastcar/core": "*"
 	},
 	"repository": {
 		"type": "git",

@@ -1,7 +1,7 @@
 import * as koaStatic from "koa-static";
 import * as KoaRange from "koa-range";
 import * as KoaMount from "koa-mount";
-import { FastCarApplication } from "fastcar-core";
+import { FastCarApplication } from "@fastcar/core";
 import { KoaConfig } from "../type/KoaConfig";
 import * as fs from "fs";
 import * as path from "path";
@@ -12,7 +12,7 @@ export default function KoaStatic(app: FastCarApplication): Koa.Middleware[] {
 	let mlist: Koa.Middleware[] = [];
 
 	//采用koa-range使文件可以流式传播
-	mlist.push(KoaRange);
+	mlist.push(KoaRange as any);
 
 	let koaConfig: KoaConfig = app.getSetting("koa");
 
@@ -34,7 +34,7 @@ export default function KoaStatic(app: FastCarApplication): Koa.Middleware[] {
 				if (!key.startsWith("/")) {
 					key = `/${key}`;
 				}
-				mlist.push(KoaMount(key, koaStatic(fp)));
+				mlist.push(KoaMount(key, koaStatic(fp)) as any);
 			}
 		}
 	}

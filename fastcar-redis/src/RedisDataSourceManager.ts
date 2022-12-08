@@ -1,7 +1,7 @@
 import RedisDataSource from "./RedisDataSource";
 import * as redis from "redis";
-import { ApplicationStart, ApplicationStop, Autowired, Log } from "fastcar-core/annotation";
-import { BootPriority, FastCarApplication, Logger } from "fastcar-core";
+import { ApplicationStart, ApplicationStop, Autowired, Log } from "@fastcar/core/annotation";
+import { BootPriority, FastCarApplication, Logger } from "@fastcar/core";
 
 interface RedisConfig extends redis.ClientOpts {
 	source: string;
@@ -29,7 +29,7 @@ class RedisDataSourceManager {
 	start(): void {
 		let config: RedisConfig[] = this.app.getSetting("redis");
 		if (config && Array.isArray(config)) {
-			config.forEach(item => {
+			config.forEach((item) => {
 				let source = item.source;
 				Reflect.deleteProperty(item, "source");
 				let client = new RedisDataSource(item);
@@ -41,7 +41,7 @@ class RedisDataSourceManager {
 	}
 
 	stop(): void {
-		this.sourceMap.forEach(client => {
+		this.sourceMap.forEach((client) => {
 			client.close();
 		});
 

@@ -1,8 +1,8 @@
 import * as assert from "assert";
-import { FastCarApplication } from "fastcar-core";
-import { Application, BaseFilePath, BasePath } from "fastcar-core/annotation";
+import { FastCarApplication } from "@fastcar/core";
+import { Application, BaseFilePath, BasePath } from "@fastcar/core/annotation";
 import EnableCache from "../../src/annotation/EnableCache";
-import { EnableMysql } from "fastcar-mysql/annotation";
+import { EnableMysql } from "@fastcar/mysql/annotation";
 
 @Application
 @BasePath(__dirname) //直接运行ts文件时可不用

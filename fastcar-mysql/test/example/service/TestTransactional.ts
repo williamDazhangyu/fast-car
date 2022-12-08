@@ -1,4 +1,4 @@
-import { Autowired, Service, SqlSession, Transactional } from "fastcar-core/annotation";
+import { Autowired, Service, SqlSession, Transactional } from "@fastcar/core/annotation";
 import MysqlDataSourceManager from "../../../src/dataSource/MysqlDataSourceManager";
 import TestMapper from "../mapper/TestMapper";
 
