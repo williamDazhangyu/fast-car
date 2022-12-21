@@ -10,7 +10,8 @@ export default function Log(category?: string) {
 		Reflect.defineProperty(target, propertyKey, {
 			get: (): Logger => {
 				let app: FastCarApplication = Reflect.get(global, CommonConstant.FastcarApp);
-				return app ? app.getLogger(m) : console;
+				let appid = app.getSetting(CommonConstant.APPId) || ""; //进行差异化区分
+				return app ? app.getLogger(appid ? `[${appid}] ${m}` : m) : console;
 			},
 		});
 	};

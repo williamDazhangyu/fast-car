@@ -17,6 +17,7 @@ import ApplicationSetting from "../../../src/annotation/env/ApplicationSetting";
 @BaseFilePath(__filename)
 @ApplicationSetting({
 	customHello: "customHello",
+	appid: "fastcar-server",
 })
 class APP implements ApplicationHook {
 	app!: FastCarApplication;

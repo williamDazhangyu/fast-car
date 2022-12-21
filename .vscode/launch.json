@@ -50,7 +50,7 @@
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
             "args": [
-                "${workspaceRoot}/@fastcar/core/test/example/simple/app.ts",
+                "${workspaceRoot}/fastcar-core/test/example/simple/app.ts",
                 "--no-timeouts"
             ],
             "cwd": "${workspaceRoot}",
@@ -71,7 +71,7 @@
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
             "args": [
-                "${workspaceRoot}/@fastcar/mysql/test/example/app.ts",
+                "${workspaceRoot}/fastcar-mysql/test/example/app.ts",
                 "--no-timeouts"
             ],
             "cwd": "${workspaceRoot}",
@@ -90,9 +90,9 @@
             "type": "node",
             "request": "launch",
             "args": [
-                "${workspaceRoot}/@fastcar/redis/test/example/app.ts"
+                "${workspaceRoot}/fastcar-redis/test/example/app.ts"
             ],
-            "cwd": "${workspaceRoot}/@fastcar/redis",
+            "cwd": "${workspaceRoot}/fastcar-redis",
             "protocol": "inspector",
             "runtimeArgs": [
                 "-r",
@@ -107,9 +107,9 @@
             "type": "node",
             "request": "launch",
             "args": [
-                "${workspaceRoot}/@fastcar/koa/test/simple/app.ts"
+                "${workspaceRoot}/fastcar-koa/test/simple/app.ts"
             ],
-            "cwd": "${workspaceRoot}/@fastcar/koa",
+            "cwd": "${workspaceRoot}/fastcar-koa",
             "protocol": "inspector",
             "runtimeArgs": [
                 "-r",
@@ -124,9 +124,9 @@
             "type": "node",
             "request": "launch",
             "args": [
-                "${workspaceRoot}/@fastcar/mongo/test/example/simple/app.ts"
+                "${workspaceRoot}/fastcar-mongo/test/example/simple/app.ts"
             ],
-            "cwd": "${workspaceRoot}/@fastcar/mongo",
+            "cwd": "${workspaceRoot}/fastcar-mongo",
             "protocol": "inspector",
             "runtimeArgs": [
                 "-r",
@@ -143,13 +143,13 @@
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
             "args": [
-                "${workspaceRoot}/@fastcar/rpc/test/example/simple/app.ts",
+                "${workspaceRoot}/fastcar-rpc/test/example/simple/app.ts",
                 "--no-timeouts"
             ],
-            "cwd": "${workspaceRoot}/@fastcar/rpc",
+            "cwd": "${workspaceRoot}/fastcar-rpc",
             "runtimeExecutable": null,
             "env": {
-                "TS_NODE_PROJECT": "${workspaceRoot}/@fastcar/rpc/tsconfig.json"
+                "TS_NODE_PROJECT": "${workspaceRoot}/fastcar-rpc/tsconfig.json"
             },
             "protocol": "inspector",
             "runtimeArgs": [
@@ -164,13 +164,13 @@
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
             "args": [
-                "${workspaceRoot}/@fastcar/rpc/test/example/simple/client.ts",
+                "${workspaceRoot}/fastcar-rpc/test/example/simple/client.ts",
                 "--no-timeouts"
             ],
-            "cwd": "${workspaceRoot}/@fastcar/rpc",
+            "cwd": "${workspaceRoot}/fastcar-rpc",
             "runtimeExecutable": null,
             "env": {
-                "TS_NODE_PROJECT": "${workspaceRoot}/@fastcar/rpc/tsconfig.json"
+                "TS_NODE_PROJECT": "${workspaceRoot}/fastcar-rpc/tsconfig.json"
             },
             "protocol": "inspector",
             "runtimeArgs": [

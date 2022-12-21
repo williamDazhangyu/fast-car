@@ -18,6 +18,10 @@
 
 * @fastcar/cache cache组件, 支持缓存，用于频繁存储数据 减缓对数据库写操作的压力
 
+* @fastcar/workerpool 工作线程组件，用来解决cpu密集计算性能瓶颈问题
+
+* @fastcar/rpc 集成主流的长连接，用于rpc调用等
+
 ## 代码风格约定
 
 采用prettierrc进行代码风格统一管理

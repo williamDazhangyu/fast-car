@@ -6,3 +6,4 @@ logs/*
 target/*
 *.log
 package-lock.json
+docs/

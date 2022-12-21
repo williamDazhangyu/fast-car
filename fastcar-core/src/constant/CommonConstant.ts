@@ -9,6 +9,7 @@ export const CommonConstant = {
 	FastcarApp: Symbol("FastcarApp"), //应用app
 	FastcarSetting: Symbol("FastcarSetting"),
 	ResourcePath: "resourcePath",
+	APPId: "appid",
 };
 
 export const FileResSuffix = ["json", "yml", "js"];

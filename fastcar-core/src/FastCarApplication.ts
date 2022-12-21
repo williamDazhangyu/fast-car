@@ -25,6 +25,7 @@ import { ProcessType } from "./type/ProcessType";
 import { FileHotterDesc } from "./type/FileHotterDesc";
 import { LifeCycleType } from "./annotation/lifeCycle/AddLifeCycleItem";
 import { WinstonLoggerType } from "./type/WinstonLoggerType";
+import { Log } from "./annotation";
 
 @Component
 class FastCarApplication extends Events {
@@ -34,7 +35,10 @@ class FastCarApplication extends Events {
 	protected baseFileName!: string; //入口文件路径
 	protected loggerFactory!: WinstonLogger;
 	protected applicationStatus: AppStatusEnum;
+
+	@Log("sys")
 	protected sysLogger!: winston.Logger;
+
 	protected componentDeatils: Map<string | symbol, ComponentDesc>; //读取路径  名称
 	protected liveTime: number;
 	protected watchFiles: Map<string, FileHotterDesc[]>;
@@ -168,7 +172,7 @@ class FastCarApplication extends Events {
 	loadSysConfig() {
 		this.sysConfig = FileUtil.getApplicationConfig(this.getResourcePath(), CommonConstant.Application, this.sysConfig);
 
-		let env = Reflect.get(this, CommonConstant.ENV) || this.sysConfig.application.env;
+		let env = (Reflect.get(this, CommonConstant.ENV) || this.sysConfig.application.env || "devlopment") as string;
 
 		this.sysConfig = FileUtil.getApplicationConfig(this.getResourcePath(), `${CommonConstant.Application}-${env}`, this.sysConfig);
 
@@ -241,7 +245,7 @@ class FastCarApplication extends Events {
 	loadClass() {
 		//加载文件扫描下的bean
 		let tmpFilePath: string[] = Array.of();
-		let includeList: string[] = Reflect.get(this, FastCarMetaData.ComponentScan);
+		let includeList: string[] = Reflect.get(this, FastCarMetaData.ComponentScan) as string[];
 
 		if (includeList) {
 			includeList.forEach((item) => {
@@ -254,7 +258,7 @@ class FastCarApplication extends Events {
 		filePathList = tmpFilePath.concat(filePathList);
 		filePathList = [...new Set(filePathList)];
 
-		let excludeList: string[] = Reflect.get(this, FastCarMetaData.ComponentScanExclusion);
+		let excludeList: string[] = Reflect.get(this, FastCarMetaData.ComponentScanExclusion) as string[];
 		if (excludeList) {
 			let excludAllPath: string[] = [];
 			excludeList.forEach((item) => {
@@ -519,7 +523,7 @@ class FastCarApplication extends Events {
 
 		this.loggerFactory = new WinstonLogger(defaultConfig);
 		//添加系统日志
-		this.sysLogger = this.loggerFactory.addLogger(CommonConstant.SYSLOGGER);
+		// this.sysLogger = this.loggerFactory.addLogger(CommonConstant.SYSLOGGER);
 	}
 
 	/***
@@ -527,8 +531,8 @@ class FastCarApplication extends Events {
 	 */
 	init() {
 		//加载配置
-		this.basePath = Reflect.get(this, CommonConstant.BasePath) || require.main?.path || module.path;
-		this.baseFileName = Reflect.get(this, CommonConstant.BaseFileName) || require.main?.filename || module.filename;
+		this.basePath = (Reflect.get(this, CommonConstant.BasePath) || require.main?.path || module.path) as string;
+		this.baseFileName = (Reflect.get(this, CommonConstant.BaseFileName) || require.main?.filename || module.filename) as string;
 
 		this.beforeStartServer();
 		this.startServer();
