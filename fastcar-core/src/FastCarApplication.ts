@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import * as fs from "fs";
 import * as process from "process";
 import * as Events from "events";
 import * as path from "path";
@@ -12,7 +13,6 @@ import { ApplicationConfig } from "./config/ApplicationConfig";
 import { ComponentKind } from "./constant/ComponentKind";
 import { CommonConstant } from "./constant/CommonConstant";
 import { LifeCycleModule } from "./constant/LifeCycleModule";
-import * as fs from "fs";
 import { AppStatusEnum } from "./constant/AppStatusEnum";
 import ValidationUtil from "./utils/ValidationUtil";
 import Component from "./annotation/stereotype/Component";
@@ -25,7 +25,7 @@ import { ProcessType } from "./type/ProcessType";
 import { FileHotterDesc } from "./type/FileHotterDesc";
 import { LifeCycleType } from "./annotation/lifeCycle/AddLifeCycleItem";
 import { WinstonLoggerType } from "./type/WinstonLoggerType";
-import { Log } from "./annotation";
+import Log from "./annotation/stereotype/Log";
 
 @Component
 class FastCarApplication extends Events {
@@ -473,7 +473,7 @@ class FastCarApplication extends Events {
 	/***
 	 * @version 1.0 判断是否拥有组件名称
 	 */
-	hasComponentByName(name: string | symbol): any {
+	hasComponentByName(name: string | symbol): boolean {
 		return this.componentMap.has(name);
 	}
 

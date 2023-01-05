@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { CommonConstant } from "../../constant/CommonConstant";
-import FastCarApplication from "../../FastCarApplication";
+import ApplicationInterface from "../../interface/ApplicationInterface";
 import DataSourceManager from "../../interface/DataSourceManager";
 import Logger from "../../interface/Logger";
 import { DesignMeta } from "../../type/DesignMeta";
@@ -11,7 +11,7 @@ import SqlError from "../../type/SqlError";
  * */
 export default function Transactional(driver: string = "MysqlDataSourceManager") {
 	return function (target: any, methodName: string, descriptor: PropertyDescriptor) {
-		const orignFunction = descriptor.value;
+		const orignFunction: Function = descriptor.value;
 
 		//在初始化时就应该检测是否注入了sessionID
 		const paramsIndex = Reflect.getOwnMetadata(DesignMeta.sqlSession, target, methodName);
@@ -22,7 +22,7 @@ export default function Transactional(driver: string = "MysqlDataSourceManager")
 		descriptor.value = async function (...args: any[]) {
 			//创建会话id
 
-			let app: FastCarApplication = Reflect.get(global, CommonConstant.FastcarApp);
+			let app: ApplicationInterface = Reflect.get(global, CommonConstant.FastcarApp);
 
 			let sysLogger: Logger = app.getSysLogger() || console;
 			let dsm: DataSourceManager = app.getComponentByName(driver);

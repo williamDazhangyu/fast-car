@@ -1,48 +1,11 @@
-import * as Events from "events";
-import { ApplicationConfig } from "./src/config/ApplicationConfig";
-import { ComponentKind } from "./src/constant/ComponentKind";
-import { LifeCycleModule } from "./src/constant/LifeCycleModule";
-import { FIELDTYPE } from "./src/model/DataMap";
-import { ProcessType } from "./src/type/ProcessType";
+import { ApplicationConfig } from "../config/ApplicationConfig";
+import { ComponentKind } from "../constant/ComponentKind";
+import { LifeCycleModule } from "../constant/LifeCycleModule";
+import { ComponentDesc } from "../type/ComponentDesc";
+import { ProcessType } from "../type/ProcessType";
+import Logger from "./Logger";
 
-declare type ComponentDesc = {
-	id: string;
-	name: string;
-	path: string;
-};
-
-export * from "./src/config/SysConfig";
-
-export * from "./src/config/ApplicationConfig";
-
-export * from "./src/constant/LifeCycleModule";
-
-export * from "./src/constant/ComponentKind";
-
-export * from "./src/constant/BootPriority";
-
-//元数据加载模块
-export * from "./src/constant/FastCarMetaData";
-
-//自定义常量模块
-export * from "./src/constant/CommonConstant";
-
-//生命周期约定
-export * from "./src/interface/ApplicationHook";
-
-export { FIELDTYPE } from "./src/model/DataMap";
-
-export abstract class Logger {
-	abstract info(...args: any[]): void;
-
-	abstract debug(...args: any[]): void;
-
-	abstract warn(...args: any[]): void;
-
-	abstract error(...args: any[]): void;
-}
-
-export class FastCarApplication extends Events {
+export default interface ApplicationInterface {
 	/***
 	 * @version 1.0 根据原型加载注入的方法
 	 *
@@ -240,28 +203,4 @@ export class FastCarApplication extends Events {
 	 *
 	 */
 	getMemoryUsage(): ProcessType;
-}
-
-//校验错误
-export class ValidError {
-	message?: string;
-}
-
-export class DataMap<K, V extends Object> extends Map<K, V> {
-	toValues(): V[];
-
-	toKeys(): K[];
-
-	//构造一个字典对象
-	toObject(): { [key: string]: V };
-
-	//自定义排序 支持多个排序
-	sort(sorts?: FIELDTYPE[], list?: V[]): V[];
-
-	/***
-	 * @version 1.0 查找属性名称
-	 * @params atts代表属性键值对匹配
-	 *
-	 */
-	findByAtts(atts: { [key: string]: any }): V[];
 }
