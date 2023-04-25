@@ -418,7 +418,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	 * @version 1.0 更新记录
 	 *
 	 */
-	async update({ row, where, limit, forceIndex }: SqlUpdate & { forceIndex?: string[] }, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
+	async update({ row, where, limit, forceIndex, orders }: SqlUpdate & { forceIndex?: string[]; orders?: OrderType; }, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		let rowStr = this.analysisRow(row);
 		if (!rowStr) {
 			return Promise.reject(new Error("row is empty"));
@@ -427,8 +427,9 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let forceIndexStr = this.analysisForceIndex(forceIndex);
 		let whereC = this.analysisWhere(where);
 		let limitStr = this.analysisLimit(limit);
+		let ordersStr = this.analysisOrders(orders);
 
-		let sql = `UPDATE ${this.tableName} ${forceIndexStr} SET ${rowStr.sql} ${whereC.sql} ${limitStr}`;
+		let sql = `UPDATE ${this.tableName} ${forceIndexStr} SET ${rowStr.sql} ${whereC.sql} ${ordersStr} ${limitStr}`;
 
 		let [okPacket] = await this.dsm.exec({ sql, args: [...rowStr.args, ...whereC.args], ds, sessionId });
 
