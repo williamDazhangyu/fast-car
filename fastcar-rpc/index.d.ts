@@ -31,7 +31,11 @@ export * from "./src/constant/SocketSymbol";
 export * from "./src/constant/SocketCodingDefault";
 export * from "./src/types/CodeProtocolEnum";
 export * from "./src/types/PBConfig";
-export * from  "./src/service/RpcAuthService";
+
+export default interface RpcAuthService {
+	auth(username: string, password: string, config: SocketServerConfig, request?: any): Promise<boolean>;
+}
+
 export interface RPCErrorService {
 	response(): Middleware;
 }
