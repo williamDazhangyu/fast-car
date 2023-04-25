@@ -13,7 +13,8 @@ export default interface MsgHookService {
 	getLogger(): Logger;
 
 	//在连接前进行用户身份验证
-	auth(username: string, password: string, session: ClientSession): Promise<boolean>;
+	//添加一个原始请求 用于操作其他情况
+	auth(username: string, password: string, session: ClientSession, request?: any): Promise<boolean>;
 
 	// 创建会话
 	createSession(serverId: string): ClientSession;

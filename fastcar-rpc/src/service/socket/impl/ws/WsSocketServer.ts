@@ -3,7 +3,7 @@ import SocketServer from "../../SocketServer";
 import { WebSocketServer, WebSocket } from "ws";
 import { IncomingMessage } from "http";
 import { SocketEvents } from "../../../../types/SocketEvents";
-import { RpcResponseCode, RpcMessage, InteractiveMode } from "../../../../types/RpcConfig";
+import { RpcMessage, InteractiveMode } from "../../../../types/RpcConfig";
 
 type SocketIOSession = {
 	id: SessionId; //会话id
@@ -33,7 +33,7 @@ export default class WsSocketServer extends SocketServer {
 				password = password.toString();
 			}
 
-			let flag = await this.manager.auth(username, password, session);
+			let flag = await this.manager.auth(username, password, session, request);
 			if (!flag) {
 				this.manager.deleteSession(session.sessionId);
 				socket.close(3000, "auth fail");
