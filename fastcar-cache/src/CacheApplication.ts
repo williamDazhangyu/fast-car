@@ -2,6 +2,7 @@ import { ApplicationStart, ApplicationStop, Log } from "@fastcar/core/annotation
 import { BootPriority, DataMap, Logger } from "@fastcar/core";
 import { CacheConfig, CacheConfigTarget, CacheMappingSymbol, CacheSetOptions, DBItem, Item, QueueItem, Store } from "./CacheType";
 import { EnableScheduling, ScheduledInterval } from "@fastcar/timer";
+import { ValidationUtil } from "@fastcar/core/utils";
 
 @ApplicationStart(BootPriority.Common, "start")
 @ApplicationStop(BootPriority.Common, "stop")
@@ -46,9 +47,12 @@ export default class CacheApplication {
 		//针对缓存的处理
 		let ttl = mapping.ttl;
 		if (Reflect.has(options, "ttl")) {
-			ttl = Reflect.get(options, "ttl");
+			ttl = Reflect.get(options, "ttl") as number;
 		}
-		ttl = ttl || 0;
+
+		if (!ValidationUtil.isNumber(ttl)) {
+			ttl = 0;
+		}
 
 		//如果不存在过期 更新时长
 		if (!ttl) {
