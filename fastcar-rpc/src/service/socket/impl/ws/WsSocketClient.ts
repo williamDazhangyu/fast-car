@@ -20,13 +20,19 @@ export default class WsSocketClient extends SocketClient {
 			this.disconnect();
 		}
 
+		let headers = {
+			username: this.config.secure?.username || "",
+			password: this.config.secure?.password || "",
+		};
+
+		if (this.config.extra && this.config.extra.headers) {
+			headers = Object.assign({}, this.config.extra.headers, headers);
+		}
+
 		const io = new WebSocket(
 			this.config.url,
 			Object.assign({}, this.config.extra, {
-				headers: {
-					username: this.config.secure?.username || "",
-					password: this.config.secure?.password || "",
-				},
+				headers,
 			})
 		);
 		io.on(SocketEvents.CLOSE, () => {
