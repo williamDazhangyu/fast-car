@@ -27,8 +27,7 @@ const m2 = (): Koa.Middleware => {
 
 @Application
 @EnableKoa //开启koa
-@KoaMiddleware(ExceptionGlobalHandler, KoaStatic, KoaBodyParser)
-@KoaMiddleware(KoaCors)
+@KoaMiddleware(ExceptionGlobalHandler, KoaStatic, KoaBodyParser as any)
 @KoaMiddleware(Swagger)
 @KoaMiddleware(m1, m2)
 class APP {
