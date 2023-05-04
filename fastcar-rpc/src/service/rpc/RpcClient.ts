@@ -147,12 +147,12 @@ export default class RpcClient implements MsgClientHookService {
 	async handleMsg(msg: RpcMessage): Promise<void> {
 		if (InteractiveMode.response == msg.mode) {
 			let id = msg.id;
-			if (!!id) {
-				let item = this.msgQueue.get(id);
+			if (ValidationUtil.isNumber(id)) {
+				let item = this.msgQueue.get(id as number);
 				if (item) {
 					item.cb.done(null, msg);
 				}
-				this.msgQueue.delete(id);
+				this.msgQueue.delete(id as number);
 			}
 		} else {
 			if (InteractiveMode.notify == msg.mode) {
@@ -165,6 +165,7 @@ export default class RpcClient implements MsgClientHookService {
 					this.rpcAsyncService.handleMsg(msg.url, msg.data || {});
 				}
 			} else {
+				//向server端发送消息
 				let repData = await this.rpcAsyncService.handleMsg(msg.url, msg.data || {});
 				this.client.sendMsg({
 					id: msg.id,
