@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/mysql-tool",
-	"version": "0.1.16",
+	"version": "0.1.17",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "逆向生成对应的model和mapper",
 	"main": "target/index.js",

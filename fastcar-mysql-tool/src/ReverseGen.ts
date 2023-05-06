@@ -7,7 +7,6 @@ import { DataTypeEnum } from "@fastcar/mysql";
 import { FiledType } from "./FiledType";
 
 const DESCSQL = "SELECT * from information_schema.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ? ORDER BY ordinal_position";
-const MAXBigNum = Math.pow(2, 53);
 
 //从数据库表逆向生成类
 class ReverseGenerate {
@@ -35,13 +34,13 @@ class ReverseGenerate {
 	}
 
 	//生成model
-	static genModel(taleName: string, dir: string, fieldInfo: FiledType[], style: prettier.Options): void {
+	static genModel(taleName: string, dir: string, fieldInfo: FiledType[], style: prettier.Options, ignoreCamelcase: boolean): void {
 		//进行写入
 		let importHead = `import "reflect-metadata";\n`;
 		let importCoreAnnotation: string[] = ["Table", "DBType"];
 		let parseDateFlag = false;
 
-		let className = ReverseGenerate.formatClassName(taleName);
+		let className = ignoreCamelcase ? taleName : ReverseGenerate.formatClassName(taleName);
 
 		let body = Array.of();
 		let objectKeys = "";
@@ -54,7 +53,7 @@ class ReverseGenerate {
 				tmpFieldList.push(`/**\n* ${field.COLUMN_COMMENT}\n*/`);
 			}
 
-			let formatName = camelcase(dbName);
+			let formatName = ignoreCamelcase ? dbName : camelcase(dbName);
 
 			//不缺省field字段
 			tmpFieldList.push(`@Field('${dbName}')`);
@@ -163,8 +162,8 @@ class ReverseGenerate {
 	}
 
 	//生成mapper层
-	static async genMapper(taleName: string, mapperDir: string, rp: string, style: prettier.Options): Promise<void> {
-		let modelName = ReverseGenerate.formatClassName(taleName);
+	static async genMapper(taleName: string, mapperDir: string, rp: string, style: prettier.Options, ignoreCamelcase: boolean): Promise<void> {
+		let modelName = ignoreCamelcase ? taleName : ReverseGenerate.formatClassName(taleName);
 		let importHeadList = [`import \{ Repository, Entity \} from "@fastcar/core/annotation";`, `import \{ MysqlMapper \} from "@fastcar/mysql";`, `import ${modelName} from "${rp}/${modelName}";`];
 		let className = `${modelName}Mapper`;
 		let importHead = `${importHeadList.join("\n")}`;
@@ -182,7 +181,6 @@ class ReverseGenerate {
 	 * @version 1.0 根据数据库文件 逆向生成model
 	 * @param tables 表名
 	 * @param modelDir model类生成的绝对路径
-	 * @param
 	 * @param dbConfig 数据库配置
 	 * @param style 基于prettier的格式
 	 */
@@ -197,7 +195,8 @@ class ReverseGenerate {
 			trailingComma: "es5",
 			useTabs: true,
 			parser: "typescript",
-		}
+		},
+		ignoreCamelcase: boolean = false
 	): Promise<void> {
 		try {
 			//生成路径
@@ -216,8 +215,8 @@ class ReverseGenerate {
 				if (!row || !Array(row) || row.length == 0) {
 					throw new Error("The table does not exist or is empty");
 				}
-				ReverseGenerate.genModel(name, modelDir, row, style);
-				ReverseGenerate.genMapper(name, mapperDir, rp, style);
+				ReverseGenerate.genModel(name, modelDir, row, style, ignoreCamelcase);
+				ReverseGenerate.genMapper(name, mapperDir, rp, style, ignoreCamelcase);
 			}
 
 			dbres.end();

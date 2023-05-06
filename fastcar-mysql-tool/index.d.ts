@@ -12,10 +12,10 @@ export class ReverseGenerate {
 	static createDir(dir: string): void;
 
 	//生成model
-	static genModel(taleName: string, dir: string, fieldInfo: FiledType[], style: prettier.Options): void;
+	static genModel(taleName: string, dir: string, fieldInfo: FiledType[], style: prettier.Options, ignoreCamelcase: boolean): void;
 
 	//生成mapper层
-	static genMapper(taleName: string, mapperDir: string, rp: string, style: prettier.Options): Promise<void>;
+	static genMapper(taleName: string, mapperDir: string, rp: string, style: prettier.Options, ignoreCamelcase: boolean): Promise<void>;
 
 	/***
 	 * @version 1.0 根据数据库文件 逆向生成model
@@ -25,5 +25,5 @@ export class ReverseGenerate {
 	 * @param dbConfig 数据库配置
 	 * @param style 基于prettier的格式
 	 */
-	static generator(tables: string[], modelDir: string, mapperDir: string, dbConfig: mysql.ConnectionOptions, style?: prettier.Options): Promise<void>;
+	static generator(tables: string[], modelDir: string, mapperDir: string, dbConfig: mysql.ConnectionOptions, style?: prettier.Options, ignoreCamelcase?: boolean): Promise<void>;
 }
