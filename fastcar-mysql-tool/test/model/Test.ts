@@ -1,62 +1,47 @@
 import "reflect-metadata";
-import { DateUtil } from "@fastcar/core/utils";
-import { Table, DBType, Field, PrimaryKey, Size, NotNull } from "@fastcar/core/annotation";
+import { Table, DBType, Field, PrimaryKey, NotNull, Size } from "@fastcar/core/annotation";
 
 @Table("test")
 class Test {
 	@Field("id")
 	@DBType("int")
 	@PrimaryKey
-	@Size({ maxSize: 9999999999 })
+	@NotNull
 	id!: number;
 
-	/**
-	 * name
-	 */
 	@Field("name")
 	@DBType("varchar")
-	@Size({ maxSize: 20 })
-	name: string = "";
+	@Size({ maxSize: 255 })
+	name!: string;
 
 	/**
-	 * case_name
+	 * 案例名称
 	 */
 	@Field("case_name")
 	@DBType("varchar")
-	@NotNull
 	@Size({ maxSize: 10 })
-	caseName: string = "haha";
-
-	/**
-	 * 案例时间
-	 */
-	@Field("case_time")
-	@DBType("datetime")
-	@NotNull
-	caseTime: Date = new Date("2022-03-23 00:00:00");
+	case_name!: string;
 
 	@Field("flag")
 	@DBType("tinyint")
-	@NotNull
 	@Size({ maxSize: 3 })
-	flag: boolean = true;
+	flag!: boolean;
 
 	@Field("money")
 	@DBType("decimal")
-	@NotNull
-	@Size({ maxSize: 99999999.99 })
-	money: number = 1;
+	money!: number;
 
-	constructor(...args: any[]) {
-		Object.assign(this, ...args);
+	constructor(args?: Partial<Test>) {
+		if (args) {
+			Object.assign(this, args);
+		}
 	}
 
 	toObject() {
 		return {
 			id: this.id,
 			name: this.name,
-			caseName: this.caseName,
-			caseTime: DateUtil.toDateTime(this.caseTime),
+			case_name: this.case_name,
 			flag: this.flag,
 			money: this.money,
 		};

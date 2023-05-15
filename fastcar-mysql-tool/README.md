@@ -10,19 +10,26 @@ npm install @fastcar/mysql-tool
 import { ReverseGenerate } from "@fastcar/mysql-tool";
 import * as path from "path";
 
-let basePath = path.join(__dirname, "../", "src");
-let modelPath = path.join(basePath, "model");
-let mapperPath = path.join(basePath, "mapper");
-
-describe("逆向生成工具", () => {
- it("逆向生成", async () => {
-  ReverseGenerate.generator(["table_example"], modelPath, mapperPath, {
-   database: "database_example",
-   user: "root",
-   password: "123456",
-   host: "localhost",
-  });
- });
+//测试逆向生成
+ReverseGen.generator({
+ tables: ["test"],
+ modelDir: path.join(__dirname, "../", "test", "model"),
+ mapperDir: path.join(__dirname, "../", "test", "mapper"),
+ dbConfig: {
+  database: "test",
+  user: "root",
+  password: "123456",
+  host: "localhost",
+ },
+ ignoreCamelcase: true,
+ style: {
+  tabWidth: 4,
+  printWidth: 200,
+  trailingComma: "es5",
+  useTabs: true,
+  parser: "typescript",
+  endOfLine: "crlf", //文件结束符
+ },
 });
 ```
 

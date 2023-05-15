@@ -34,13 +34,13 @@ class ReverseGenerate {
 	}
 
 	//生成model
-	static genModel(taleName: string, dir: string, fieldInfo: FiledType[], style: prettier.Options, ignoreCamelcase: boolean): void {
+	static genModel({ taleName, dir, fieldInfo, style, ignoreCamelcase }: { taleName: string; dir: string; fieldInfo: FiledType[]; style: prettier.Options; ignoreCamelcase: boolean }): void {
 		//进行写入
 		let importHead = `import "reflect-metadata";\n`;
 		let importCoreAnnotation: string[] = ["Table", "DBType"];
 		let parseDateFlag = false;
 
-		let className = ignoreCamelcase ? taleName : ReverseGenerate.formatClassName(taleName);
+		let className = ReverseGenerate.formatClassName(taleName);
 
 		let body = Array.of();
 		let objectKeys = "";
@@ -162,8 +162,8 @@ class ReverseGenerate {
 	}
 
 	//生成mapper层
-	static async genMapper(taleName: string, mapperDir: string, rp: string, style: prettier.Options, ignoreCamelcase: boolean): Promise<void> {
-		let modelName = ignoreCamelcase ? taleName : ReverseGenerate.formatClassName(taleName);
+	static async genMapper({ taleName, mapperDir, rp, style }: { taleName: string; mapperDir: string; rp: string; style: prettier.Options }): Promise<void> {
+		let modelName = ReverseGenerate.formatClassName(taleName);
 		let importHeadList = [`import \{ Repository, Entity \} from "@fastcar/core/annotation";`, `import \{ MysqlMapper \} from "@fastcar/mysql";`, `import ${modelName} from "${rp}/${modelName}";`];
 		let className = `${modelName}Mapper`;
 		let importHead = `${importHeadList.join("\n")}`;
@@ -179,26 +179,39 @@ class ReverseGenerate {
 
 	/***
 	 * @version 1.0 根据数据库文件 逆向生成model
-	 * @param tables 表名
-	 * @param modelDir model类生成的绝对路径
-	 * @param dbConfig 数据库配置
-	 * @param style 基于prettier的格式
+	 * @param config
+	 * tables 表名
+	 * modelDir model类生成的绝对路径文件夹
+	 * mapperDir mapper类生成的绝对路径文件夹
+	 * dbConfig 数据库配置
+	 * style 基于prettier的格式
 	 */
-	static async generator(
-		tables: string[],
-		modelDir: string, //绝对路径
-		mapperDir: string, //mapper绝对路径文件夹
-		dbConfig: mysql.ConnectionOptions,
-		style: prettier.Options = {
+	static async generator({
+		tables,
+		modelDir,
+		mapperDir,
+		dbConfig,
+		style = {
 			tabWidth: 4,
 			printWidth: 200,
 			trailingComma: "es5",
 			useTabs: true,
 			parser: "typescript",
 		},
-		ignoreCamelcase: boolean = false
-	): Promise<void> {
+		ignoreCamelcase = false,
+	}: {
+		tables: string[];
+		modelDir: string; //绝对路径
+		mapperDir: string; //mapper绝对路径文件夹
+		dbConfig: mysql.ConnectionOptions;
+		style?: prettier.Options;
+		ignoreCamelcase?: boolean;
+	}): Promise<void> {
 		try {
+			if (tables.length == 0) {
+				throw new Error("table is empty");
+			}
+
 			//生成路径
 			ReverseGenerate.createDir(modelDir);
 			ReverseGenerate.createDir(mapperDir);
@@ -215,8 +228,8 @@ class ReverseGenerate {
 				if (!row || !Array(row) || row.length == 0) {
 					throw new Error("The table does not exist or is empty");
 				}
-				ReverseGenerate.genModel(name, modelDir, row, style, ignoreCamelcase);
-				ReverseGenerate.genMapper(name, mapperDir, rp, style, ignoreCamelcase);
+				ReverseGenerate.genModel({ taleName: name, dir: modelDir, fieldInfo: row, style, ignoreCamelcase });
+				ReverseGenerate.genMapper({ taleName: name, mapperDir, rp, style });
 			}
 
 			dbres.end();
