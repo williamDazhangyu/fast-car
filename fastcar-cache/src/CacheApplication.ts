@@ -8,10 +8,10 @@ import { ValidationUtil } from "@fastcar/core/utils";
 @ApplicationStop(BootPriority.Common, "stop")
 @EnableScheduling
 export default class CacheApplication {
-	@Log("sys")
+	@Log("cache")
 	private logger!: Logger;
 
-	private _dataMapping: DataMap<Store, DBItem>;
+	private _dataMapping: DataMap<Store, DBItem<any>>;
 	private _syncStatus: DataMap<Store, boolean>;
 
 	constructor() {
@@ -19,23 +19,29 @@ export default class CacheApplication {
 		this._syncStatus = new DataMap();
 	}
 
-	//创造节点
-	createMapping(config: DBItem): void {
+	/***
+	 * @version 1.0 初始化创造节点
+	 */
+	private createMapping<T>(config: DBItem<T>): void {
 		if (!this._dataMapping.has(config.store)) {
 			this._dataMapping.set(config.store, config);
 			return;
 		}
 
-		let beforeConfig = this._dataMapping.get(config.store) || {};
-		this._dataMapping.set(config.store, Object.assign(beforeConfig, config));
+		this._dataMapping.set(config.store, Object.assign(this._dataMapping.get(config.store) || {}, config));
 	}
 
-	getStore(store: string): DBItem | null {
+	/**
+	 * @version 1.0 获取当前节前信息
+	 */
+	getStore<T>(store: string): DBItem<T> | null {
 		return this._dataMapping.get(store) || null;
 	}
 
-	//进行set赋值 过期时间 单位秒 0为不过期
-	set(store: string, key: string, val: any, options: CacheSetOptions = {}): boolean {
+	/***
+	 * @version 1.0 进行set赋值 过期时间 单位秒 0为不过期
+	 */
+	set<T>(store: string, key: string, val: T, options: CacheSetOptions = {}): boolean {
 		let mapping = this.getStore(store);
 
 		if (!mapping) {
@@ -55,11 +61,12 @@ export default class CacheApplication {
 		}
 
 		//如果不存在过期 更新时长
-		if (!ttl) {
+		if (ttl == 0) {
 			if (mapping.ttlMap.has(key)) {
 				mapping.ttlMap.delete(key);
 			}
 		} else {
+			//刷新过期时间
 			mapping.ttlMap.set(key, {
 				ttl: ttl * 1000,
 				interval: ttl * 1000,
@@ -72,8 +79,8 @@ export default class CacheApplication {
 			if (!mapping.syncMap?.has(key) || options.flush) {
 				mapping.syncMap?.set(key, {
 					ttl: options.flush ? 0 : mapping.syncTimer * 1000,
-					interval: mapping.syncTimer * 1000,
-					failNum: mapping.failNum,
+					interval: mapping.syncTimer * 1000, //同步周期
+					failNum: mapping.failNum, //失败次数
 				});
 			}
 		}
@@ -82,14 +89,15 @@ export default class CacheApplication {
 	}
 
 	//获取数据
-	get(store: string, key: string): null | any {
+	get<T>(store: string, key: string): null | T {
 		let mapping = this.getStore(store);
 
 		if (!mapping) {
 			return null;
 		}
 
-		return mapping.data.get(key);
+		let val = mapping.data.get(key) as T;
+		return ValidationUtil.isNotNull(val) ? val : null;
 	}
 
 	delete(store: string, key: string): boolean {
@@ -144,24 +152,24 @@ export default class CacheApplication {
 	}
 
 	//获取某一类
-	getDictionary(store: string): { [key: string]: any } {
+	getDictionary<T>(store: string): { [key: string]: T } {
 		let mapping = this.getStore(store);
 
 		if (!mapping) {
 			return {};
 		}
 
-		return mapping.data.toObject();
+		return mapping.data.toObject() as { [key: string]: T };
 	}
 
 	@ScheduledInterval({ fixedRate: 100 })
-	loop(diff: number, status: boolean = false): void {
-		//先计算同步数据
-		//再清除掉缓存数据
+	loop(diff: number): void {
+		//先计算同步数据 再清除掉缓存数据
 		this._dataMapping.forEach(async (mapping, store) => {
 			let data = mapping.data;
-
 			let syncMap = mapping.syncMap;
+
+			//先执行同步数据操作
 			if (mapping.dbClient) {
 				if (syncMap) {
 					//当上一次的状态未同步时 则无法继续
@@ -170,12 +178,16 @@ export default class CacheApplication {
 					}
 
 					this._syncStatus.set(store, true);
-					let syncList: Item[] = [];
+
+					//进行精细化操作
+					let syncList: Item<any>[] = [];
 					let newSyncMap = new DataMap<string, QueueItem>();
 					let syncPendingMap = new DataMap<string, QueueItem>();
+
 					syncMap.forEach((t, key) => {
 						t.ttl -= diff;
 						if (t.ttl <= 0) {
+							//需要同步的周期
 							syncList.push({
 								key,
 								value: data.get(key),
@@ -183,16 +195,24 @@ export default class CacheApplication {
 							});
 							syncPendingMap.set(key, t);
 						} else {
+							//保留待更新的map节点
 							newSyncMap.set(key, t);
 						}
 					});
 					mapping.syncMap = newSyncMap;
-
 					if (syncList.length > 0) {
 						//进行持久化
 						let flag = false;
 						try {
-							flag = await mapping.dbClient.mset(syncList);
+							if (mapping.readonly) {
+								let keys = syncList.map((i) => {
+									return i.key;
+								});
+								//遍历进行同步赋值
+								this.initData(keys);
+							} else {
+								flag = await mapping.dbClient.mset(syncList);
+							}
 						} catch (e: any) {
 							this.logger.error(`sync  ${store} update data error`);
 							this.logger.error(e);
@@ -222,6 +242,7 @@ export default class CacheApplication {
 				}
 			}
 
+			//再执行删除缓存操作
 			let ttlMap = mapping.ttlMap;
 			if (ttlMap.size > 0) {
 				let newTllMap = new DataMap<string, QueueItem>();
@@ -243,7 +264,11 @@ export default class CacheApplication {
 				if (ttlKeys.length > 0) {
 					if (mapping.dbClient) {
 						try {
-							flag = await mapping.dbClient.mdelete(ttlKeys);
+							if (mapping.dbSync) {
+								flag = await mapping.dbClient.mdelete(ttlKeys);
+							} else {
+								flag = true;
+							}
 						} catch (e) {
 							this.logger.error(`sync  ${store} delete data error`);
 							this.logger.error(e);
@@ -279,22 +304,14 @@ export default class CacheApplication {
 	}
 
 	//读取数据
-	async initData(): Promise<void> {
+	async initData(keys?: string[]): Promise<void> {
 		for (let [store, item] of this._dataMapping) {
 			if (item.dbClient && item.initSync) {
-				let list = await item.dbClient.mget();
+				let list = await item.dbClient.mget(keys);
 				list.forEach((l) => {
-					item.data.set(l.key, l.value);
-					if (l.ttl > 0) {
-						if (item.dbClient) {
-							//由秒转化为毫秒
-							item.ttlMap.set(l.key, {
-								ttl: l.ttl * 1000,
-								interval: l.ttl * 1000,
-								failNum: item.failNum,
-							});
-						}
-					}
+					this.set(store, l.key, l.value, {
+						ttl: l.ttl,
+					});
 				});
 			}
 		}
@@ -303,12 +320,12 @@ export default class CacheApplication {
 	//关闭时 将持久化未及时同步的数据
 	async stop(): Promise<void> {
 		//停止循环
-		this.loop(0, true);
+		Reflect.apply(this.loop, this, [0, true]);
 		for (let [store, item] of this._dataMapping) {
 			if (item.dbClient) {
 				let syncMap = item.syncMap;
 				if (syncMap && syncMap.size > 0) {
-					let list: Item[] = [];
+					let list: Item<any>[] = [];
 					syncMap.forEach((t, key) => {
 						list.push({
 							key,
@@ -316,7 +333,6 @@ export default class CacheApplication {
 							ttl: this.getTTL(store, key),
 						});
 					});
-
 					await item.dbClient.mset(list);
 				}
 			}
@@ -346,6 +362,8 @@ export default class CacheApplication {
 			dbClient: item.dbClient, //持久化存储的客户端
 			syncMap: new DataMap(), //需要同步持久化的key
 			failNum: item?.failNum || 3,
+			readonly: item.readonly || false,
+			dbSync: ValidationUtil.isBoolean(item.dbSync) ? item.dbSync : true,
 		});
 	}
 }

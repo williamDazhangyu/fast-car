@@ -9,7 +9,7 @@ export default class FileClientMapping implements CacheConfig {
 	store: string = "fileStore";
 	initSync: boolean = true;
 	syncTimer: number = 5; //5秒钟同步一次
-	dbClient: DBClientService;
+	dbClient: DBClientService<String>;
 
 	constructor() {
 		this.dbClient = new FSClient(path.join(__dirname, "../", "filedb", "filedb.json"));

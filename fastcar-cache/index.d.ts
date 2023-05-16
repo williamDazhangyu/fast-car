@@ -6,41 +6,45 @@ export function CacheMapping(target: CacheConfigTarget): void;
 
 export function EnableCache(target: any): void;
 
-export class FSClient implements DBClientService {
+export class FSClient<T> implements DBClientService<T> {
 	private filepath: string;
 
 	constructor(filepath: string);
 
-	mget(): Promise<Item[]>;
+	mget(): Promise<Item<T>[]>;
 
-	mset(list: Item[]): Promise<boolean>;
-
-	mdelete(keys: string[]): Promise<boolean>;
-}
-
-export interface DBClientService {
-	mget(): Promise<Item[]>; //读取批量数据 初始化的时候选择是否调用
-
-	mset(list: Item[]): Promise<boolean>;
+	mset(list: Item<T>[]): Promise<boolean>;
 
 	mdelete(keys: string[]): Promise<boolean>;
 }
 
-export class CacheApplication {
-	constructor();
+export interface DBClientService<T> {
+	mget(keys?: string[]): Promise<Item<T>[]>; //读取批量数据 初始化的时候选择是否调用
 
-	//创造节点
-	createMapping(config: DBItem): void;
+	mset(list: Item<T>[]): Promise<boolean>;
 
-	getStore(store: string): DBItem | null;
+	mdelete(keys: string[]): Promise<boolean>;
+}
 
-	//进行set赋值 过期时间 单位秒 0为不过期
-	set(store: string, key: string, val: any, options?: CacheSetOptions): boolean;
+export default class CacheApplication {
+	/***
+	 * @version 1.0 初始化创造节点
+	 */
+	private createMapping<T>(config: DBItem<T>): void;
+
+	/**
+	 * @version 1.0 获取当前节前信息
+	 */
+	getStore<T>(store: string): DBItem<T> | null;
+
+	/***
+	 * @version 1.0 进行set赋值 过期时间 单位秒 0为不过期
+	 */
+	set<T>(store: string, key: string, val: T, options?: CacheSetOptions): boolean;
 
 	//获取数据
-	get(store: string, key: string): null | any;
+	get<T>(store: string, key: string): null | T;
 
-	//删除数据
 	delete(store: string, key: string): boolean;
 
 	//获取是否存在key
@@ -50,10 +54,12 @@ export class CacheApplication {
 	getTTL(store: string, key: string): number;
 
 	//获取某一类
-	getDictionary(store: string): { [key: string]: any };
+	getDictionary<T>(store: string): { [key: string]: T };
+
+	loop(diff: number): void;
 
 	//读取数据
-	initData(): Promise<void>;
+	initData(keys?: string[]): Promise<void>;
 
 	//关闭时 将持久化未及时同步的数据
 	stop(): Promise<void>;

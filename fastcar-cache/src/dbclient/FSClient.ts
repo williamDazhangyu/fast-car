@@ -3,7 +3,7 @@ import DBClientService from "./DBClientService";
 import * as fs from "fs";
 import * as path from "path";
 
-export default class FSClient implements DBClientService {
+export default class FSClient<T> implements DBClientService<T> {
 	private filepath: string;
 
 	constructor(filepath: string) {
@@ -18,7 +18,7 @@ export default class FSClient implements DBClientService {
 		}
 	}
 
-	async mget(): Promise<Item[]> {
+	async mget(): Promise<Item<T>[]> {
 		let list = fs.readFileSync(this.filepath).toString();
 		let object = JSON.parse(list);
 
@@ -35,7 +35,7 @@ export default class FSClient implements DBClientService {
 		});
 	}
 
-	async mset(list: Item[]): Promise<boolean> {
+	async mset(list: Item<T>[]): Promise<boolean> {
 		if (list.length == 0) {
 			return true;
 		}

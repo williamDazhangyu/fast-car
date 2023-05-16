@@ -26,6 +26,7 @@ class APP {
 * 无客户端持久化缓存示例
 
 ```ts
+import {CacheMapping} from "@fastcar/cache";
 //配置操作
 @CacheMapping
 class NoclientMapping implements CacheConfig {
@@ -38,10 +39,9 @@ export default NoclientMapping;
 
 ```ts
 //调用操作
-let cacheApplication: CacheApplication = appInsatcne.app.getComponentByTarget(CacheApplication);
-cacheApplication.set("noclientStore", "hello", "world");  //存储
-let world = cacheApplication.get("noclientStore", "hello"); //拉取
-assert(world == "world"); //期望为true
+cacheApplication.set("noclientStore", "hello", "world");
+let world = cacheApplication.get("noclientStore", "hello");
+assert(world == "world");
 
 //设置缓存过期时间
 cacheApplication.set("noclientStore", "hellottl", "worldttl", { ttl: 2 }); //2秒后消失
@@ -60,7 +60,7 @@ export default class FileClientMapping implements CacheConfig {
  store: string = "fileStore";
  initSync: boolean = true;
  syncTimer: number = 5; //5秒钟同步一次
- dbClient: DBClientService;
+ dbClient: DBClientService<String>;
 
  constructor() {
   this.dbClient = new FSClient(path.join(__dirname, "../", "filedb", "filedb.json"));
@@ -80,11 +80,11 @@ export default class FileClientMapping implements CacheConfig {
 @CacheMapping
 export default class MySqlClientMapping implements CacheConfig {
  store: string = "mysqlStore";
- initSync: boolean = true; //是否进行初始化读取数据
- syncTimer: number = 10;  //同步间隔
- ttl: number = 60; //60秒后过期 0为永久有效
- dbClient: DBClientService;
- failNum: number; //持久化失败后重试次数 默认三次
+ initSync: boolean = true;
+ syncTimer: number = 10;
+ ttl: number = 20; //60秒后过期
+ dbClient: DBClientService<String>;
+ dbSync: boolean = false;
 
  @CallDependency
  private cacheMapper!: CacheMapper;
@@ -92,7 +92,7 @@ export default class MySqlClientMapping implements CacheConfig {
  constructor() {
   //自定义构造一个存储器
   this.dbClient = {
-   mset: async (list: Item[]) => {
+   mset: async (list: Item<String>[]) => {
     await this.cacheMapper.saveORUpdate(
      list.map((item) => {
       return new CacheModel(Object.assign(item, { updateTime: DateUtil.toDateTime() }));
@@ -100,9 +100,15 @@ export default class MySqlClientMapping implements CacheConfig {
     );
     return true;
    },
-   mget: async () => {
+   mget: async (): Promise<Item<String>[]> => {
     let list = await this.cacheMapper.select({});
-    return list;
+    return list.map((item) => {
+     return {
+      key: item.key,
+      value: item.value,
+      ttl: Math.floor((item.updateTime.getTime() - Date.now()) / 1000),
+     };
+    });
    },
    mdelete: async (keys: string[]) => {
     await this.cacheMapper.delete({

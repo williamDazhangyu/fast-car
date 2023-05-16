@@ -11,8 +11,9 @@ export default class MySqlClientMapping implements CacheConfig {
 	store: string = "mysqlStore";
 	initSync: boolean = true;
 	syncTimer: number = 10;
-	ttl: number = 60; //60秒后过期
-	dbClient: DBClientService;
+	ttl: number = 20; //60秒后过期
+	dbClient: DBClientService<String>;
+	dbSync: boolean = false;
 
 	@CallDependency
 	private cacheMapper!: CacheMapper;
@@ -20,7 +21,7 @@ export default class MySqlClientMapping implements CacheConfig {
 	constructor() {
 		//自定义构造一个存储器
 		this.dbClient = {
-			mset: async (list: Item[]) => {
+			mset: async (list: Item<String>[]) => {
 				await this.cacheMapper.saveORUpdate(
 					list.map((item) => {
 						return new CacheModel(Object.assign(item, { updateTime: DateUtil.toDateTime() }));
@@ -28,9 +29,15 @@ export default class MySqlClientMapping implements CacheConfig {
 				);
 				return true;
 			},
-			mget: async () => {
+			mget: async (): Promise<Item<String>[]> => {
 				let list = await this.cacheMapper.select({});
-				return list;
+				return list.map((item) => {
+					return {
+						key: item.key,
+						value: item.value,
+						ttl: Math.floor((item.updateTime.getTime() - Date.now()) / 1000),
+					};
+				});
 			},
 			mdelete: async (keys: string[]) => {
 				await this.cacheMapper.delete({
