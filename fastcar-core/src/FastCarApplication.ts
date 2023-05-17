@@ -245,10 +245,16 @@ class FastCarApplication extends Events {
 	loadClass() {
 		//加载文件扫描下的bean
 		let tmpFilePath: string[] = Array.of();
-		let includeList: string[] = Reflect.get(this, FastCarMetaData.ComponentScan) as string[];
+		let includeList: string[] = (Reflect.get(this, FastCarMetaData.ComponentScan) as string[]) || [];
 
-		if (includeList) {
+		//从配置文件内读
+		if (Array.isArray(this.sysConfig.application?.scan?.include) && this.sysConfig.application?.scan?.include) {
+			includeList = [...includeList, ...this.sysConfig.application.scan.include];
+		}
+
+		if (includeList.length > 0) {
 			includeList.forEach((item) => {
+				//获取路径
 				let tmpList = FileUtil.getFilePathList(item);
 				tmpFilePath = tmpFilePath.concat(tmpList);
 			});
@@ -258,8 +264,13 @@ class FastCarApplication extends Events {
 		filePathList = tmpFilePath.concat(filePathList);
 		filePathList = [...new Set(filePathList)];
 
-		let excludeList: string[] = Reflect.get(this, FastCarMetaData.ComponentScanExclusion) as string[];
-		if (excludeList) {
+		let excludeList: string[] = (Reflect.get(this, FastCarMetaData.ComponentScanExclusion) as string[]) || [];
+
+		if (Array.isArray(this.sysConfig.application?.scan?.exclude) && this.sysConfig.application?.scan?.exclude) {
+			excludeList = [...excludeList, ...this.sysConfig.application.scan.exclude];
+		}
+
+		if (excludeList.length > 0) {
 			let excludAllPath: string[] = [];
 			excludeList.forEach((item) => {
 				let exlist = FileUtil.getFilePathList(item);
