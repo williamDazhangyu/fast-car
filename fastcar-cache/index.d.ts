@@ -30,12 +30,12 @@ export default class CacheApplication {
 	/***
 	 * @version 1.0 初始化创造节点
 	 */
-	private createMapping<T>(config: DBItem<T>): void;
+	private createMapping<T extends Object>(config: DBItem<T>): void;
 
 	/**
 	 * @version 1.0 获取当前节前信息
 	 */
-	getStore<T>(store: string): DBItem<T> | null;
+	getStore<T extends Object>(store: string): DBItem<T> | null;
 
 	/***
 	 * @version 1.0 进行set赋值 过期时间 单位秒 0为不过期

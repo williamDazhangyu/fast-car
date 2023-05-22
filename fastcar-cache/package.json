@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/cache",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "应用内缓存",
 	"main": "target/index.js",

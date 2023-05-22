@@ -9,7 +9,7 @@ export type QueueItem = {
 	failNum: number; //失败次数 默认三次
 };
 
-export type DBItem<T> = {
+export type DBItem<T extends Object> = {
 	store: Store; //存储的对象
 	data: DataMap<string, T>; //存放key
 	initSync: boolean; //是否需要初始化同步 自动拉取
