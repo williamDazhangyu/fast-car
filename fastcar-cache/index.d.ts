@@ -26,7 +26,7 @@ export interface DBClientService<T> {
 	mdelete(keys: string[]): Promise<boolean>;
 }
 
-export default class CacheApplication {
+export class CacheApplication {
 	/***
 	 * @version 1.0 初始化创造节点
 	 */
@@ -40,10 +40,10 @@ export default class CacheApplication {
 	/***
 	 * @version 1.0 进行set赋值 过期时间 单位秒 0为不过期
 	 */
-	set<T>(store: string, key: string, val: T, options?: CacheSetOptions): boolean;
+	set<T extends Object>(store: string, key: string, val: T, options?: CacheSetOptions): boolean;
 
 	//获取数据
-	get<T>(store: string, key: string): null | T;
+	get<T extends Object>(store: string, key: string): null | T;
 
 	delete(store: string, key: string): boolean;
 
@@ -54,7 +54,7 @@ export default class CacheApplication {
 	getTTL(store: string, key: string): number;
 
 	//获取某一类
-	getDictionary<T>(store: string): { [key: string]: T };
+	getDictionary<T extends Object>(store: string): { [key: string]: T };
 
 	loop(diff: number): void;
 

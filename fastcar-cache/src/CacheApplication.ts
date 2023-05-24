@@ -41,7 +41,7 @@ export default class CacheApplication {
 	/***
 	 * @version 1.0 进行set赋值 过期时间 单位秒 0为不过期
 	 */
-	set<T>(store: string, key: string, val: T, options: CacheSetOptions = {}): boolean {
+	set<T extends Object>(store: string, key: string, val: T, options: CacheSetOptions = {}): boolean {
 		let mapping = this.getStore(store);
 
 		if (!mapping) {
@@ -89,7 +89,7 @@ export default class CacheApplication {
 	}
 
 	//获取数据
-	get<T>(store: string, key: string): null | T {
+	get<T extends Object>(store: string, key: string): null | T {
 		let mapping = this.getStore(store);
 
 		if (!mapping) {
@@ -152,7 +152,7 @@ export default class CacheApplication {
 	}
 
 	//获取某一类
-	getDictionary<T>(store: string): { [key: string]: T } {
+	getDictionary<T extends Object>(store: string): { [key: string]: T } {
 		let mapping = this.getStore(store);
 
 		if (!mapping) {
@@ -209,12 +209,13 @@ export default class CacheApplication {
 									return i.key;
 								});
 								//遍历进行同步赋值
-								this.initData(keys);
+								await this.initData(keys);
+								flag = true;
 							} else {
 								flag = await mapping.dbClient.mset(syncList);
 							}
 						} catch (e: any) {
-							this.logger.error(`sync  ${store} update data error`);
+							this.logger.error(`sync name [${store}] update data error`);
 							this.logger.error(e);
 						} finally {
 							if (!flag) {
