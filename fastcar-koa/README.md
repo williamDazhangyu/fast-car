@@ -2,7 +2,7 @@
 
 ## 快速安装
 
-npm install fastcar@koa
+npm install @fastcar/koa
 
 ## 基本原理
 
@@ -31,12 +31,17 @@ export const app = new APP();
 ```ts
 import { Controller } from "@fastcar/core/annotation";
 import { GET } from "@fastcar/koa/annotation";
+import { Context } from "koa";
+
 
 @Controller
 export default class HelloController {
 
  @GET("/")
- home() {
+ home(params: string, ctx: Context) {
+  console.log("这边请注意 params是params和body二合一的参数 重名的值会优先取body的");
+  console.log('body取 ctx.request.body');
+  console.log('路径后参数取ctx.params');
   return "hello world";
  }
 }
