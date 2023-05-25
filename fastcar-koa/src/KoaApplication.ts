@@ -5,7 +5,7 @@ import * as Koa from "koa";
 import * as KoaRouter from "koa-router";
 import { MethodType } from "./type/MethodType";
 import { DesignMeta } from "./type/DesignMeta";
-import { TypeUtil } from "@fastcar/core/utils";
+import { TypeUtil, ValidationUtil } from "@fastcar/core/utils";
 import { KoaConfig } from "./type/KoaConfig";
 import { ServerApplication } from "@fastcar/server";
 
@@ -69,10 +69,15 @@ export default class KoaApplication {
 				//去除ctx的影响
 				let callBack = async (ctx: any, next?: Function) => {
 					//进行参数的取值
-					let body = Object.keys(ctx.query).length > 0 ? ctx.query : ctx.request.body;
+					let body = {};
 
-					if (!body) {
-						body = {};
+					//自动合并传参 如果有重合的部分 需要再次单独取就好了
+					if (Object.keys(ctx.query).length > 0) {
+						Object.assign(body, ctx.query);
+					}
+
+					if (!!ctx.request.body) {
+						Object.assign(body, ctx.request.body);
 					}
 
 					if (!!ctx.params) {
@@ -80,7 +85,7 @@ export default class KoaApplication {
 					}
 
 					let res = await instance[item.method](body, ctx);
-					if (!!res) {
+					if (ValidationUtil.isNotNull(res)) {
 						ctx.body = res;
 					}
 
