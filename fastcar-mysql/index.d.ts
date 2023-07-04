@@ -174,6 +174,11 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 	selectByPrimaryKey(row: T, ds?: string, sessionId?: string): Promise<T | null>;
 
 	/***
+	 * @version 1.0 查询单个对象自定义
+	 */
+	selectByCustom<T>(conditions?: SqlQuery & { forceIndex?: string[] }, ds?: string, sessionId?: string): Promise<T[]>;
+
+	/***
 	 * @version 1.0 判定是否存在
 	 *
 	 */

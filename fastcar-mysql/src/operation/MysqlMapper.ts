@@ -5,6 +5,7 @@ import { DataFormat, TypeUtil, ValidationUtil } from "@fastcar/core/utils";
 import SerializeUtil from "../util/SerializeUtil";
 import { BaseMapper, JoinEnum } from "@fastcar/core/db";
 import { OrderType, OperatorEnum, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "@fastcar/core/db";
+import { FastCarMetaData } from "@fastcar/core";
 
 /****
  * @version 1.0 采用crud方式进行数据操作
@@ -15,6 +16,13 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 	constructor() {
 		super();
+	}
+
+	//改变动态的tablename
+	setTableName(table: string) {
+		console.log(Reflect.getMetadata(FastCarMetaData.ValidChildFormRules, this.classZ));
+
+		this.tableName = table;
 	}
 
 	//修正关键词的别名需转义的错误
@@ -418,7 +426,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	 * @version 1.0 更新记录
 	 *
 	 */
-	async update({ row, where, limit, forceIndex, orders }: SqlUpdate & { forceIndex?: string[]; orders?: OrderType; }, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
+	async update({ row, where, limit, forceIndex, orders }: SqlUpdate & { forceIndex?: string[]; orders?: OrderType }, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		let rowStr = this.analysisRow(row);
 		if (!rowStr) {
 			return Promise.reject(new Error("row is empty"));
@@ -498,6 +506,29 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		}
 
 		return this.setRows(rows);
+	}
+
+	/***
+	 * @version 1.0 返回值自定义
+	 */
+	async selectByCustom<T>(conditions: SqlQuery & { forceIndex?: string[] } = {}, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T[]> {
+		let fields = this.analysisFields(conditions.fields);
+		let whereC = this.analysisWhere(conditions.where);
+		let groupStr = this.analysisGroups(conditions.groups);
+		let orderStr = this.analysisOrders(conditions.orders);
+		let limitStr = this.analysisLimit(conditions?.limit, conditions?.offest);
+		let forceIndexStr = this.analysisForceIndex(conditions?.forceIndex);
+
+		let args = whereC.args;
+		let sql = `SELECT ${fields} FROM ${this.tableName} ${forceIndexStr} ${whereC.sql} ${groupStr} ${orderStr} ${limitStr}`;
+
+		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
+
+		if (!Array.isArray(rows)) {
+			return [];
+		}
+
+		return rows as Array<T>;
 	}
 
 	/***
@@ -631,6 +662,13 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let [rows] = await this.dsm.query({ sql, args, ds, sessionId });
 
 		return rows;
+	}
+
+	/**
+	 * @version 1.0 根据模型生成 todo
+	 */
+	async createTable(tableName: string = this.tableName) {
+		console.log(Reflect.get);
 	}
 }
 
