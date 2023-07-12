@@ -469,7 +469,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 		for (let item of this.mappingList) {
 			let dbValue = this.toDBValue(row, item.name, item.type);
-			if (ValidationUtil.isNotNull(dbValue)) {
+			if (Reflect.has(row, item.name)) {
 				if (item.primaryKey) {
 					Reflect.set(sqlUpdate.where, item.field, dbValue);
 				} else {
