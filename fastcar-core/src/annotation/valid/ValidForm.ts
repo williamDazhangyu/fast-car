@@ -96,7 +96,9 @@ export default function ValidForm(target: any, methodName: string, descriptor: P
 						if (rule.required) {
 							throwErrMsg(rule, prop, rule.nullMessage);
 						} else {
-							delFormValue(currObj, prop);
+							if(TypeUtil.isObject(currObj) && !Reflect.has(currObj, prop)) {
+								delFormValue(currObj, prop);
+							}
 						}
 					} else {
 						//进行类型判断并赋值
