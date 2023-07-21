@@ -74,10 +74,7 @@ export default class CryptoUtil {
 	}
 
 	static sha256Encode(text: string, serect: string = crypto.randomBytes(32).toString("hex"), encoding: BinaryToTextEncoding = "base64"): { salt: string; msg: string } {
-		let msg = crypto
-			.createHmac("sha256", serect)
-			.update(text)
-			.digest(encoding);
+		let msg = crypto.createHmac("sha256", serect).update(text).digest(encoding);
 
 		return {
 			salt: serect,
@@ -86,10 +83,7 @@ export default class CryptoUtil {
 	}
 
 	static sha256EncodeContent(str: string, encoding: BinaryToTextEncoding = "base64"): string {
-		let msg = crypto
-			.createHash("sha256")
-			.update(str)
-			.digest(encoding);
+		let msg = crypto.createHash("sha256").update(str).digest(encoding);
 
 		return msg;
 	}
@@ -102,5 +96,16 @@ export default class CryptoUtil {
 
 	static getHashStr(num: number = 16): string {
 		return crypto.randomBytes(num).toString("hex");
+	}
+
+	//根据给定的字符串返回hash值按照追加的原则
+	static getHashStrByLength(serect: string, num: number): string {
+		let list = crypto.createHash("md5").update(serect).digest().toString("hex");
+
+		while (list.length < num) {
+			list = list.repeat(num - list.length);
+		}
+
+		return list.substring(0, num);
 	}
 }

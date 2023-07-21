@@ -57,6 +57,8 @@ export class CryptoUtil {
 	static sha256Very(msg: string, serect: string, encodeMsg: string, encoding?: BinaryToTextEncoding): boolean;
 
 	static getHashStr(num?: number): string;
+
+	static getHashStrByLength(serect: string, num: number): string;
 }
 
 export class FileUtil {
