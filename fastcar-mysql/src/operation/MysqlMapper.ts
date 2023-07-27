@@ -44,7 +44,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			});
 			return tmpStr;
 		}
-		return `\`${alias}\``;
+		return !!info ? `\`${alias}\`` : alias;
 	}
 
 	//自动映射数据库字段
@@ -233,7 +233,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let args = Object.keys(row).map((key) => {
 			let alias = this.getFieldName(key);
 
-			let v = Reflect.get(row, key);
+			let v = Reflect.get(row, key) as any;
 			if (TypeUtil.isObject(v) && Reflect.has(v, "operate") && Reflect.has(v, "value")) {
 				str.push(`${alias} ${v.operate} ?`);
 				v = v.value;
