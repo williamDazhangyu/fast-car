@@ -19,6 +19,10 @@ const InnerIPList = [
 
 export default class IPUtils {
 	static isInnerIP = (ip: string): boolean => {
+		if (["0.0.0.0", "localhost"].includes(ip)) {
+			return true;
+		}
+
 		let n = ip.split(".");
 		if (n.length != 4) {
 			return false;
