@@ -166,3 +166,7 @@ export class MixTool {
 	//多个对象赋值
 	static assign(target: any, source: any): void;
 }
+
+export class IPUtils {
+	static isInnerIP(ip: string): boolean;
+}
