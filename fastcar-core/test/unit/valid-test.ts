@@ -3,6 +3,7 @@ import ValidForm from "../../src/annotation/valid/ValidForm";
 import NotNull from "../../src/annotation/valid/NotNull";
 import Size from "../../src/annotation/valid/Size";
 import { Rule } from "../../src/annotation/valid/Rule";
+import { ValidationUtil } from "../../src/utils";
 
 describe("表单校验测试", () => {
 	it("表单单个测试", () => {
@@ -61,5 +62,11 @@ describe("表单校验测试", () => {
 		}
 		let instance = new A();
 		instance.test("a", { c: "c", d: 13 }); //校验失败
+	});
+
+	it("测试map是否为空", () => {
+		let d = new Map();
+		d.set("hello", "world");
+		console.log(ValidationUtil.isNotNull(d) == true);
 	});
 });

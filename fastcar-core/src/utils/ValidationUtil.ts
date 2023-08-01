@@ -10,9 +10,10 @@ export default class ValidationUtil {
 			}
 
 			if (TypeUtil.isObject(param)) {
-				if (TypeUtil.isDate(param)) {
+				if (TypeUtil.isDate(param) || TypeUtil.isMap(param) || TypeUtil.isSet(param)) {
 					return true;
 				}
+
 				return Reflect.ownKeys(param).length > 0;
 			}
 

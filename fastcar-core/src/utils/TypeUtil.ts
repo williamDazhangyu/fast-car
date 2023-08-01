@@ -53,4 +53,12 @@ export default class TypeUtil {
 		let fname = name.toLowerCase();
 		return BasicTypes.includes(fname);
 	}
+
+	static isMap(value: any) {
+		return value instanceof Map;
+	}
+
+	static isSet(value: any) {
+		return value instanceof Set;
+	}
 }

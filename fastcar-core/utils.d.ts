@@ -94,6 +94,10 @@ export class TypeUtil {
 
 	//是否为基本类型
 	static isBasic(name: string): boolean;
+
+	static isMap(value: any): boolean;
+
+	static isSet(value: any): boolean;
 }
 
 export class ValidationUtil {

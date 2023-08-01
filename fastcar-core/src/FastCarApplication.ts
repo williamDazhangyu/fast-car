@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as process from "process";
 import * as Events from "events";
 import * as path from "path";
-import ClassLoader from "./utils/classLoader";
+import ClassLoader from "./utils/ClassLoader";
 import FileUtil from "./utils/FileUtil";
 import MixTool from "./utils/Mix";
 import TypeUtil from "./utils/TypeUtil";
