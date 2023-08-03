@@ -1,4 +1,4 @@
-import ClassLoader from "./utils/classLoader";
+import ClassLoader from "./utils/ClassLoader";
 import ClassUtils from "./utils/ClassUtils";
 import CryptoUtil from "./utils/CryptoUtil";
 import DataFormat from "./utils/DataFormat";
