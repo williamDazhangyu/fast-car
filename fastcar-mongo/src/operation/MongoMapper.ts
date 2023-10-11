@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { Autowired, DSIndex } from "@fastcar/core/annotation";
-import { DBMapper, SqlDelete, SqlQuery, SqlUpdate, SqlWhere, MapperType, DesignMeta, JoinEnum, OperatorEnum, OrderType, OrderEnum } from "@fastcar/core/db";
+import { SqlQuery, SqlUpdate, SqlWhere, JoinEnum, OperatorEnum, OrderType, OrderEnum } from "@fastcar/core/db";
 import MongoDataSourceManager from "../dataSource/MongoDataSourceManager";
 import { BaseMapper } from "@fastcar/core/db";
 import { RowData } from "@fastcar/core/db";
@@ -32,7 +32,7 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 	protected covertEntity(row: T): RowData {
 		let data: RowData = {};
 		this.mappingList.forEach((item) => {
-			let value = Reflect.get(row, item.name);
+			let value: any = Reflect.get(row, item.name);
 			if (ValidationUtil.isNotNull(value)) {
 				if (item.primaryKey) {
 					Reflect.set(data, "_id", new ObjectId(value));
@@ -101,7 +101,7 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 				} else if (ValidationUtil.isNull(value)) {
 					//空值类型
 					Reflect.set(ov, OperatorEnum.isNUll, value);
-				} else if (!TypeUtil.isObject(value) || Object.keys(ov).length == 0) {
+				} else if (!TypeUtil.isObject(value)) {
 					//基本类型
 					Reflect.set(ov, OperatorEnum.eq, value);
 				} else {
@@ -340,6 +340,15 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 	}
 
 	async select(conditions: SqlQuery, @DSIndex ds?: string): Promise<T[]> {
+		let rows = await this.selectByCustom<T>(conditions, ds);
+		if (rows.length == 0) {
+			return [];
+		}
+
+		return this.setRows(rows);
+	}
+
+	async selectByCustom<T>(conditions: SqlQuery, @DSIndex ds?: string): Promise<T[]> {
 		let searchArray = [];
 
 		let fields = this.analysisFields(conditions.fields);
@@ -379,7 +388,7 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 			return [];
 		}
 
-		return this.setRows(rows);
+		return rows as Array<T>;
 	}
 
 	/***
@@ -465,7 +474,7 @@ class MongoMapper<T extends Object> extends BaseMapper<T> {
 	}
 
 	async deleteByPrimaryKey(row: T, @DSIndex ds?: string): Promise<boolean> {
-		let id = Reflect.get(row, this.primaryKey);
+		let id: any = Reflect.get(row, this.primaryKey);
 
 		return await this.deleteOne({ _id: id }, ds);
 	}

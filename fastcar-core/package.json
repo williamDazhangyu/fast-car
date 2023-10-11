@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/core",
-	"version": "0.2.49",
+	"version": "0.2.50",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "target/index.js",
 	"author": "william_zhong",
@@ -33,7 +33,7 @@
 	},
 	"dependencies": {
 		"reflect-metadata": "^0.1.13",
-		"winston": "^3.9.0",
+		"winston": "^3.10.0",
 		"yaml": "^1.10.2"
 	},
 	"devDependencies": {

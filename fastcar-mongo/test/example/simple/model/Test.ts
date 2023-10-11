@@ -2,10 +2,10 @@ import { Size, NotNull, Table, Field, DBType, PrimaryKey } from "@fastcar/core/a
 
 @Table("test")
 class Test {
-	@Field("id")
+	@Field("_id")
 	@DBType("int")
 	@PrimaryKey
-	id!: number;
+	id!: string;
 
 	@Field("name")
 	@DBType("varchar")
@@ -20,15 +20,15 @@ class Test {
 
 	@Field("case_time")
 	@DBType("datetime")
-	caseTime: Date = new Date();
+	caseTime!: Date;
 
 	@Field("flag")
 	@DBType("tinyint")
-	flag: boolean = true;
+	flag!: boolean;
 
 	@Field("money")
 	@DBType("decimal")
-	money: number = 1.0;
+	money!: number;
 
 	constructor(...args: any) {
 		Object.assign(this, ...args);

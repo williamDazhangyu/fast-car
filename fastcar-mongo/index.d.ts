@@ -98,6 +98,8 @@ export class MongoMapper<T extends Object> extends BaseMapper<T> {
 
 	select(conditions: SqlQuery, ds?: string): Promise<T[]>;
 
+	selectByCustom<T>(conditions: SqlQuery, ds?: string): Promise<T[]>;
+
 	selectOne(conditions?: SqlQuery, ds?: string): Promise<T | null>;
 
 	selectByPrimaryKey(row: T, ds?: string): Promise<T | null>;
