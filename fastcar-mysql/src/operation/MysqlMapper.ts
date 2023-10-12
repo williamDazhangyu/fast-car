@@ -167,6 +167,10 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 							params.push(operatorValue);
 							break;
 						}
+						case "CUSTOM": {
+							clist.push(`${alias} ${operatorValue}`); //当为自定义时则不管了
+							break;
+						}
 						default: {
 							clist.push(`${alias} ${formatOperatorKeys} ?`);
 							params.push(operatorValue);
