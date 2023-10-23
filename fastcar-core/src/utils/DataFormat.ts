@@ -35,6 +35,11 @@ class DataFormat {
 			if (value == "false") {
 				return false;
 			}
+
+			//增加判断是不是数值类型
+			if (!isNaN(parseInt(value))) {
+				return !!parseInt(value);
+			}
 		}
 
 		return !!value;
