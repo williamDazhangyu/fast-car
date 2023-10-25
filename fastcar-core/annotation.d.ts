@@ -147,6 +147,9 @@ export function BaseFilePath(name: string): Ret;
 //设置入口文件夹路径
 export function BasePath(name: string): Ret;
 
+//设置资源文件不是application的
+export function BaseName(name: string): Ret;
+
 //自定义程序内配置
 export function ApplicationSetting(setting: { [key: string]: any }): Ret;
 

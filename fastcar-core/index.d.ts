@@ -70,6 +70,11 @@ export class FastCarApplication extends Events {
 	 */
 	getBasePath(): string;
 
+	/***
+	 * @version 1.0 获取项目的基础资源路径
+	 */
+	getBaseName(): string;
+
 	/**
 	 * @version 1.0 加载系统配置 加载顺序为 default json < yaml < env
 	 *

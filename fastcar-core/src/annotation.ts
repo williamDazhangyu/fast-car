@@ -47,6 +47,7 @@ import ApplicationDestory from "./annotation/lifeCycle/ApplicationDestory";
 import ApplicationSetting from "./annotation/env/ApplicationSetting";
 import AliasInjection from "./annotation/bind/AliasInjection";
 import ResourcePath from "./annotation/env/ResourcePath";
+import BaseName from "./annotation/env/BaseName";
 
 //注解暴露出去
 export {
@@ -100,4 +101,4 @@ export {
 	Transactional, //事务管理
 };
 
-export { ENV, BaseFilePath, BasePath, ApplicationSetting };
+export { ENV, BaseFilePath, BasePath, BaseName, ApplicationSetting };

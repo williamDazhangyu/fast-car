@@ -45,6 +45,7 @@ class FastCarApplication extends Events {
 	protected resourcePath: string = ""; //资源路径
 	protected delayHotIds: Map<string, { fp: string; loadType: number }>;
 	protected reloadTimerId: NodeJS.Timeout | null;
+	protected basename: string = CommonConstant.Application;
 
 	constructor() {
 		super();
@@ -97,7 +98,7 @@ class FastCarApplication extends Events {
 		});
 
 		this.on("sysReload", (fp: string) => {
-			if (fp.indexOf(CommonConstant.Application) != -1) {
+			if (fp.indexOf(this.basename) != -1) {
 				this.addDelayHot(fp, 2);
 			}
 		});
@@ -165,16 +166,23 @@ class FastCarApplication extends Events {
 		return this.basePath;
 	}
 
+	/**
+	 * @version 1.0 获取项目读取的基本配置路径
+	 */
+	getBaseName(): string {
+		return this.basename;
+	}
+
 	/***
 	 * @version 1.0 加载系统配置 加载顺序为 default json < yaml < env
 	 *
 	 */
 	loadSysConfig() {
-		this.sysConfig = FileUtil.getApplicationConfig(this.getResourcePath(), CommonConstant.Application, this.sysConfig);
+		this.sysConfig = FileUtil.getApplicationConfig(this.getResourcePath(), this.basename, this.sysConfig);
 
 		let env = (Reflect.get(this, CommonConstant.ENV) || this.sysConfig.application.env || "devlopment") as string;
 
-		this.sysConfig = FileUtil.getApplicationConfig(this.getResourcePath(), `${CommonConstant.Application}-${env}`, this.sysConfig);
+		this.sysConfig = FileUtil.getApplicationConfig(this.getResourcePath(), `${this.basename}-${env}`, this.sysConfig);
 
 		//自定义环境变量设置
 		process.env.NODE_ENV = env;

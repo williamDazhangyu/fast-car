@@ -10,6 +10,7 @@ export const CommonConstant = {
 	FastcarSetting: Symbol("FastcarSetting"),
 	ResourcePath: "resourcePath",
 	APPId: "appid",
+	BaseName: "basename", //设置基础的文件名称
 };
 
 export const FileResSuffix = ["json", "yml", "js"];

@@ -1,0 +1,10 @@
+application:
+    scan:
+        exclude: ["noclude"]
+settings:
+    log:
+        consoleLevel: info
+        fileLevel: info
+        maxsize: 1024
+        maxFiles: 10
+        printConsole: true

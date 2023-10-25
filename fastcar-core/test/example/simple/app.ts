@@ -10,7 +10,9 @@ import ApplicationHook from "../../../src/interface/ApplicationHook";
 import Log from "../../../src/annotation/stereotype/Log";
 import Logger from "../../../src/interface/Logger";
 import ApplicationSetting from "../../../src/annotation/env/ApplicationSetting";
+import { ComponentScanExclusion } from "../../../src/annotation";
 
+@ComponentScanExclusion("app-test.ts")
 @Application
 @ENV("test") //设置环境变量
 @BasePath(__dirname) //直接运行ts文件时可不用
