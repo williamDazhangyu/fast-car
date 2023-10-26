@@ -48,7 +48,7 @@ export default class RpcClient implements MsgClientHookService {
 		this.serialId = 0;
 		this.checkStatus = false;
 		this.rpcAsyncService = rpcAsyncService;
-		this.checkConnectTimer = 0;
+		this.checkConnectTimer = this.config.disconnectInterval || 1000;
 	}
 
 	//初始化配置事件
@@ -193,14 +193,9 @@ export default class RpcClient implements MsgClientHookService {
 				data: data,
 			},
 			{
-				retryCount: this.config.retryCount,
-				retryInterval: this.config.retryInterval,
-				timeout: this.config.timeout, //超时时间
-			},
-			{
-				retryCount: opts?.retryCount,
-				retryInterval: opts?.retryInterval,
-				timeout: opts?.timeout, //超时时间
+				retryCount: opts?.retryCount || this.config.retryCount,
+				retryInterval: opts?.retryInterval || this.config.retryInterval,
+				timeout: opts?.timeout || this.config.timeout, //超时时间
 			}
 		);
 
@@ -263,6 +258,15 @@ export default class RpcClient implements MsgClientHookService {
 			let nowTime = Date.now();
 
 			if (this.msgQueue.size > 0) {
+				//进行断线重连
+				if (!this.isConnect()) {
+					this.checkConnectTimer -= diff;
+					if (this.checkConnectTimer <= 0) {
+						this.checkConnectTimer = this.config.disconnectInterval || 1000;
+						await this.start();
+					}
+				}
+
 				let cleanIds: Map<number, RpcResponseType> = new Map();
 				this.msgQueue.forEach((item, id) => {
 					if (nowTime > item.expiretime) {
