@@ -8,7 +8,6 @@ import PatchMapping from "./annotation/router/PatchMapping";
 import PostMapping from "./annotation/router/PostMapping";
 import PutMapping from "./annotation/router/PutMapping";
 import RequestMapping from "./annotation/router/RequestMapping";
-import KoaMulter from "./middleware/KoaMulter";
 
 //声明简化的方式
 const GET = GetMapping;
@@ -41,5 +40,4 @@ export {
 	PATCH,
 	ALL,
 	REQUEST,
-	KoaMulter,
 };
