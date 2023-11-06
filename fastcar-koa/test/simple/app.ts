@@ -8,6 +8,7 @@ import * as Koa from "koa";
 import ExceptionGlobalHandler from "../../src/middleware/ExceptionGlobalHandler";
 import KoaCors from "../../src/middleware/koaCors";
 import Swagger from "../../src/middleware/Swagger";
+import KoaMulter from "../../src/middleware/KoaMulter";
 
 const m1 = () => {
 	return async (ctx: any, next: Function) => {
@@ -27,9 +28,8 @@ const m2 = (): Koa.Middleware => {
 
 @Application
 @EnableKoa //开启koa
-@KoaMiddleware(ExceptionGlobalHandler, KoaStatic, KoaBodyParser as any)
-@KoaMiddleware(Swagger)
-@KoaMiddleware(m1, m2)
+@KoaMiddleware(ExceptionGlobalHandler, KoaBodyParser as any, KoaMulter)
+// @KoaMiddleware(m1, m2)
 class APP {
 	app!: FastCarApplication;
 }
