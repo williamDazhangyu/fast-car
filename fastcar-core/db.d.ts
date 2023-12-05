@@ -13,6 +13,8 @@ export enum OperatorEnum {
 	dec = "-", //累减
 	multiply = "*", //累乘
 	division = "/", //累除
+	notin = "NOT IN", //not in
+	custom = "CUSTOM", //自定义
 }
 
 export enum JoinEnum {
