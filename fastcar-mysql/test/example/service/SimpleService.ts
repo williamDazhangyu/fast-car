@@ -129,6 +129,17 @@ class SimpleService {
 			fields: ['DATE_FORMAT( case_time, "%Y-%m-%d %H:%I:%s" ) as caseTime'],
 		});
 	}
+
+	//使用数组
+	async queryArray() {
+		return await this.myMapper.select({
+			where: {
+				id: {
+					IN: [2, 3],
+				},
+			},
+		});
+	}
 }
 
 export default SimpleService;

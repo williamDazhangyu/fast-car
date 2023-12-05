@@ -149,12 +149,13 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 							clist.push(`${alias} IS NOT NULL`);
 							break;
 						}
-						case OperatorEnum.in: {
+						case OperatorEnum.in:
+						case "NOT IN": {
 							if (Array.isArray(operatorValue)) {
-								clist.push(`${alias} IN ( ${operatorValue.map(() => "?").join(",")} )`);
+								clist.push(`${alias} ${formatOperatorKeys} ( ${operatorValue.map(() => "?").join(",")} )`);
 								params = [...params, ...operatorValue];
 							} else {
-								clist.push(`${alias} IN ( ? )`);
+								clist.push(`${alias} ${formatOperatorKeys} ( ? )`);
 								params.push(operatorValue);
 							}
 							break;
