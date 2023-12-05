@@ -60,11 +60,11 @@ export default class CryptoUtil {
 			let pwd = Buffer.from(password, "hex");
 
 			//读取数组
-			let iv = tmpSerect.slice(0, 12);
+			let iv = tmpSerect.subarray(0, 12);
 			let cipher = crypto.createDecipheriv("aes-128-gcm", pwd, iv);
 
 			//这边的数据为 去除头的iv12位和尾部的tags的16位
-			let msg = cipher.update(tmpSerect.slice(12, tmpSerect.length - 16));
+			let msg = cipher.update(tmpSerect.subarray(12, tmpSerect.length - 16));
 
 			return msg.toString("utf8");
 		} catch (e) {
