@@ -176,7 +176,19 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 	/***
 	 * @version 1.0 查询单个对象自定义
 	 */
-	selectByCustom<T>(conditions?: SqlQuery & { forceIndex?: string[] }, ds?: string, sessionId?: string): Promise<T[]>;
+	selectByCustom<T>(
+		conditions?: SqlQuery & {
+			forceIndex?: string[];
+			join?: Array<{
+				type?: "INNER" | "LEFT" | "FULL" | "CROSS" | "RIGHT";
+				table: string;
+				on?: string;
+			}>;
+			tableAlias?: string; //表名是别名
+		},
+		ds?: string,
+		sessionId?: string
+	): Promise<T[]>;
 
 	/***
 	 * @version 1.0 判定是否存在

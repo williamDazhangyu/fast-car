@@ -20,8 +20,6 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 	//改变动态的tablename
 	setTableName(table: string) {
-		console.log(Reflect.getMetadata(FastCarMetaData.ValidChildFormRules, this.classZ));
-
 		this.tableName = table;
 	}
 
@@ -296,6 +294,26 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		return `FORCE INDEX (${formatFileds.join(",")})`;
 	}
 
+	protected analysisJoin(
+		list?: Array<{
+			type?: "INNER" | "LEFT" | "FULL" | "CROSS" | "RIGHT";
+			table: string;
+			on?: string;
+		}>
+	) {
+		if (!list || list.length == 0) {
+			return "";
+		}
+
+		let joinList: Array<string> = [];
+		list.forEach((item) => {
+			let onStr = item.on ? `ON ${item.on}` : "";
+			joinList.push(`${item.type || "LEFT"} JOIN ${item.table} ${onStr}`);
+		});
+
+		return joinList.join(" ");
+	}
+
 	//修正布尔值时的赋值错误
 	protected setRow(rowData: Object): T {
 		let t = new this.classZ();
@@ -494,21 +512,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	 * @version 1.0 根据条件进行查找
 	 */
 	async select(conditions: SqlQuery & { forceIndex?: string[] } = {}, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T[]> {
-		let fields = this.analysisFields(conditions.fields);
-		let whereC = this.analysisWhere(conditions.where);
-		let groupStr = this.analysisGroups(conditions.groups);
-		let orderStr = this.analysisOrders(conditions.orders);
-		let limitStr = this.analysisLimit(conditions?.limit, conditions?.offest);
-		let forceIndexStr = this.analysisForceIndex(conditions?.forceIndex);
-
-		let args = whereC.args;
-		let sql = `SELECT ${fields} FROM ${this.tableName} ${forceIndexStr} ${whereC.sql} ${groupStr} ${orderStr} ${limitStr}`;
-
-		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
-
-		if (!Array.isArray(rows)) {
-			return [];
-		}
+		let rows: Array<T> = await this.selectByCustom(conditions, ds, sessionId);
 
 		return this.setRows(rows);
 	}
@@ -516,7 +520,19 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	/***
 	 * @version 1.0 返回值自定义
 	 */
-	async selectByCustom<T>(conditions: SqlQuery & { forceIndex?: string[] } = {}, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T[]> {
+	async selectByCustom<T>(
+		conditions: SqlQuery & {
+			forceIndex?: string[];
+			join?: Array<{
+				type?: "INNER" | "LEFT" | "FULL" | "CROSS" | "RIGHT";
+				table: string;
+				on?: string;
+			}>;
+			tableAlias?: string; //表名是别名
+		} = {},
+		@DSIndex ds?: string,
+		@SqlSession sessionId?: string
+	): Promise<T[]> {
 		let fields = this.analysisFields(conditions.fields);
 		let whereC = this.analysisWhere(conditions.where);
 		let groupStr = this.analysisGroups(conditions.groups);
@@ -524,8 +540,10 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let limitStr = this.analysisLimit(conditions?.limit, conditions?.offest);
 		let forceIndexStr = this.analysisForceIndex(conditions?.forceIndex);
 
+		let joinStr = this.analysisJoin(conditions.join);
+
 		let args = whereC.args;
-		let sql = `SELECT ${fields} FROM ${this.tableName} ${forceIndexStr} ${whereC.sql} ${groupStr} ${orderStr} ${limitStr}`;
+		let sql = `SELECT ${fields} FROM ${this.tableName} ${conditions.tableAlias || ""} ${joinStr} ${forceIndexStr} ${whereC.sql} ${groupStr} ${orderStr} ${limitStr}`.trim();
 
 		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
 

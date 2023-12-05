@@ -81,4 +81,10 @@ describe("mysql测试", () => {
 		let res = await service.testFormat();
 		console.log(res);
 	});
+
+	it("连接测试", async () => {
+		let service: SimpleService = appInstance.app.getComponentByTarget(SimpleService);
+		let res = await service.testLeftJoin();
+		console.log(res);
+	});
 });

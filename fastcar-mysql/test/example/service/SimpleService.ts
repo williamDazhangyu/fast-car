@@ -140,6 +140,22 @@ class SimpleService {
 			},
 		});
 	}
+
+	//测试左连接
+	async testLeftJoin() {
+		let res = await this.myMapper.selectByCustom({
+			join: [
+				{
+					type: "LEFT",
+					table: "cache c",
+					on: "c.key = t.name",
+				},
+			],
+			tableAlias: "t",
+		});
+
+		return res;
+	}
 }
 
 export default SimpleService;
