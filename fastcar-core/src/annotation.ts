@@ -48,6 +48,7 @@ import ApplicationSetting from "./annotation/env/ApplicationSetting";
 import AliasInjection from "./annotation/bind/AliasInjection";
 import ResourcePath from "./annotation/env/ResourcePath";
 import BaseName from "./annotation/env/BaseName";
+import CustomType from "./annotation/valid/CustomType";
 
 //注解暴露出去
 export {
@@ -87,6 +88,7 @@ export {
 	ValidForm,
 	Rule,
 	ResourcePath,
+	CustomType,
 };
 
 export {

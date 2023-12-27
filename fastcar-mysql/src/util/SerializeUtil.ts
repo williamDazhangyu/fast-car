@@ -18,6 +18,9 @@ export default class SerializeUtil {
 			case "date": {
 				return DateUtil.toDateTime(value);
 			}
+			case "json": {
+				return value;
+			}
 			default: {
 				return JSON.stringify(value);
 			}

@@ -158,3 +158,6 @@ export function AliasInjection(alias: string): PMRet;
 
 //自定义资源路径
 export function ResourcePath(name: string): Ret;
+
+//自定义类型
+export function CustomType(name: string): PMRet;
