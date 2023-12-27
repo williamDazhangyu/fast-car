@@ -50,6 +50,8 @@ let appInsatcne = new APP();
 import EnvConfig from "./config/EnvConfig";
 import CallService from "./service/CallService";
 import NotFoundController from "./controller/NotFoundController";
+import HotConfig from "./config/HotConfig";
+import HelloConfig from "./config/HelloConfig";
 
 describe("程序应用测试", () => {
 	it("获取配置", () => {
@@ -98,5 +100,13 @@ describe("程序应用测试", () => {
 		} catch (e) {
 			appInsatcne.app.getLogger().error(e);
 		}
+	});
+	it("热更新配置解析", () => {
+		setInterval(() => {
+			let hotConfig: HotConfig = appInsatcne.app.getComponentByTarget(HotConfig);
+			let helloConfig: HelloConfig = appInsatcne.app.getComponentByTarget(HelloConfig);
+			console.log("热更新配置", hotConfig.hello);
+			console.log("不变的配置", helloConfig.hello);
+		}, 1000);
 	});
 });

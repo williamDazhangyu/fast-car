@@ -446,6 +446,7 @@ class FastCarApplication extends Events {
 
 	/**
 	 * @version 1.0 加载需要注入的类
+	 * @deprecated
 	 */
 	// loadInjectionModule() {
 	// 	this.componentMap.forEach((instance, instanceName) => {

@@ -7,4 +7,4 @@ settings:
         sessionTimeOut: 10000
         dataSoucreConfig:
             - { source: "test", database: "test", host: "localhost", user: "root", password: "123456", connectionLimit: 10 }
-            - { source: "test2", database: "test2", host: "localhost", user: "root", password: "123456", connectionLimit: 10 }
+            # - { source: "test2", database: "test2", host: "localhost", user: "root", password: "123456", connectionLimit: 10 }
