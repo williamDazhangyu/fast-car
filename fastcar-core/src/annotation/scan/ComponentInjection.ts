@@ -8,7 +8,7 @@ export default function ComponentInjection(target: any, ...names: string[]) {
 
 	for (let name of names) {
 		//可支持绝对路径
-		let p = path.join(require.main?.path || "", name);
+		let p = path.join(require.main?.path || process.cwd() || "", name);
 		if (fs.existsSync(name)) {
 			p = name;
 		}

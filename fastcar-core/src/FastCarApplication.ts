@@ -268,7 +268,9 @@ class FastCarApplication extends Events {
 			});
 		}
 
+		let includeFinalList: string[] = [...tmpFilePath];
 		let filePathList = FileUtil.getFilePathList(this.basePath);
+
 		filePathList = tmpFilePath.concat(filePathList);
 		filePathList = [...new Set(filePathList)];
 
@@ -286,6 +288,9 @@ class FastCarApplication extends Events {
 			});
 
 			filePathList = filePathList.filter((item) => {
+				if (includeFinalList.includes(item)) {
+					return true;
+				}
 				return !excludAllPath.includes(item);
 			});
 		}
@@ -551,7 +556,7 @@ class FastCarApplication extends Events {
 	 */
 	init() {
 		//加载配置
-		this.basePath = (Reflect.get(this, CommonConstant.BasePath) || require.main?.path || module.path) as string;
+		this.basePath = (Reflect.get(this, CommonConstant.BasePath) || require.main?.path || module.path || process.cwd()) as string;
 		this.baseFileName = (Reflect.get(this, CommonConstant.BaseFileName) || require.main?.filename || module.filename) as string;
 
 		this.beforeStartServer();
