@@ -41,6 +41,7 @@ export function ApplicationDestory(order?: number): MRet;
 export function ComponentScan(...names: string[]): Ret;
 export function ComponentScanExclusion(...names: string[]): Ret;
 export function ComponentInjection(target: any, ...names: string[]): void;
+export function ComponentScanMust(...names: string[]): Ret;
 export function Hotter(target: any): void;
 
 /***

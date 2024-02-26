@@ -23,4 +23,5 @@ export enum FastCarMetaData {
 	LoggerModule = "LoggerModule", //日志模块集合
 	HotterSysConfig = "hotterSysConfig", //支持热更系统配置
 	CustomType = "custom:type", //自定义类型
+	ComponentScanMust = "ComponentScanMust", //扫描路径
 }

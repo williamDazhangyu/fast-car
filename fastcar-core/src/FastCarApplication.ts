@@ -254,6 +254,7 @@ class FastCarApplication extends Events {
 		//加载文件扫描下的bean
 		let tmpFilePath: string[] = Array.of();
 		let includeList: string[] = (Reflect.get(this, FastCarMetaData.ComponentScan) as string[]) || [];
+		let mustIncludMustList: string[] = (Reflect.get(this, FastCarMetaData.ComponentScanMust) as string[]) || [];
 
 		//从配置文件内读
 		if (Array.isArray(this.sysConfig.application?.scan?.include) && this.sysConfig.application?.scan?.include) {
@@ -268,7 +269,12 @@ class FastCarApplication extends Events {
 			});
 		}
 
-		let includeFinalList: string[] = [...tmpFilePath];
+		let includeFinalList: string[] = [];
+		mustIncludMustList.forEach((item) => {
+			let tmpList = FileUtil.getFilePathList(item);
+			includeFinalList = includeFinalList.concat(tmpList);
+		});
+
 		let filePathList = FileUtil.getFilePathList(this.basePath);
 
 		filePathList = tmpFilePath.concat(filePathList);

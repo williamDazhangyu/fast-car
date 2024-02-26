@@ -49,6 +49,7 @@ import AliasInjection from "./annotation/bind/AliasInjection";
 import ResourcePath from "./annotation/env/ResourcePath";
 import BaseName from "./annotation/env/BaseName";
 import CustomType from "./annotation/valid/CustomType";
+import ComponentScanMust from "./annotation/scan/ComponentScanMust";
 
 //注解暴露出去
 export {
@@ -61,6 +62,7 @@ export {
 	ComponentScanExclusion,
 	Component,
 	ComponentInjection,
+	ComponentScanMust,
 	Hotter,
 	BeanName,
 	Configure,
