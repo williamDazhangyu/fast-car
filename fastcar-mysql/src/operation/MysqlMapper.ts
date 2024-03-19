@@ -5,7 +5,6 @@ import { DataFormat, TypeUtil, ValidationUtil } from "@fastcar/core/utils";
 import SerializeUtil from "../util/SerializeUtil";
 import { BaseMapper, JoinEnum } from "@fastcar/core/db";
 import { OrderType, OperatorEnum, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "@fastcar/core/db";
-import { FastCarMetaData } from "@fastcar/core";
 
 /****
  * @version 1.0 采用crud方式进行数据操作
@@ -104,7 +103,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		for (let key of keys) {
 			let value: any = where[key];
 
-			if (JoinEnum.and == key || JoinEnum.or == key) {
+			if (Object.keys(JoinEnum).includes(key)) {
 				//递归调用计算
 				let childResult = this.analysisCondition(value, key);
 				list.push(childResult.sql);

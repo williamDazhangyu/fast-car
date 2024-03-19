@@ -129,7 +129,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 
 	getSession(sessionId: string): Map<string, mysql.PoolConnection[]> {
 		let connMap = Reflect.get(this, sessionId);
-		return connMap;
+		return connMap as Map<string, mysql.PoolConnection[]>;
 	}
 
 	isReadBySql(sql: string): boolean {
@@ -172,7 +172,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 		}
 
 		if (sessionId) {
-			let connMap: Map<string, mysql.PoolConnection[]> = Reflect.get(this, sessionId);
+			let connMap: Map<string, mysql.PoolConnection[]> = Reflect.get(this, sessionId) as Map<string, mysql.PoolConnection[]>;
 			if (connMap) {
 				let conns = connMap.get(ds) || [];
 				if (conns.length == 0) {
