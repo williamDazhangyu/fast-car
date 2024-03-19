@@ -23,6 +23,7 @@ export enum OperatorEnum {
 export enum JoinEnum {
 	and = "AND",
 	or = "OR",
+	not = "NOT",
 }
 
 export enum OrderEnum {
