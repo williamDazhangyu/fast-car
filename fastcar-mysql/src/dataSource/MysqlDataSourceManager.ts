@@ -213,7 +213,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 
 			let conn;
 			try {
-				let conn = await dataSoucre.getConnection();
+				conn = await dataSoucre.getConnection();
 				let result = await this.connExecute(conn, sql, args, useServerPrepStmts);
 				dataSoucre.releaseConnection(conn);
 				return resolve(result);
