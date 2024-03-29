@@ -6,6 +6,10 @@ import SerializeUtil from "../util/SerializeUtil";
 import { BaseMapper, JoinEnum } from "@fastcar/core/db";
 import { OrderType, OperatorEnum, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "@fastcar/core/db";
 
+const JoinEnums = Object.keys(JoinEnum).map((item) => {
+	return item.toLowerCase();
+});
+
 /****
  * @version 1.0 采用crud方式进行数据操作
  */
@@ -102,8 +106,8 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 		for (let key of keys) {
 			let value: any = where[key];
-
-			if (Object.keys(JoinEnum).includes(key)) {
+			//进行小写标准化
+			if (JoinEnums.includes(key.toLowerCase())) {
 				//递归调用计算
 				let childResult = this.analysisCondition(value, key);
 				list.push(childResult.sql);
