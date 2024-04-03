@@ -41,7 +41,9 @@ function Scheduled(config: ScheduledConfig) {
 						timerMap.set(timeId, timer);
 					} else if (stop) {
 						let timer: Heartbeat = timerMap.get(timeId);
-						timer.stop();
+						if (timer) {
+							timer.stop();
+						}
 						timerMap.delete(timeId);
 					}
 				}
