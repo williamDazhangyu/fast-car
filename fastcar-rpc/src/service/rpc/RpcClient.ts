@@ -35,7 +35,7 @@ export default class RpcClient implements MsgClientHookService {
 		this.config = Object.assign(
 			{
 				retryCount: 3, //错误重试次数 默认三次
-				retryInterval: 100, //重试间隔 默认一秒
+				retryInterval: 1000, //重试间隔 默认一秒
 				maxMsgNum: 10000, //最大消息瞬时并发数
 				timeout: 3000,
 				disconnectInterval: 100,
@@ -230,7 +230,7 @@ export default class RpcClient implements MsgClientHookService {
 				id,
 				msg,
 				retryCount: 0,
-				retryInterval: m.retryInterval,
+				retryInterval: Date.now() + m.retryInterval,
 				expiretime: Date.now() + timeout,
 				timeout,
 				maxRetryCount: m.retryCount,
@@ -282,8 +282,7 @@ export default class RpcClient implements MsgClientHookService {
 						return;
 					}
 
-					item.retryInterval -= diff;
-					if (item.retryInterval <= 0) {
+					if (item.retryInterval <= nowTime) {
 						//发送消息
 						if (item.retryCount >= item.maxRetryCount) {
 							cleanIds.set(id, {
@@ -295,7 +294,7 @@ export default class RpcClient implements MsgClientHookService {
 							item.retryCount++;
 							this.client.sendMsg(item.msg);
 						}
-						item.retryInterval = item.maxRetryInterval;
+						item.retryInterval = nowTime + item.maxRetryInterval;
 					}
 				});
 
