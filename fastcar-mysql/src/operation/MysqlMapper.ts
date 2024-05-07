@@ -431,7 +431,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 		for (let i = 0; i < rows.length; ) {
 			let paramsList: string[] = [];
-			let tpmList = rows.slice(0, 1000);
+			let tpmList = rows.slice(i, i + 1000);
 			let args: any[] = [];
 
 			tpmList.forEach((row: T) => {
