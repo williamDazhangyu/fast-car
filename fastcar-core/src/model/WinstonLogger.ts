@@ -50,7 +50,7 @@ export default class WinstonLogger {
 		let newLogger = winston.loggers.add(category, {
 			format: winston.format.combine(
 				winston.format.label({ label: category }),
-				winston.format.printf(info => {
+				winston.format.printf((info) => {
 					//debug模式等级时仅为控制台输出
 					let level = info.level.toUpperCase();
 					let timestamp = DateUtil.toDateTimeMS();
@@ -63,7 +63,8 @@ export default class WinstonLogger {
 					};
 
 					if (Reflect.has(info, SPLAT)) {
-						Reflect.set(content, "splat", JSON.stringify(Reflect.get(info, SPLAT)));
+						let splat = Reflect.get(info, SPLAT);
+						Reflect.set(content, "splat", typeof splat == "string" ? splat : JSON.stringify(splat));
 					}
 
 					if (info.stack) {
@@ -79,7 +80,7 @@ export default class WinstonLogger {
 
 						if (Reflect.has(info, SPLAT)) {
 							let splatMsg: any[] = Reflect.get(info, SPLAT);
-							splatMsg.forEach(item => {
+							splatMsg.forEach((item) => {
 								text += " " + this.colorizeData(item);
 							});
 						}

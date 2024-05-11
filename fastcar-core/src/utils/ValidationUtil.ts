@@ -1,5 +1,8 @@
 import { DataTypes } from "../constant/DataTypes";
 import TypeUtil from "./TypeUtil";
+
+const NumberRegex = /^[0-9]+$/;
+
 //类型校验器
 export default class ValidationUtil {
 	//是否为空
@@ -27,8 +30,9 @@ export default class ValidationUtil {
 		return !ValidationUtil.isNotNull(param);
 	}
 
+	//修改数字的判断方法
 	static isNumber(param: any): boolean {
-		return typeof param === "number" && !isNaN(param);
+		return NumberRegex.test(param);
 	}
 
 	static isString(param: any): boolean {
@@ -59,6 +63,11 @@ export default class ValidationUtil {
 
 		if (ValidationUtil.isBoolean(param)) {
 			return true;
+		}
+
+		//修正数组的判断
+		if (Array.isArray(param)) {
+			return param.length >= value;
 		}
 
 		let v = ValidationUtil.isNotNull(param) ? param.toString() : "";

@@ -59,7 +59,7 @@ export default class ClassLoader {
 		//添加热更方法
 		fs.watch(fp, function (event, filename) {
 			if (event === "change") {
-				if (!fileFlag) {
+				if (!fileFlag && filename) {
 					context.emit(eventName, path.join(fp, filename));
 				} else {
 					context.emit(eventName, fp);
