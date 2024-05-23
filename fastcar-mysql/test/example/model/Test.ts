@@ -1,4 +1,4 @@
-import { Size, NotNull, Table, Field, DBType, PrimaryKey } from "@fastcar/core/annotation";
+import { Size, NotNull, Table, Field, DBType, PrimaryKey, CustomType } from "@fastcar/core/annotation";
 import "reflect-metadata";
 
 @Table("test")
@@ -30,6 +30,11 @@ class Test {
 	@Field("money")
 	@DBType("decimal")
 	money: number = 1.0;
+
+	@Field("j_text")
+	@DBType("json")
+	@CustomType("json")
+	jText: any;
 
 	constructor(...args: any) {
 		Object.assign(this, ...args);

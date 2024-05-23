@@ -62,6 +62,8 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 				} else {
 					value = dbValue;
 				}
+			} else {
+				value = null;
 			}
 		}
 
@@ -402,6 +404,10 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			if (ValidationUtil.isNotNull(dbValue)) {
 				params.push(`\`${item.field}\``);
 				args.push(dbValue);
+			} else if (item.dbType == "json") {
+				//赋值json空对象
+				params.push(`\`${item.field}\``);
+				args.push({});
 			}
 		}
 
