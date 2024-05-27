@@ -142,13 +142,13 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 	 * @version 1.0 更新记录
 	 *
 	 */
-	update({ row, where, limit, forceIndex }: SqlUpdate & { forceIndex?: string[] }, ds?: string, sessionId?: string): Promise<boolean>;
+	update({ row, where, limit, forceIndex }: SqlUpdate & { forceIndex?: string[]; orders?: OrderType }, ds?: string, sessionId?: string): Promise<boolean>;
 
 	/****
 	 * @version 1.0 更新一条数据
 	 *
 	 */
-	updateOne(sqlUpdate: SqlUpdate & { forceIndex?: string[] }, ds?: string, sessionId?: string): Promise<boolean>;
+	updateOne(sqlUpdate: SqlUpdate & { forceIndex?: string[]; orders?: OrderType }, ds?: string, sessionId?: string): Promise<boolean>;
 
 	/***
 	 * @version 1.0 根据实体类的主键来更新数据
@@ -185,6 +185,7 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 				on?: string;
 			}>;
 			tableAlias?: string; //表名是别名
+			camelcaseStyle?: boolean;
 		},
 		ds?: string,
 		sessionId?: string

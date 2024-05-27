@@ -5,6 +5,7 @@ import { DataFormat, TypeUtil, ValidationUtil } from "@fastcar/core/utils";
 import SerializeUtil from "../util/SerializeUtil";
 import { BaseMapper, JoinEnum } from "@fastcar/core/db";
 import { OrderType, OperatorEnum, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "@fastcar/core/db";
+import * as camelcase from "camelcase";
 
 const JoinEnums = Object.keys(JoinEnum).map((item) => {
 	return item.toLowerCase();
@@ -483,7 +484,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	 * @version 1.0 更新一条数据
 	 *
 	 */
-	async updateOne(sqlUpdate: SqlUpdate & { forceIndex?: string[] }, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
+	async updateOne(sqlUpdate: SqlUpdate & { forceIndex?: string[]; orders?: OrderType }, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		return await this.update(Object.assign({}, sqlUpdate, { limit: 1 }), ds, sessionId);
 	}
 
@@ -538,6 +539,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 				on?: string;
 			}>;
 			tableAlias?: string; //表名是别名
+			camelcaseStyle?: boolean;
 		} = {},
 		@DSIndex ds?: string,
 		@SqlSession sessionId?: string
@@ -558,6 +560,16 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 		if (!Array.isArray(rows)) {
 			return [];
+		}
+
+		if (conditions.camelcaseStyle) {
+			rows = rows.map((item) => {
+				let o = {};
+				Object.keys(item).forEach((key) => {
+					Reflect.set(o, camelcase(key), item[key]);
+				});
+				return o;
+			});
 		}
 
 		return rows as Array<T>;
