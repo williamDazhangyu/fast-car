@@ -63,9 +63,11 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 				} else {
 					value = dbValue;
 				}
-			} else {
-				value = null;
 			}
+		}
+
+		if (ValidationUtil.isNull(value)) {
+			value = null;
 		}
 
 		let tmpValue = SerializeUtil.serialize(value, type);
