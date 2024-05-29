@@ -245,7 +245,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			let alias = this.getFieldName(key);
 
 			let v = Reflect.get(row, key) as any;
-			if (TypeUtil.isObject(v) && Reflect.has(v, "operate") && Reflect.has(v, "value")) {
+			if (v != null && TypeUtil.isObject(v) && Reflect.has(v, "operate") && Reflect.has(v, "value")) {
 				str.push(`${alias} ${v.operate} ?`);
 				v = v.value;
 			} else {
