@@ -277,7 +277,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		};
 	}
 
-	protected analysisLimit(limit?: number, offest?: number): { str: string; args: number[] } {
+	protected analysisLimit(limit?: number, offest?: number): { str: string; args: string[] } {
 		if (typeof limit != "number" || limit < 0) {
 			return {
 				str: "",
@@ -285,13 +285,13 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			};
 		}
 
-		let args: number[] = [];
+		let args: string[] = [];
 		let str = `LIMIT ? `;
-		args = [limit];
+		args = [limit.toString()];
 
 		if (typeof offest == "number" && offest > 0) {
 			str = `LIMIT ?, ? `;
-			args = [offest, limit];
+			args = [offest.toString(), limit.toString()];
 		}
 
 		return {
