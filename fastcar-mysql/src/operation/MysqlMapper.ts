@@ -277,17 +277,27 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		};
 	}
 
-	protected analysisLimit(limit?: number, offest?: number): string {
+	protected analysisLimit(limit?: number, offest?: number): { str: string; args: number[] } {
 		if (typeof limit != "number" || limit < 0) {
-			return "";
+			return {
+				str: "",
+				args: [],
+			};
 		}
 
-		let str = `LIMIT ${limit} `;
+		let args: number[] = [];
+		let str = `LIMIT ? `;
+		args = [limit];
+
 		if (typeof offest == "number" && offest > 0) {
-			str = `LIMIT ${offest}, ${limit} `;
+			str = `LIMIT ?, ? `;
+			args = [offest, limit];
 		}
 
-		return str;
+		return {
+			str,
+			args,
+		};
 	}
 
 	protected analysisForceIndex(fileds: string[] = []): string {
@@ -472,9 +482,9 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let limitStr = this.analysisLimit(limit);
 		let ordersStr = this.analysisOrders(orders);
 
-		let sql = `UPDATE ${this.tableName} ${forceIndexStr} SET ${rowStr.sql} ${whereC.sql} ${ordersStr} ${limitStr}`;
+		let sql = `UPDATE ${this.tableName} ${forceIndexStr} SET ${rowStr.sql} ${whereC.sql} ${ordersStr} ${limitStr.str}`;
 
-		let [okPacket] = await this.dsm.exec({ sql, args: [...rowStr.args, ...whereC.args], ds, sessionId });
+		let [okPacket] = await this.dsm.exec({ sql, args: [...rowStr.args, ...whereC.args, ...limitStr.args], ds, sessionId });
 
 		let affectedRows = okPacket.affectedRows;
 		let changedRows = okPacket.changedRows;
@@ -555,8 +565,8 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 		let joinStr = this.analysisJoin(conditions.join);
 
-		let args = whereC.args;
-		let sql = `SELECT ${fields} FROM ${this.tableName} ${conditions.tableAlias || ""} ${joinStr} ${forceIndexStr} ${whereC.sql} ${groupStr} ${orderStr} ${limitStr}`.trim();
+		let args = [...whereC.args, ...limitStr.args];
+		let sql = `SELECT ${fields} FROM ${this.tableName} ${conditions.tableAlias || ""} ${joinStr} ${forceIndexStr} ${whereC.sql} ${groupStr} ${orderStr} ${limitStr.str}`.trim();
 
 		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
 
@@ -652,9 +662,9 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let whereC = this.analysisWhere(conditions.where);
 		let limitStr = this.analysisLimit(conditions.limit);
 
-		let sql = `DELETE FROM ${this.tableName} ${forceIndexStr} ${whereC.sql} ${limitStr}`;
+		let sql = `DELETE FROM ${this.tableName} ${forceIndexStr} ${whereC.sql} ${limitStr.str}`;
 
-		let [okPacket] = await this.dsm.exec({ sql, args: whereC.args, ds, sessionId });
+		let [okPacket] = await this.dsm.exec({ sql, args: [...whereC.args, ...limitStr.args], ds, sessionId });
 
 		let affectedRows = okPacket.affectedRows;
 		return affectedRows > 0;
