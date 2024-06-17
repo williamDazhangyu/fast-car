@@ -63,7 +63,7 @@ class ReverseGenerate {
 
 			tmpFieldList.push(`@DBType('${field.DATA_TYPE}')`);
 
-			if (field.COLUMN_KEY) {
+			if (field.COLUMN_KEY == "PRI") {
 				tmpFieldList.push("@PrimaryKey");
 
 				if (!importCoreAnnotation.includes("PrimaryKey")) {
