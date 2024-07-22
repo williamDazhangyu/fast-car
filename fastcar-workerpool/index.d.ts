@@ -4,7 +4,7 @@ export * from "./src/type/TaskType";
 
 export class WorkerPool extends EventEmitter {
 	//numThreads 默认为本机的最大线程数
-	constructor(numThreads?: number, scripts?: string | URL, workerData?: any);
+	constructor(info?: { numThreads?: number; scripts?: string | URL; workerData?: any });
 
 	private addNewWorker(scripts?: string | URL, workerData?: any): void;
 

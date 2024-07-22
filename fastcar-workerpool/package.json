@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/workerpool",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "工作线程方法包装",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "index.js",
@@ -21,7 +21,8 @@
 		"worker_threads"
 	],
 	"devDependencies": {
-		"@fastcar/core": "^0.2.38"
+		"@fastcar/core": "^0.2.62",
+		"@types/node": "^20.14.11"
 	},
 	"peerDependencies": {
 		"@fastcar/core": "*"

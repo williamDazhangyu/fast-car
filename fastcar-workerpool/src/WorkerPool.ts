@@ -20,7 +20,7 @@ export default class WorkerPool extends EventEmitter {
 	@Log("sys")
 	private logger!: Logger;
 
-	constructor(numThreads: number = WorkerPool.getDefaultThreads(), scripts?: string | URL, workerData?: any) {
+	constructor({ numThreads = WorkerPool.getDefaultThreads(), scripts, workerData }: { numThreads?: number; scripts?: string | URL; workerData?: any } = {}) {
 		super();
 		this.numThreads = numThreads;
 		this.workers = [];

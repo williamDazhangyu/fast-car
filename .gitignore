@@ -7,3 +7,4 @@ target/*
 *.log
 package-lock.json
 docs/
+pnpm-lock.yaml
