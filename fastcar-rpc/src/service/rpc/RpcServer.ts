@@ -223,7 +223,7 @@ export default class RpcServer implements MsgCallbackService {
 			return config.secure.password === password && config.secure.username === username;
 		}
 
-		return await service.auth(username, password, config);
+		return await service.auth(username, password, config, session);
 	}
 
 	disconnect(session: ClientSession, reason: string): void {

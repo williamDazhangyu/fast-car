@@ -32,6 +32,8 @@ export * from "./src/constant/SocketCodingDefault";
 export * from "./src/types/CodeProtocolEnum";
 export * from "./src/types/PBConfig";
 export interface RpcAuthService {
+	auth(username: string, password: string, config: SocketServerConfig, session: ClientSession, request?: any): Promise<boolean>;
+
 	auth(username: string, password: string, config: SocketServerConfig, request?: any): Promise<boolean>;
 }
 
