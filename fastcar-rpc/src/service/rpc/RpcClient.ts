@@ -38,7 +38,7 @@ export default class RpcClient implements MsgClientHookService {
 				retryInterval: 1000, //重试间隔 默认一秒
 				maxMsgNum: 10000, //最大消息瞬时并发数
 				timeout: 3000,
-				disconnectInterval: 100,
+				disconnectInterval: 10000, //断线重连十秒
 			},
 			config,
 			retry
@@ -257,16 +257,16 @@ export default class RpcClient implements MsgClientHookService {
 			this.checkStatus = true;
 			let nowTime = Date.now();
 
-			if (this.msgQueue.size > 0) {
-				//进行断线重连
-				if (!this.isConnect()) {
-					this.checkConnectTimer -= diff;
-					if (this.checkConnectTimer <= 0) {
-						this.checkConnectTimer = this.config.disconnectInterval || 1000;
-						await this.start();
-					}
+			//进行断线重连
+			if (!this.isConnect()) {
+				this.checkConnectTimer -= diff;
+				if (this.checkConnectTimer <= 0) {
+					this.checkConnectTimer = this.config.disconnectInterval || 1000;
+					await this.start();
 				}
+			}
 
+			if (this.msgQueue.size > 0) {
 				let cleanIds: Map<number, RpcResponseType> = new Map();
 				this.msgQueue.forEach((item, id) => {
 					if (nowTime > item.expiretime) {
