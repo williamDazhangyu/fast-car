@@ -45,6 +45,14 @@ export default class WsSocketClient extends SocketClient {
 			this.receiveMsg(msg);
 		});
 
+		io.on("error", (e: any) => {
+			this.logger.error("ws error");
+			this.logger.error(e.code);
+			if (e.code == "ECONNREFUSED") {
+				this.disconnect("ws connect refuse");
+			}
+		});
+
 		this.forceConnect = false;
 		this.io = io;
 	}
