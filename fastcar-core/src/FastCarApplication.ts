@@ -46,6 +46,7 @@ class FastCarApplication extends Events {
 	protected delayHotIds: Map<string, { fp: string; loadType: number }>;
 	protected reloadTimerId: NodeJS.Timeout | null;
 	protected basename: string = CommonConstant.Application;
+	protected componentAliasMap: Map<string | symbol, string | symbol>;
 
 	constructor() {
 		super();
@@ -58,6 +59,7 @@ class FastCarApplication extends Events {
 		this.watchFiles = new Map();
 		this.delayHotIds = new Map();
 		this.reloadTimerId = null;
+		this.componentAliasMap = new Map();
 
 		this.loadSelf();
 		this.addHot();
@@ -397,12 +399,13 @@ class FastCarApplication extends Events {
 			//判断是否有别名
 			let aliasName = Reflect.getMetadata(FastCarMetaData.Alias, instance);
 			if (aliasName) {
-				this.componentMap.set(aliasName, instance);
-				this.componentDeatils.set(aliasName, {
-					id: aliasName,
-					name: aliasName,
-					path: fp,
-				});
+				this.componentAliasMap.set(aliasName, instanceKey);
+				// this.componentMap.set(aliasName, instance);
+				// this.componentDeatils.set(aliasName, {
+				// 	id: aliasName,
+				// 	name: aliasName,
+				// 	path: fp,
+				// });
 			}
 
 			//判断是否需要热更加载
@@ -498,14 +501,23 @@ class FastCarApplication extends Events {
 	 * @version 1.0 根据名称组件
 	 */
 	getComponentByName(name: string | symbol): any {
-		return this.componentMap.get(name);
+		if (this.componentMap.has(name)) {
+			return this.componentMap.get(name);
+		}
+
+		let key = this.componentAliasMap.get(name);
+		if (key) {
+			return this.componentMap.get(key);
+		}
+
+		return null;
 	}
 
 	/***
 	 * @version 1.0 判断是否拥有组件名称
 	 */
 	hasComponentByName(name: string | symbol): boolean {
-		return this.componentMap.has(name);
+		return this.componentMap.has(name) || this.componentAliasMap.has(name as string);
 	}
 
 	/***
@@ -529,7 +541,16 @@ class FastCarApplication extends Events {
 	 *
 	 */
 	getComponentDetailByName(name: string | symbol): ComponentDesc | undefined {
-		return this.componentDeatils.get(name);
+		if (this.componentDeatils.has(name)) {
+			return this.componentDeatils.get(name);
+		}
+
+		let key = this.componentAliasMap.get(name);
+		if (key) {
+			return this.componentDeatils.get(key);
+		}
+
+		return undefined;
 	}
 
 	/***
