@@ -30,7 +30,7 @@ export default class ValidationUtil {
 
 	//修改数字的判断方法
 	static isNumber(param: any): boolean {
-		return !isNaN(param);
+		return ValidationUtil.isNotNull(param) && !isNaN(param);
 	}
 
 	static isString(param: any): boolean {
