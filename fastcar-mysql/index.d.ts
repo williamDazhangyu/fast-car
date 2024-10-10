@@ -112,7 +112,7 @@ export class MysqlMapper<T extends Object> implements DBMapper<T> {
 
 	protected analysisRow(row: RowData): RowType | null;
 
-	protected analysisLimit(limit?: number, offest?: number): string;
+	protected analysisLimit(l: { limit?: number; offest?: number; useServerPrepStmts?: boolean }): string;
 
 	protected analysisForceIndex(fileds?: string[]): string;
 

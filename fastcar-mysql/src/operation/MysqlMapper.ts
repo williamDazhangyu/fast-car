@@ -277,7 +277,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		};
 	}
 
-	protected analysisLimit(limit?: number, offest?: number): { str: string; args: string[] } {
+	protected analysisLimit({ limit, offest, useServerPrepStmts = true }: { limit?: number; offest?: number; useServerPrepStmts?: boolean }): { str: string; args: Array<number | string> } {
 		if (typeof limit != "number" || limit < 0) {
 			return {
 				str: "",
@@ -285,13 +285,17 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			};
 		}
 
-		let args: string[] = [];
+		let args: Array<number | string> = [];
 		let str = `LIMIT ? `;
-		args = [limit.toString()];
+		args = [useServerPrepStmts ? limit.toString() : limit];
 
 		if (typeof offest == "number" && offest > 0) {
 			str = `LIMIT ?, ? `;
-			args = [offest.toString(), limit.toString()];
+			if (useServerPrepStmts) {
+				args = [offest.toString(), limit.toString()];
+			} else {
+				args = [offest, limit];
+			}
 		}
 
 		return {
@@ -373,6 +377,8 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			return Promise.reject(new Error(`rows is empty by ${this.tableName} saveORUpdate`));
 		}
 
+		let useServerPrepStmts = rows.length == 1;
+
 		let afterKeys: string[] = Array.of();
 		let beforeKeys: string[] = Array.of();
 
@@ -400,7 +406,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let afterKeyStr = afterKeys.join(",");
 
 		let sql = `INSERT INTO ${this.tableName} (${beforeKeys.join(",")}) VALUES ${valueStr} ON DUPLICATE KEY UPDATE ${afterKeyStr}`;
-		let [okPacket] = await this.dsm.exec({ sql, args, ds, sessionId });
+		let [okPacket] = await this.dsm.exec({ sql, args, ds, sessionId, useServerPrepStmts });
 
 		return okPacket.insertId;
 	}
@@ -461,7 +467,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			});
 			i += tpmList.length;
 			let tmpSQL = sql + paramsList.join(",");
-			await this.dsm.exec({ sql: tmpSQL, args, ds, sessionId });
+			await this.dsm.exec({ sql: tmpSQL, args, ds, sessionId, useServerPrepStmts: false });
 		}
 
 		return true;
@@ -479,12 +485,15 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 
 		let forceIndexStr = this.analysisForceIndex(forceIndex);
 		let whereC = this.analysisWhere(where);
-		let limitStr = this.analysisLimit(limit);
+		let limitStr = this.analysisLimit({
+			limit,
+			useServerPrepStmts: false,
+		});
 		let ordersStr = this.analysisOrders(orders);
 
 		let sql = `UPDATE ${this.tableName} ${forceIndexStr} SET ${rowStr.sql} ${whereC.sql} ${ordersStr} ${limitStr.str}`;
 
-		let [okPacket] = await this.dsm.exec({ sql, args: [...rowStr.args, ...whereC.args, ...limitStr.args], ds, sessionId });
+		let [okPacket] = await this.dsm.exec({ sql, args: [...rowStr.args, ...whereC.args, ...limitStr.args], ds, sessionId, useServerPrepStmts: false });
 
 		let affectedRows = okPacket.affectedRows;
 		let changedRows = okPacket.changedRows;
@@ -560,7 +569,10 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let whereC = this.analysisWhere(conditions.where);
 		let groupStr = this.analysisGroups(conditions.groups);
 		let orderStr = this.analysisOrders(conditions.orders);
-		let limitStr = this.analysisLimit(conditions?.limit, conditions?.offest);
+		let limitStr = this.analysisLimit({
+			limit: conditions?.limit,
+			offest: conditions?.offest,
+		});
 		let forceIndexStr = this.analysisForceIndex(conditions?.forceIndex);
 
 		let joinStr = this.analysisJoin(conditions.join);
@@ -660,7 +672,9 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 	async delete(conditions: SqlDelete & { forceIndex?: string[] }, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<boolean> {
 		let forceIndexStr = this.analysisForceIndex(conditions?.forceIndex);
 		let whereC = this.analysisWhere(conditions.where);
-		let limitStr = this.analysisLimit(conditions.limit);
+		let limitStr = this.analysisLimit({
+			limit: conditions.limit,
+		});
 
 		let sql = `DELETE FROM ${this.tableName} ${forceIndexStr} ${whereC.sql} ${limitStr.str}`;
 
@@ -718,13 +732,6 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let [rows] = await this.dsm.query({ sql, args, ds, sessionId });
 
 		return rows;
-	}
-
-	/**
-	 * @version 1.0 根据模型生成 todo
-	 */
-	async createTable(tableName: string = this.tableName) {
-		console.log(Reflect.get);
 	}
 }
 
