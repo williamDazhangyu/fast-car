@@ -38,9 +38,8 @@ class MysqlDataSourceManager implements DataSourceManager {
 
 	async connExecute(conn: mysql.PoolConnection, sql: string, args: any[] = [], useServerPrepStmts: boolean = true) {
 		//打印sql
-		let finalSQL = mysql.format(sql, args).replace(/  /g, " ");
-
 		if (this.config.printSQL) {
+			let finalSQL = mysql.format(sql, args).replace(/  /g, " ");
 			this.sysLogger.info(finalSQL);
 		}
 
@@ -54,6 +53,7 @@ class MysqlDataSourceManager implements DataSourceManager {
 
 		if (diff >= this.config.slowSQLInterval) {
 			this.sysLogger.warn(`The SQL execution time took ${diff} ms, more than ${this.config.slowSQLInterval} ms`);
+			let finalSQL = mysql.format(sql, args).replace(/  /g, " ");
 			this.sysLogger.warn(finalSQL);
 		}
 
