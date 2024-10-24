@@ -223,7 +223,7 @@ export default class RpcClient implements MsgClientHookService {
 			}
 
 			let cb = new TaskAsync((err: RpcResponseType | null, res: RpcMessage) => {
-				err ? resolve(err) : resolve({ code: RpcResponseCode.ok, data: res.data } || { code: RpcResponseCode.ok });
+				err ? resolve(err) : resolve({ code: RpcResponseCode.ok, data: res.data || {} });
 			});
 
 			let rpcMsg: RpcClientMsgBox = {
