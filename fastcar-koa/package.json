@@ -35,7 +35,8 @@
 		"@types/koa": "^2.13.5",
 		"reflect-metadata": "^0.1.13",
 		"@types/koa-bodyparser": "^4.3.11",
-		"@types/koa-router": "^7.4.6"
+		"@types/koa-router": "^7.4.6",
+		"@types/koa__multer": "*"
 	},
 	"dependencies": {
 		"koa": "^2.13.1",
@@ -58,9 +59,8 @@
 		"koa-range": "^0.3.0",
 		"koa-static": "^5.0.0",
 		"koa2-cors": "^2.0.6",
-		"swagger-ui-dist": "4.5.0",
-		"@types/koa__multer": "*",
-		"multer": "*"
+		"multer": "*",
+		"swagger-ui-dist": "4.5.0"
 	},
 	"peerDependenciesMeta": {
 		"@types/koa-bodyparser": {
