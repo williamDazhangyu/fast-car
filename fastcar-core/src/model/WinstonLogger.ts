@@ -79,7 +79,7 @@ export default class WinstonLogger {
 						text += this.colorizeData(content.message);
 
 						if (Reflect.has(info, SPLAT)) {
-							let splatMsg: any[] = Reflect.get(info, SPLAT);
+							let splatMsg: any[] = Reflect.get(info, SPLAT) as any;
 							splatMsg.forEach((item) => {
 								text += " " + this.colorizeData(item);
 							});

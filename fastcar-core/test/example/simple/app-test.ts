@@ -10,6 +10,7 @@ import Logger from "../../../src/interface/Logger";
 import ApplicationSetting from "../../../src/annotation/env/ApplicationSetting";
 import { ComponentScanExclusion } from "../../../src/annotation";
 import BaseName from "../../../src/annotation/env/BaseName";
+import * as path from "path";
 
 @Application
 @ENV("test") //设置环境变量
@@ -19,7 +20,7 @@ import BaseName from "../../../src/annotation/env/BaseName";
 	appid: "other-server",
 })
 @BaseName("other")
-@ComponentScanExclusion("app.ts")
+@ComponentScanExclusion(path.join(__dirname, "app.ts"))
 class APP implements ApplicationHook {
 	app!: FastCarApplication;
 

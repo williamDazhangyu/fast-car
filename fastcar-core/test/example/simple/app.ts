@@ -11,8 +11,9 @@ import Log from "../../../src/annotation/stereotype/Log";
 import Logger from "../../../src/interface/Logger";
 import ApplicationSetting from "../../../src/annotation/env/ApplicationSetting";
 import { ComponentScanExclusion } from "../../../src/annotation";
+import * as path from "path";
 
-@ComponentScanExclusion("app-test.ts")
+@ComponentScanExclusion(path.join(__dirname, "app-test.ts"))
 @Application
 @ENV("test") //设置环境变量
 @BasePath(__dirname) //直接运行ts文件时可不用
@@ -56,13 +57,13 @@ import HelloConfig from "./config/HelloConfig";
 describe("程序应用测试", () => {
 	it("获取配置", () => {
 		//调用相关方法
-		let helloController: HelloController = appInsatcne.app.getComponentByTarget(HelloController);
-		helloController.callHello();
-		helloController.print();
-		console.log("获取到的配置--", helloController.getConfig());
+		let helloController = appInsatcne.app.getComponentByTarget<HelloController>(HelloController);
+		helloController?.callHello();
+		helloController?.print();
+		console.log("获取到的配置--", helloController?.getConfig());
 	});
 	it("测试别名", () => {
-		let controller1: AliasController = appInsatcne.app.getComponentByName("controller1");
+		let controller1 = appInsatcne.app.getComponentByName("controller1") as AliasController;
 		console.log("controller1类型和AliasController相符", controller1 instanceof AliasController);
 	});
 	it("获取完善的加载信息", () => {
@@ -77,8 +78,8 @@ describe("程序应用测试", () => {
 		}, 2000);
 	});
 	it("根据环境动态设置变量", () => {
-		let evnConfig: EnvConfig = appInsatcne.app.getComponentByTarget(EnvConfig);
-		console.log(evnConfig.text);
+		let evnConfig = appInsatcne.app.getComponentByTarget<EnvConfig>(EnvConfig);
+		console.log(evnConfig?.text);
 	});
 	it("测试调用时加载时机才会注入方法", () => {
 		let callServerice = new CallService();
@@ -88,25 +89,24 @@ describe("程序应用测试", () => {
 		console.log("配置", appInsatcne.app.getSetting("customHello"));
 	});
 	it("查找一个不存在的注入", () => {
-		let notFound: NotFoundController = appInsatcne.app.getComponentByTarget(NotFoundController);
+		let notFound = appInsatcne.app.getComponentByTarget<NotFoundController>(NotFoundController);
 		try {
-			notFound.getNotFound();
+			notFound?.getNotFound();
 		} catch (e) {
 			appInsatcne.app.getLogger().error(e);
 		}
-
 		try {
-			notFound.getAutoNotFound();
+			notFound?.getAutoNotFound();
 		} catch (e) {
 			appInsatcne.app.getLogger().error(e);
 		}
 	});
 	it("热更新配置解析", () => {
 		setInterval(() => {
-			let hotConfig: HotConfig = appInsatcne.app.getComponentByTarget(HotConfig);
-			let helloConfig: HelloConfig = appInsatcne.app.getComponentByTarget(HelloConfig);
-			console.log("热更新配置", hotConfig.hello);
-			console.log("不变的配置", helloConfig.hello);
+			let hotConfig = appInsatcne.app.getComponentByTarget<HotConfig>(HotConfig);
+			let helloConfig = appInsatcne.app.getComponentByTarget<HelloConfig>(HelloConfig);
+			console.log("热更新配置", hotConfig?.hello);
+			console.log("不变的配置", helloConfig?.hello);
 		}, 1000);
 	});
 });

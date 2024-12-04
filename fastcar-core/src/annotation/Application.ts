@@ -1,11 +1,13 @@
-import FastCarApplication from "../FastCarApplication";
+import { ClassConstructor } from "../type/ClassConstructor";
 import ClassUtils from "../utils/ClassUtils";
 import TypeUtil from "../utils/TypeUtil";
 
 //基础服务的应用
 export default function Application(target: any) {
 	return new Proxy(target, {
-		construct: (target: any, args: any) => {
+		construct: (target: ClassConstructor<Object>, args: any) => {
+			const FastCarApplication = require("../FastCarApplication").default;
+
 			let app = new FastCarApplication();
 			let appProxy = new target(...args);
 			Reflect.set(appProxy, "app", app);
@@ -39,6 +41,7 @@ export default function Application(target: any) {
 				}
 			}
 
+			app.loadLoggerIOC(appProxy);
 			app.init();
 			return appProxy;
 		},

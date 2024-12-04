@@ -71,6 +71,9 @@ export function Autowired(target: any, propertyKey: string): void;
 //调用时注入类
 export function CallDependency(target: any, propertyKey: string): void;
 
+//按需注入加载
+export function DemandInjection(target: any): any;
+
 //异常方法类
 export function ExceptionMonitor(target: any): void;
 

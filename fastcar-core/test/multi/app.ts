@@ -10,6 +10,6 @@ class APP {
 
 let instance = new APP();
 setTimeout(() => {
-	let c: CService = instance.app.getComponentByTarget(CService);
-	c.test();
+	let c = instance.app.getComponentByTarget<CService>(CService);
+	c?.test();
 }, 1000);

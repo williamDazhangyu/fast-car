@@ -50,6 +50,7 @@ import ResourcePath from "./annotation/env/ResourcePath";
 import BaseName from "./annotation/env/BaseName";
 import CustomType from "./annotation/valid/CustomType";
 import ComponentScanMust from "./annotation/scan/ComponentScanMust";
+import DemandInjection from "./annotation/bind/DemandInjection";
 
 //注解暴露出去
 export {
@@ -73,6 +74,7 @@ export {
 	Application,
 	Autowired,
 	CallDependency,
+	DemandInjection,
 	AliasInjection,
 	ExceptionMonitor,
 	Deprecate,

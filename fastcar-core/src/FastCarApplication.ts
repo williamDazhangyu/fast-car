@@ -19,17 +19,19 @@ import Component from "./annotation/stereotype/Component";
 import WinstonLogger from "./model/WinstonLogger";
 import * as winston from "winston";
 import Logger from "./interface/Logger";
-import { ComponentDesc } from "./type/ComponentDesc";
+import { ComponentDesc, InjectionMeta } from "./type/ComponentDesc";
 import DateUtil from "./utils/DateUtil";
 import { ProcessType } from "./type/ProcessType";
-import { FileHotterDesc } from "./type/FileHotterDesc";
+import { FileHotterDesc, HotReloadEnum } from "./type/FileHotterDesc";
 import { LifeCycleType } from "./annotation/lifeCycle/AddLifeCycleItem";
 import { WinstonLoggerType } from "./type/WinstonLoggerType";
+import { ClassConstructor } from "./type/ClassConstructor";
+import ReflectUtil from "./utils/ReflectUtil";
 import Log from "./annotation/stereotype/Log";
 
 @Component
 class FastCarApplication extends Events {
-	protected componentMap: Map<string | symbol, any>; //组件键值对
+	protected componentMap: Map<string | symbol, ClassConstructor<Object> | Object>; //组件键值对
 	protected sysConfig: SYSConfig; //系统配置
 	protected basePath!: string; //入口文件夹路径
 	protected baseFileName!: string; //入口文件路径
@@ -37,16 +39,17 @@ class FastCarApplication extends Events {
 	protected applicationStatus: AppStatusEnum;
 
 	@Log("sys")
-	protected sysLogger!: winston.Logger;
+	protected sysLogger: Logger;
 
 	protected componentDeatils: Map<string | symbol, ComponentDesc>; //读取路径  名称
 	protected liveTime: number;
 	protected watchFiles: Map<string, FileHotterDesc[]>;
 	protected resourcePath: string = ""; //资源路径
-	protected delayHotIds: Map<string, { fp: string; loadType: number }>;
+	protected delayHotIds: Map<string, { fp: string; loadType: HotReloadEnum }>;
 	protected reloadTimerId: NodeJS.Timeout | null;
 	protected basename: string = CommonConstant.Application;
 	protected componentAliasMap: Map<string | symbol, string | symbol>;
+	protected hotConfigure: Map<string, string[]>;
 
 	constructor() {
 		super();
@@ -60,6 +63,9 @@ class FastCarApplication extends Events {
 		this.delayHotIds = new Map();
 		this.reloadTimerId = null;
 		this.componentAliasMap = new Map();
+		this.hotConfigure = new Map();
+
+		this.sysLogger = console;
 
 		this.loadSelf();
 		this.addHot();
@@ -81,6 +87,7 @@ class FastCarApplication extends Events {
 			id: key,
 			name: "FastCarApplication",
 			path: __filename,
+			classZ: this,
 		});
 		//暴露一个全局的app 以便调用
 		Reflect.set(global, CommonConstant.FastcarApp, this);
@@ -91,22 +98,26 @@ class FastCarApplication extends Events {
 	 * @version 1.1 热更新配置文件
 	 */
 	addHot() {
-		this.on("reload", (fp: string) => {
+		this.on(HotReloadEnum.reload, (fp: string) => {
 			if (this.applicationStatus != AppStatusEnum.RUN) {
 				return;
 			}
 
-			this.addDelayHot(fp, 1);
+			this.addDelayHot(fp, HotReloadEnum.reload);
 		});
 
-		this.on("sysReload", (fp: string) => {
+		this.on(HotReloadEnum.sysReload, (fp: string) => {
 			if (fp.indexOf(this.basename) != -1) {
-				this.addDelayHot(fp, 2);
+				this.addDelayHot(fp, HotReloadEnum.sysReload);
 			}
+		});
+
+		this.on(HotReloadEnum.configReload, (fp: string) => {
+			this.addDelayHot(fp, HotReloadEnum.configReload);
 		});
 	}
 
-	addDelayHot(fp: string, loadType: number) {
+	addDelayHot(fp: string, loadType: HotReloadEnum) {
 		if (this.delayHotIds.has(fp)) {
 			return;
 		}
@@ -124,7 +135,7 @@ class FastCarApplication extends Events {
 	reloadFiles() {
 		this.delayHotIds.forEach(({ fp, loadType }) => {
 			switch (loadType) {
-				case 1: {
+				case HotReloadEnum.reload: {
 					let moduleClass = ClassLoader.loadModule(fp, true);
 					this.sysLogger.info("hot update---" + fp);
 					if (moduleClass != null) {
@@ -134,12 +145,26 @@ class FastCarApplication extends Events {
 					}
 					break;
 				}
-				case 2: {
+				case HotReloadEnum.sysReload: {
 					this.sysLogger.info("sysConfig hot update----" + fp);
 					this.loadSysConfig();
 					break;
 				}
+				case HotReloadEnum.configReload: {
+					let ids = this.hotConfigure.get(fp);
+					if (ids) {
+						ids.forEach((item) => {
+							let instance = this.getComponentByName(item);
+							if (instance) {
+								this.updateConfig(instance, fp);
+							}
+						});
+					}
+					break;
+				}
 				default: {
+					this.sysLogger.warn(`not found ${loadType} by ${fp}`);
+					break;
 				}
 			}
 		});
@@ -234,7 +259,7 @@ class FastCarApplication extends Events {
 
 		res = Reflect.get(this.sysConfig, key);
 		if (ValidationUtil.isNotNull(res)) {
-			res;
+			return res;
 		}
 
 		return Reflect.get(this, key);
@@ -364,116 +389,25 @@ class FastCarApplication extends Events {
 			let beforeKey = this.getInjectionUniqueKeyByFilePath(fp, iname);
 
 			if (beforeKey) {
-				let beforeInstance = this.componentMap.get(beforeKey);
+				let beforeInstance = this.getBean(beforeKey);
 				if (!!beforeInstance) {
 					MixTool.assign(beforeInstance, classZ);
 					return;
 				}
 			}
 
-			//判断是否需要加载对应配置
-			let cp = Reflect.getMetadata(LifeCycleModule.LoadConfigure, Target);
-			if (cp) {
-				let rfp = path.join(this.getResourcePath(), cp);
-				let tmpConfig = FileUtil.getResource(rfp);
-
-				//进行实例化赋值
-				if (tmpConfig) {
-					//进行赋值不改变基础属性
-					if (TypeUtil.isFunction(classZ)) {
-						MixTool.copPropertyValue(classZ.prototype, tmpConfig);
-					} else {
-						MixTool.copPropertyValue(classZ, tmpConfig);
-					}
-				}
-			}
-
-			let instance = TypeUtil.isFunction(classZ) ? new classZ() : classZ;
-			this.componentMap.set(instanceKey, instance);
+			//这边只放元数据
 			this.componentDeatils.set(instanceKey, {
 				id: instanceKey,
 				name: classZ?.name || FileUtil.getFileName(fp),
 				path: fp,
+				classZ,
 			});
 
-			//判断是否有别名
-			let aliasName = Reflect.getMetadata(FastCarMetaData.Alias, instance);
-			if (aliasName) {
-				this.componentAliasMap.set(aliasName, instanceKey);
-				// this.componentMap.set(aliasName, instance);
-				// this.componentDeatils.set(aliasName, {
-				// 	id: aliasName,
-				// 	name: aliasName,
-				// 	path: fp,
-				// });
-			}
-
-			//判断是否需要热更加载
-			if (this.isHotter() || Reflect.getMetadata(FastCarMetaData.Hotter, instance)) {
-				let fpObj = this.watchFiles.get(fp);
-				let fpdesc = {
-					key: instanceKey,
-					name: iname,
-				};
-				if (!fpObj) {
-					fpObj = [fpdesc];
-					ClassLoader.watchServices(fp, this);
-					this.watchFiles.set(fp, fpObj);
-				} else {
-					fpObj.push(fpdesc);
-				}
-			}
+			//加载Bean
+			this.getBean(instanceKey);
 		}
 	}
-
-	/***
-	 * @version 1.0 装配模块
-	 * @version 1.0 装配日志模块
-	 * @version 1.1 移除装配日志模块 改为随用随取
-	 * @deprecated 弃用系统自动装配
-	 */
-	// injectionModule(instance: any, instanceName: string | symbol): void {
-	// 	let relyname = FastCarMetaData.IocModule;
-	// 	let moduleList: Map<string, string> = Reflect.getMetadata(relyname, instance);
-	// 	let detailInfo = this.componentDeatils.get(instanceName);
-
-	// 	if (moduleList && moduleList.size > 0) {
-	// 		moduleList.forEach((name: string, propertyKey: string) => {
-	// 			let func = this.componentMap.get(name);
-
-	// 			//如果等于自身则进行注入
-	// 			if (name === FastCarApplication.name || name === FastCarMetaData.APP) {
-	// 				func = this;
-	// 			} else {
-	// 				if (!this.componentMap.has(name)) {
-	// 					//找不到依赖项
-	// 					let injectionError = new Error(`Unsatisfied dependency expressed through [${propertyKey}] in ${detailInfo?.path} `);
-	// 					this.sysLogger.error(injectionError.message);
-	// 					throw injectionError;
-	// 				}
-	// 			}
-
-	// 			Reflect.set(instance, propertyKey, func);
-	// 		});
-	// 	}
-	// }
-
-	/**
-	 * @version 1.0 加载需要注入的类
-	 * @deprecated
-	 */
-	// loadInjectionModule() {
-	// 	this.componentMap.forEach((instance, instanceName) => {
-	// 		//补充实例找不到时 不能被注解
-	// 		if (!instance) {
-	// 			let insatnceError = new Error(`instance not found by ${instanceName.toString()}`);
-	// 			this.sysLogger.error(insatnceError.message);
-	// 			throw insatnceError;
-	// 		}
-
-	// 		this.injectionModule(instance, instanceName);
-	// 	});
-	// }
 
 	/***
 	 * @version 1.0 根据类型获取组件
@@ -493,24 +427,154 @@ class FastCarApplication extends Events {
 	/***
 	 * @version 1.0 获取全部的组件列表
 	 */
-	getComponentList(): any[] {
+	getComponentList(): (Object | ClassConstructor<Object>)[] {
 		return [...this.componentMap.values()];
 	}
 
 	/***
 	 * @version 1.0 根据名称组件
 	 */
-	getComponentByName(name: string | symbol): any {
+	getComponentByName(name: string | symbol): Object | null {
 		if (this.componentMap.has(name)) {
-			return this.componentMap.get(name);
+			return this.getBean(name);
 		}
 
 		let key = this.componentAliasMap.get(name);
 		if (key) {
-			return this.componentMap.get(key);
+			return this.getBean(key);
 		}
 
 		return null;
+	}
+
+	/**
+	 * @version 1.0 组件改成按需加载的模式
+	 */
+	getBean(key: string | symbol): Object | null {
+		let instance = this.componentMap.get(key) || null;
+		if (!instance) {
+			//初始化
+			let item = this.componentDeatils.get(key);
+			if (!item) {
+				return null;
+			}
+
+			//判断是否有别名
+			let instanceKey = item.id;
+			let classZ = item.classZ as ClassConstructor<Object>;
+			let instance = TypeUtil.isFunction(classZ) ? new classZ() : classZ;
+
+			let hotter = this.isHotter();
+			if (!hotter) {
+				if (classZ?.prototype && Reflect.getMetadata(FastCarMetaData.Hotter, classZ.prototype)) {
+					hotter = true;
+				}
+			}
+
+			//加载配置
+			let cp = Reflect.getMetadata(LifeCycleModule.LoadConfigure, classZ);
+			if (cp) {
+				let rfp = path.join(this.getResourcePath(), cp);
+				this.updateConfig(instance, rfp);
+
+				if (hotter) {
+					//监听资源文件
+					this.setHotConfigures(rfp, instanceKey);
+					ClassLoader.watchServices(rfp, this, HotReloadEnum.configReload);
+				}
+			}
+
+			this.loadInjectionService(instance);
+
+			this.loadLoggerIOC(instance);
+
+			let aliasName = Reflect.getMetadata(FastCarMetaData.Alias, instance);
+			if (aliasName) {
+				this.componentAliasMap.set(aliasName, instanceKey);
+			}
+
+			let fp = item.path;
+			let iname = classZ?.name || FileUtil.getFileName(fp);
+
+			//判断是否需要热更加载
+			if (hotter) {
+				let fpObj = this.watchFiles.get(fp);
+				let fpdesc = {
+					key: instanceKey,
+					name: iname,
+				};
+				if (!fpObj) {
+					fpObj = [fpdesc];
+					ClassLoader.watchServices(fp, this);
+					this.watchFiles.set(fp, fpObj);
+				} else {
+					fpObj.push(fpdesc);
+				}
+			}
+
+			this.componentMap.set(key, instance);
+		}
+
+		return instance;
+	}
+
+	public loadInjectionService(instance: Object) {
+		let injectionIds: Array<InjectionMeta> = Reflect.getMetadata(FastCarMetaData.InjectionSingleInstance, instance);
+		if (injectionIds && injectionIds.length > 0) {
+			injectionIds.forEach((item) => {
+				Reflect.defineProperty(instance, item.key, {
+					get: () => {
+						let key = ReflectUtil.getNameByPropertyKey(instance, item.alias || item.key);
+						if (!this.hasComponentByName(key)) {
+							//找不到依赖组件异常
+							let injectionError = new Error(`Unsatisfied dependency expressed through [${item.key}] `);
+							throw injectionError;
+						}
+
+						return this.getComponentByName(key);
+					},
+				});
+			});
+		}
+	}
+
+	public loadLoggerIOC(instance: Object) {
+		let logIds: Array<{
+			propertyKey: string;
+			name: string;
+		}> = Reflect.getMetadata(FastCarMetaData.InjectionLog, instance);
+
+		if (logIds && logIds.length > 0) {
+			logIds.forEach((item) => {
+				Reflect.defineProperty(instance, item.propertyKey, {
+					get: (): Logger => {
+						let appid = this.getSetting(CommonConstant.APPId) || ""; //进行差异化区分
+						return this.getLogger(appid ? `${appid}.${item.name}` : item.name);
+					},
+				});
+			});
+		}
+	}
+
+	private updateConfig(instance: Object, fp: string) {
+		let tmpConfig = FileUtil.getResource(fp);
+
+		//进行实例化赋值
+		if (tmpConfig) {
+			MixTool.copPropertyValue(instance, tmpConfig);
+		}
+	}
+
+	private setHotConfigures(fid: string, servicePath: string) {
+		let list = this.hotConfigure.get(fid);
+		if (!list) {
+			list = [];
+			this.hotConfigure.set(fid, list);
+		}
+
+		if (!list.includes(servicePath)) {
+			list.push(servicePath);
+		}
 	}
 
 	/***
@@ -523,9 +587,11 @@ class FastCarApplication extends Events {
 	/***
 	 * @version 1.0 根据原型获取实例
 	 */
-	getComponentByTarget(target: Object): any {
+	getComponentByTarget<T>(target: Object): T | null {
 		let key = this.getInjectionUniqueKey(target);
-		return this.componentMap.get(key);
+		let bean = this.getBean(key);
+
+		return bean != null ? (bean as T) : null;
 	}
 
 	/**
@@ -574,8 +640,6 @@ class FastCarApplication extends Events {
 		}
 
 		this.loggerFactory = new WinstonLogger(defaultConfig);
-		//添加系统日志
-		// this.sysLogger = this.loggerFactory.addLogger(CommonConstant.SYSLOGGER);
 	}
 
 	/***
@@ -587,6 +651,7 @@ class FastCarApplication extends Events {
 		this.baseFileName = (Reflect.get(this, CommonConstant.BaseFileName) || require.main?.filename || module.filename) as string;
 
 		this.beforeStartServer();
+
 		this.startServer();
 		this.addExitEvent();
 		this.addExecptionEvent();
@@ -678,19 +743,17 @@ class FastCarApplication extends Events {
 
 		//监听系统配置
 		if (this.isHotterSysConfig()) {
-			ClassLoader.watchServices(this.getResourcePath(), this, "sysReload");
+			ClassLoader.watchServices(this.getResourcePath(), this, HotReloadEnum.sysReload);
 		}
 
 		//开启日志
 		this.startLog();
 
+		this.loadLoggerIOC(this);
+
 		this.sysLogger.info("Start scanning component");
 		this.loadClass();
 		this.sysLogger.info("Complete component scan");
-
-		// this.sysLogger.info("Start component injection");
-		// this.loadInjectionModule();
-		// this.sysLogger.info("Complete component injection");
 	}
 
 	/***

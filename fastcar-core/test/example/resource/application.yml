@@ -2,6 +2,8 @@ application:
     scan:
         exclude: ["noclude"]
 settings:
+    # hotter: true
+    # hotterSysConfig: true
     log:
         consoleLevel: info
         fileLevel: info

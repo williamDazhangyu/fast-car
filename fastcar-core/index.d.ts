@@ -4,6 +4,8 @@ import { ComponentKind } from "./src/constant/ComponentKind";
 import { LifeCycleModule } from "./src/constant/LifeCycleModule";
 import { FIELDTYPE } from "./src/model/DataMap";
 import { ProcessType } from "./src/type/ProcessType";
+import { HotReloadEnum } from "./src/type/FileHotterDesc";
+import { ClassConstructor } from "./src/type/ClassConstructor";
 
 declare type ComponentDesc = {
 	id: string;
@@ -56,26 +58,29 @@ export class FastCarApplication extends Events {
 
 	/***
 	 * @version 1.0 热更新组件
+	 * @version 1.1 热更新配置文件
 	 */
 	addHot(): void;
 
-	/**
+	addDelayHot(fp: string, loadType: HotReloadEnum): void;
+
+	reloadFiles(): void;
+
+	/***
 	 * @version 1.0 获取资源路径
 	 */
 	getResourcePath(): string;
-
 	/***
 	 * @version 1.0 获取项目的基本路径
 	 *
 	 */
 	getBasePath(): string;
 
-	/***
-	 * @version 1.0 获取项目的基础资源路径
+	/**
+	 * @version 1.0 获取项目读取的基本配置路径
 	 */
 	getBaseName(): string;
-
-	/**
+	/***
 	 * @version 1.0 加载系统配置 加载顺序为 default json < yaml < env
 	 *
 	 */
@@ -83,28 +88,22 @@ export class FastCarApplication extends Events {
 
 	setSetting(key: string | symbol, value: any): void;
 
-	/**
+	/***
 	 * @version 1.0 获取自定义设置 设置优先级 配置自定义>系统配置>初始化
-	 * @param key
+	 *
 	 */
 	getSetting(key: string | symbol): any;
 
-	/**
+	/***
 	 * @version 1.0 获取应用配置
-	 * @return
 	 */
 	getapplicationConfig(): ApplicationConfig;
-
-	/**
+	/***
 	 * @version 1.0 扫描组件
+	 * @version 1.1 新增手动注入组件
+	 * @version 1.2 改成统一入口
 	 */
 	loadClass(): void;
-
-	/***
-	 * @version 1.0 装配单个模块
-	 * @deprecated 修改为主动查找时装配
-	 */
-	injectionModule(instance: any, instanceName: string | symbol): void;
 
 	/***
 	 * @version 1.0 根据名称获取组件的加载情况
@@ -118,35 +117,45 @@ export class FastCarApplication extends Events {
 	 */
 	getComponentDetailByTarget(target: Object): ComponentDesc | undefined;
 
-	/**
-	 * @version 1.0 加载需要注入的类
-	 * @deprecated 修改为主动查找时装配
+	getInjectionUniqueKeyByFilePath(fp: string, name: string): string | symbol | null;
+	/***
+	 * @version 1.0 转成实例对象
+	 * @version 1.0.1 新增加载时识别载入配置选项
+	 *
 	 */
-	loadInjectionModule(): void;
+	convertInstance(classZ: any, fp: string): void;
 
-	/**
+	/***
 	 * @version 1.0 根据类型获取组件
-	 * @param name
-	 * @return
 	 */
 	getComponentByType(name: ComponentKind): any[];
 
-	/**
+	/***
 	 * @version 1.0 获取全部的组件列表
-	 * @return
 	 */
-	getComponentList(): any[];
-
-	/**
+	getComponentList(): (Object | ClassConstructor<Object>)[];
+	/***
 	 * @version 1.0 根据名称组件
-	 * @param name
 	 */
-	getComponentByName(name: string | symbol): any;
+	getComponentByName(name: string | symbol): Object | null;
+	/**
+	 * @version 1.0 组件改成按需加载的模式
+	 */
+	getBean(key: string | symbol): Object | null;
+
+	loadInjectionService(instance: Object): void;
+
+	loadLoggerIOC(instance: Object): void;
+
+	/***
+	 * @version 1.0 判断是否拥有组件名称
+	 */
+	hasComponentByName(name: string | symbol): boolean;
 
 	/***
 	 * @version 1.0 根据原型获取实例
 	 */
-	getComponentByTarget(target: Object): any;
+	getComponentByTarget<T>(target: Object): T | null;
 
 	/**
 	 * @version 1.0 获取组件详情列表
@@ -155,16 +164,12 @@ export class FastCarApplication extends Events {
 	getComponentDetailsList(): ComponentDesc[];
 
 	/**
-	 * @version 1.0 判断组件是否存在
-	 */
-	hasComponentByName(name: string | symbol): boolean;
-
-	/**
 	 * @version 1.0 开启日志系统
+	 * @version 1.1 更改为采用winston日志
 	 */
 	startLog(): void;
 
-	/**
+	/***
 	 * @version 1.0 初始化应用
 	 */
 	init(): void;
@@ -173,6 +178,8 @@ export class FastCarApplication extends Events {
 	 * @version 1.0 退出事件监听
 	 *
 	 */
+	exitEvent(msg: string): Promise<void>;
+
 	addExitEvent(): void;
 
 	/***
@@ -180,28 +187,24 @@ export class FastCarApplication extends Events {
 	 */
 	addExecptionEvent(): void;
 
-	/**
+	/***
 	 * @version 1.0 自动调用方法
-	 * @param name
 	 */
-	automaticRun(name: LifeCycleModule): void;
+	automaticRun(name: LifeCycleModule): Promise<void>;
 
 	/**
 	 * @version 1.0 开启应用前执行的操作 加载配置,扫描组件，注入依赖组件
 	 */
 	beforeStartServer(): void;
-
-	/**
+	/***
 	 * @version 1.0 启动服务
 	 */
-	startServer(): void;
-
-	/**
+	startServer(): Promise<void>;
+	/***
 	 * @version 1.0 停止服务前自动调用服务
 	 */
-	beforeStopServer(): void;
-
-	/**
+	beforeStopServer(): Promise<void>;
+	/***
 	 * @version 1.0 停止服务
 	 */
 	stopServer(): void;
@@ -233,6 +236,10 @@ export class FastCarApplication extends Events {
 	 *
 	 */
 	isHotter(): boolean;
+	/***
+	 * @version 1.0 是否支持资源文件热更
+	 */
+	isHotterSysConfig(): boolean;
 
 	/**
 	 * @version 1.0 指定热更新文件

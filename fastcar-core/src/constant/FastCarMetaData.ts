@@ -24,4 +24,6 @@ export enum FastCarMetaData {
 	HotterSysConfig = "hotterSysConfig", //支持热更系统配置
 	CustomType = "custom:type", //自定义类型
 	ComponentScanMust = "ComponentScanMust", //扫描路径
+	InjectionSingleInstance = "InjectionSingleInstance", //单个实例注入的服务
+	InjectionLog = "InjectionLog", //反射的日志方法
 }

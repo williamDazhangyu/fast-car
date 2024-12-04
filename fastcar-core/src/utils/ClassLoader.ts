@@ -2,6 +2,7 @@ import TypeUtil from "./TypeUtil";
 import FileUtil from "./FileUtil";
 import * as fs from "fs";
 import * as path from "path";
+import { HotReloadEnum } from "../type/FileHotterDesc";
 
 export default class ClassLoader {
 	/***
@@ -48,7 +49,7 @@ export default class ClassLoader {
 	/**
 	 * @version 1.0 监听某个文件或者文件夹
 	 */
-	static watchServices(fp: string, context: any, eventName: string = "reload"): boolean {
+	static watchServices(fp: string, context: any, eventName: HotReloadEnum = HotReloadEnum.reload): boolean {
 		if (typeof context.emit != "function") {
 			return false;
 		}

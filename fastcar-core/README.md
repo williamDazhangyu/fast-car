@@ -64,7 +64,9 @@ Application 声明为一个应用
 
 Autowired 自动注入依赖的组件,现在等同为CallDependency
 
-CallDependency 调用时注入组件(调用对象可以不是组件 可以是一个普通类) 0.2.11版本以上生效
+CallDependency 调用时注入组件 0.2.11版本以上生效
+
+DemandInjection 当注入组件时在实例化对象时进行扫描注入  0.3.0版本以上生效
 
 AliasInjection 根据别名注入组件
 
@@ -261,8 +263,9 @@ class HelloConfig {
 ```ts
 //调用依赖版本示例
 import HelloService from "./HelloService";
-import { CallDependency } from "@fastcar/core/annotation";
+import { CallDependency, DemandInjection } from "@fastcar/core/annotation";
 
+@DemandInjection //如果没有标明是一个组件则需要使用该方法表明是一个延迟组件
 export default class CallService {
 
  //仅在调用时才会注入组件信息
