@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/koa",
-	"version": "0.1.14",
+	"version": "0.1.15",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "fastcar框架下对koa的包装",
 	"main": "target/index.js",
@@ -109,6 +109,9 @@
 			"optional": true
 		},
 		"@types/koa__multer": {
+			"optional": true
+		},
+		"@koa/multer": {
 			"optional": true
 		}
 	},

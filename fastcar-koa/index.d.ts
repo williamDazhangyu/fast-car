@@ -1,7 +1,5 @@
 import { FastCarApplication, Logger } from "@fastcar/core";
 import * as Koa from "koa";
-import * as koaBody from "koa-body";
-import * as bodyParser from "koa-bodyparser";
 import { ServerConfig } from "@fastcar/server";
 
 type MiddleWareType = (...args: any) => Koa.Middleware | Koa.Middleware[];
@@ -37,8 +35,8 @@ export class KoaApplication {
 export type KoaConfig = {
 	server: ServerConfig[] | ServerConfig; //监听的端口号
 	koaStatic?: string[]; //相对路径为resource下的 或者绝对文件路径
-	koaBodyOptions?: koaBody.IKoaBodyOptions; //文件上传的解析
-	koaBodyParser?: bodyParser.Options; //解析请求
+	koaBodyOptions?: { [key: string]: any }; //文件上传的解析
+	koaBodyParser?: { [key: string]: any }; //解析请求
 	extra?: { [key: string]: any }; //拓展设置
 };
 
