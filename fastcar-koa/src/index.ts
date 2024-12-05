@@ -5,7 +5,7 @@ import KoaBody from "./middleware/KoaBody";
 import KoaBodyParser from "./middleware/KoaBodyParser";
 import KoaCors from "./middleware/KoaCors";
 import KoaStatic from "./middleware/KoaStatic";
-import Swagger from "./middleware/Swagger";
 import { DesignMeta } from "./type/DesignMeta";
+import KoaMulter from "./middleware/KoaMulter";
 
-export { KoaApplication, KoaConfig, ExceptionGlobalHandler, KoaBody, KoaBodyParser, KoaCors, KoaStatic, Swagger, DesignMeta };
+export { KoaApplication, KoaConfig, ExceptionGlobalHandler, KoaBody, KoaBodyParser, KoaCors, KoaStatic, KoaMulter, DesignMeta };

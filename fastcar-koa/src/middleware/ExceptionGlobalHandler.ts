@@ -2,7 +2,7 @@ import { FastCarApplication, ValidError } from "@fastcar/core";
 
 //默认错误捕捉
 export default function ExceptionGlobalHandler(app: FastCarApplication) {
-	let logger = app.getSysLogger();
+	const logger = app.getSysLogger();
 	return async (ctx: any, next: Function) => {
 		try {
 			await next();

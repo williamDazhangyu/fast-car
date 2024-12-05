@@ -1,6 +1,3 @@
-import * as koaStatic from "koa-static";
-import * as KoaRange from "koa-range";
-import * as KoaMount from "koa-mount";
 import { FastCarApplication } from "@fastcar/core";
 import { KoaConfig } from "../type/KoaConfig";
 import * as fs from "fs";
@@ -9,6 +6,8 @@ import * as Koa from "koa";
 
 //支持静态文件访问
 export default function KoaStatic(app: FastCarApplication): Koa.Middleware[] {
+	const KoaRange = require("koa-range");
+
 	let mlist: Koa.Middleware[] = [];
 
 	//采用koa-range使文件可以流式传播
@@ -17,6 +16,9 @@ export default function KoaStatic(app: FastCarApplication): Koa.Middleware[] {
 	let koaConfig: KoaConfig = app.getSetting("koa");
 
 	if (!!koaConfig?.koaStatic) {
+		const KoaMount = require("koa-mount").default;
+		const koaStatic = require("koa-static").default;
+
 		let keys = Object.keys(koaConfig?.koaStatic);
 		if (keys.length > 0) {
 			for (let key of keys) {
