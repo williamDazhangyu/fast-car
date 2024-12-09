@@ -26,4 +26,5 @@ export enum FastCarMetaData {
 	ComponentScanMust = "ComponentScanMust", //扫描路径
 	InjectionSingleInstance = "InjectionSingleInstance", //单个实例注入的服务
 	InjectionLog = "InjectionLog", //反射的日志方法
+	InjectionValue = "InjectionValue", //反射注入值
 }

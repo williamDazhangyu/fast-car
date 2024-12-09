@@ -16,3 +16,9 @@ export type InjectionMeta = {
 	kind: InjectionType;
 	alias?: string;
 };
+
+export type InjectionValueMeta = {
+	key: string;
+	propertyKey: string;
+	relayTarget?: Object;
+};

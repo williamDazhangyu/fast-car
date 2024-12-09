@@ -165,3 +165,8 @@ export function ResourcePath(name: string): Ret;
 
 //自定义类型
 export function CustomType(name: string): PMRet;
+
+//获取自定义参数
+export function Value(key: string, relayTarget?: Object): PMRet;
+
+export function AppEnv(target: Object, propertyKey: string): void;

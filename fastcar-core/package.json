@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/core",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "target/index.js",
 	"author": "william_zhong",

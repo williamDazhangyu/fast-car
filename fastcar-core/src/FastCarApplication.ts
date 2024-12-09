@@ -19,7 +19,7 @@ import Component from "./annotation/stereotype/Component";
 import WinstonLogger from "./model/WinstonLogger";
 import * as winston from "winston";
 import Logger from "./interface/Logger";
-import { ComponentDesc, InjectionMeta } from "./type/ComponentDesc";
+import { ComponentDesc, InjectionMeta, InjectionValueMeta } from "./type/ComponentDesc";
 import DateUtil from "./utils/DateUtil";
 import { ProcessType } from "./type/ProcessType";
 import { FileHotterDesc, HotReloadEnum } from "./type/FileHotterDesc";
@@ -532,6 +532,51 @@ class FastCarApplication extends Events {
 						}
 
 						return this.getComponentByName(key);
+					},
+				});
+			});
+		}
+
+		let injectionValues: Array<InjectionValueMeta> = Reflect.getMetadata(FastCarMetaData.InjectionValue, instance);
+		if (Array.isArray(injectionValues) && injectionValues.length > 0) {
+			injectionValues.forEach((item) => {
+				Reflect.defineProperty(instance, item.propertyKey, {
+					get: () => {
+						let rootService = item.relayTarget || null;
+						let keys = item.key.split(".");
+						let first = keys[0];
+
+						switch (first) {
+							case "application": {
+								if (!rootService) {
+									rootService = this.getapplicationConfig();
+								}
+								keys.shift();
+								break;
+							}
+							case "sys": {
+								rootService = this.getSetting(keys[1]);
+								keys.splice(0, 2);
+								break;
+							}
+							default: {
+								if (!item.relayTarget) {
+									return null;
+								}
+								rootService = this.getComponentByTarget(item.relayTarget);
+								break;
+							}
+						}
+
+						let obj = rootService;
+						for (let key of keys) {
+							if (obj == null) {
+								break;
+							}
+							obj = Reflect.get(obj, key);
+						}
+
+						return obj || null;
 					},
 				});
 			});

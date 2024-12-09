@@ -104,6 +104,10 @@ ApplicationSetting 应用内配置设置 具有最高等级
 
 ResourcePath 自定义resource的位置
 
+Value 获取自定义的配置 0.3.2版本开始
+
+AppEnv 获取运行环境 0.3.2版本开始
+
 ## 约定
 
 ### 配置文件约定
@@ -371,6 +375,28 @@ class APP implements ApplicationHook {
   this.logger.debug("stopServer-----");
  }
 }
+```
+
+```ts
+//获取系统配置和第三方配置的key
+@DemandInjection
+export default class TestValue {
+ @Value("sys.test.a")
+ a!: any;
+
+ @Value("sys.test.a.b")
+ b!: any;
+
+ @Value("sys.test.a.b.c")
+ c!: string;
+
+ @AppEnv
+ env!: string;
+
+ @Value("a.b.c", HelloConfig)
+ hello_c!: string;
+}
+
 ```
 
 ## 更多用法

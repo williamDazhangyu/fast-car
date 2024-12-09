@@ -53,6 +53,7 @@ import CallService from "./service/CallService";
 import NotFoundController from "./controller/NotFoundController";
 import HotConfig from "./config/HotConfig";
 import HelloConfig from "./config/HelloConfig";
+import TestValue from "./service/TestValue";
 
 describe("程序应用测试", () => {
 	it("获取配置", () => {
@@ -108,5 +109,13 @@ describe("程序应用测试", () => {
 			console.log("热更新配置", hotConfig?.hello);
 			console.log("不变的配置", helloConfig?.hello);
 		}, 1000);
+	});
+	it("注入值判断", () => {
+		let testValue = new TestValue();
+		console.log(JSON.stringify(testValue.a));
+		console.log(JSON.stringify(testValue.b));
+		console.log(testValue.c);
+		console.log(testValue.env);
+		console.log(testValue.hello_c);
 	});
 });

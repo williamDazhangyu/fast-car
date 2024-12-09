@@ -51,6 +51,8 @@ import BaseName from "./annotation/env/BaseName";
 import CustomType from "./annotation/valid/CustomType";
 import ComponentScanMust from "./annotation/scan/ComponentScanMust";
 import DemandInjection from "./annotation/bind/DemandInjection";
+import Value from "./annotation/bind/Value";
+import AppEnv from "./annotation/bind/AppEnv";
 
 //注解暴露出去
 export {
@@ -93,6 +95,8 @@ export {
 	Rule,
 	ResourcePath,
 	CustomType,
+	Value,
+	AppEnv,
 };
 
 export {

@@ -1,4 +1,5 @@
 application:
+    env: dev
     scan:
         exclude: ["noclude"]
 settings:
@@ -10,3 +11,6 @@ settings:
         maxsize: 1024
         maxFiles: 10
         printConsole: true
+    test:
+        a:
+            b: { hello: "world", c: "c" }
