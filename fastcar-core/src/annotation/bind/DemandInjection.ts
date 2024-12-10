@@ -4,8 +4,8 @@ import { ClassConstructor } from "../../type/ClassConstructor";
 
 export default function DemandInjection(Target: ClassConstructor<any>) {
 	return new Proxy(Target, {
-		construct: (Target: ClassConstructor<any>, args: any) => {
-			let c = new Target(...args);
+		construct: (Target: ClassConstructor<any>, args: any, newTarget?: any) => {
+			let c = Reflect.construct(Target, args, newTarget);
 			let app: any = Reflect.get(global, CommonConstant.FastcarApp);
 
 			app?.loadInjectionService(c);

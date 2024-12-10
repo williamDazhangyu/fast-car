@@ -5,11 +5,11 @@ import TypeUtil from "../utils/TypeUtil";
 //基础服务的应用
 export default function Application(target: any) {
 	return new Proxy(target, {
-		construct: (target: ClassConstructor<Object>, args: any) => {
+		construct: (target: ClassConstructor<Object>, args: any, newTarget?: any) => {
 			const FastCarApplication = require("../FastCarApplication").default;
 
 			let app = new FastCarApplication();
-			let appProxy = new target(...args);
+			let appProxy = Reflect.construct(target, args, newTarget);
 			Reflect.set(appProxy, "app", app);
 
 			let keys = ClassUtils.getProtoType(target);
