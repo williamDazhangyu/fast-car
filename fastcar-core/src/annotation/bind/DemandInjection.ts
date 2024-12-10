@@ -9,6 +9,7 @@ export default function DemandInjection(Target: ClassConstructor<any>) {
 			let app: any = Reflect.get(global, CommonConstant.FastcarApp);
 
 			app?.loadInjectionService(c);
+			app?.loadLoggerIOC(c);
 			return c;
 		},
 	});
