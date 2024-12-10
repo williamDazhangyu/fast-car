@@ -16,8 +16,8 @@ export default function KoaStatic(app: FastCarApplication): Koa.Middleware[] {
 	let koaConfig: KoaConfig = app.getSetting("koa");
 
 	if (!!koaConfig?.koaStatic) {
-		const KoaMount = require("koa-mount").default;
-		const koaStatic = require("koa-static").default;
+		const KoaMount = require("koa-mount");
+		const koaStatic = require("koa-static");
 
 		let keys = Object.keys(koaConfig?.koaStatic);
 		if (keys.length > 0) {
