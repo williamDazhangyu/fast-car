@@ -29,7 +29,7 @@
 		"@fastcar/core"
 	],
 	"engines": {
-		"node": ">=16"
+		"node": ">=18"
 	},
 	"dependencies": {
 		"reflect-metadata": "^0.2.2",

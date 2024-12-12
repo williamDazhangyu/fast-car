@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { ApplicationStart, ApplicationStop, Autowired, Log } from "@fastcar/core/annotation";
 import { FastCarApplication, BootPriority, ComponentKind, Logger } from "@fastcar/core";
 import * as Koa from "koa";
-import * as KoaRouter from "koa-router";
+import * as KoaRouter from "@koa/router";
 import { MethodType } from "./type/MethodType";
 import { DesignMeta } from "./type/DesignMeta";
 import { TypeUtil, ValidationUtil } from "@fastcar/core/utils";
@@ -54,7 +54,7 @@ export default class KoaApplication {
 	 *
 	 */
 	protected loadRoute(): Koa.Middleware {
-		let router: any = new KoaRouter();
+		let router = new KoaRouter();
 
 		let instanceList = this.app.getComponentByType(ComponentKind.Controller);
 
@@ -101,7 +101,7 @@ export default class KoaApplication {
 			});
 		});
 
-		return router.routes();
+		return router.routes() as any;
 	}
 
 	start(): void {
