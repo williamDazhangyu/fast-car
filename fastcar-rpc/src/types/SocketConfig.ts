@@ -4,6 +4,7 @@ import { CodeProtocolEnum } from "./CodeProtocolEnum";
 import { RpcMessage } from "./RpcConfig";
 export type SessionId = string;
 export type ServerId = string;
+export type CustomId = string; //程序自定义id
 
 export type SecureClientOptions = {
 	username: string;
@@ -20,6 +21,7 @@ export type SocketClientConfig = {
 	disconnectInterval?: number;
 	secure?: SecureClientOptions;
 	ssl?: SSLConfig;
+	connectionLimit?: number; //连接数限制 默认1
 } & { [key: string]: any };
 
 //服务端连接配置
@@ -34,6 +36,7 @@ export type SocketServerConfig = {
 	codeProtocol?: CodeProtocolEnum; //约定协议 json protobuf
 	secure?: SecureClientOptions;
 	maxConnections?: number; //最大连接数 默认1024
+	timeout?: number; //空闲超时时间 针对ws和grpc有效
 } & { [key: string]: any };
 
 //客户端连接至服务的会话
@@ -55,6 +58,8 @@ export type ClientSession = {
 	serverId: string;
 	connectedTime: number; //连接的开始时间
 	settings: Map<string | symbol, any>; //自定义设置项
+	cid?: CustomId; //自定义逻辑id
+	channels?: Set<string>; //频道
 };
 
 //压缩消息

@@ -1,28 +1,41 @@
-import { Logger } from "@fastcar/core";
+import { DataMap, Logger } from "@fastcar/core";
 import { ValidationUtil } from "@fastcar/core/utils";
-import { CallDependency, Log } from "@fastcar/core/annotation";
+import { CallDependency, DemandInjection, Log } from "@fastcar/core/annotation";
 import { ServerConfig, ServerType, ServerApplication, Protocol } from "@fastcar/server";
 import SocketServer from "./SocketServer";
-import { ClientSession, ServerId, SessionId, SocketServerConfig, SocketSession } from "../../types/SocketConfig";
+import { ClientSession, CustomId, ServerId, SessionId, SocketServerConfig, SocketSession } from "../../types/SocketConfig";
 import { SocketServerFactory } from "./SocketFactory";
 import MsgHookService from "../MsgHookService";
 import { SocketEnum } from "../../constant/SocketEnum";
 import MsgCallbackService from "../MsgCallbackService";
 import { nanoid } from "nanoid";
 import { SocketMsgStatus } from "../../constant/SocketMsgStatus";
-import { InteractiveMode, RpcMessage, RpcNotiyMessage } from "../../types/RpcConfig";
+import { InteractiveMode, RpcMessage } from "../../types/RpcConfig";
 /***
  * @version 1.0 用于集成各个不同类型的socket和实现丰富的消息逻辑表达
  */
+@DemandInjection
 export default class SocketManager implements MsgHookService {
 	protected serverMap: Map<ServerId, SocketServer>; //key值用来表示是哪个通讯协议 干嘛的 sid
+
 	protected clientSessionMap: Map<SessionId, ClientSession>; //客户端的会话值 sessionId
+
 	protected msgCallBack!: MsgCallbackService;
+
+	protected customIds: DataMap<
+		CustomId,
+		{
+			sessionIds: Set<SessionId>;
+			channel?: Set<string>;
+		}
+	>; //自定义id和sessionId绑定
 
 	@Log("socket")
 	protected logger!: Logger;
 
-	protected channels: Map<string, SessionId[]>;
+	protected channels: Map<string, Set<SessionId>>;
+
+	protected customChannel: Map<string, Set<CustomId>>; //自定义渠道
 
 	@CallDependency
 	private netServer!: ServerApplication;
@@ -31,6 +44,8 @@ export default class SocketManager implements MsgHookService {
 		this.serverMap = new Map();
 		this.clientSessionMap = new Map();
 		this.channels = new Map();
+		this.customIds = new DataMap();
+		this.customChannel = new Map();
 	}
 
 	async auth(username: string, password: string, session: ClientSession): Promise<boolean> {
@@ -49,13 +64,6 @@ export default class SocketManager implements MsgHookService {
 		return this.logger;
 	}
 
-	connect(sessionId: string): void {
-		let session: ClientSession | null = this.getClientSession(sessionId);
-		if (session) {
-			this.msgCallBack.connect(session);
-		}
-	}
-
 	disconnect(sessionId: string, reason: string, force: boolean): void {
 		let session = this.clientSessionMap.get(sessionId);
 		if (session) {
@@ -70,7 +78,7 @@ export default class SocketManager implements MsgHookService {
 				this.msgCallBack.disconnect(session, reason);
 			}
 
-			this.clientSessionMap.delete(sessionId);
+			this.deleteSession(sessionId);
 		}
 	}
 
@@ -133,6 +141,61 @@ export default class SocketManager implements MsgHookService {
 		return SocketMsgStatus.offline;
 	}
 
+	//发送自定义id的消息
+	async sendMsgByCustomId(customId: CustomId, msg: RpcMessage = { mode: InteractiveMode.notify, url: "" }): Promise<SocketMsgStatus> {
+		let s = this.customIds.get(customId);
+		if (s && s.sessionIds.size > 0) {
+			let index = Math.floor(Math.random() * s.sessionIds.size);
+			let sessionid = [...s.sessionIds][index];
+
+			return await this.sendMsg(sessionid, msg);
+		}
+
+		return SocketMsgStatus.fail;
+	}
+
+	//绑定自定义id
+	bindCustomID(cid: CustomId, sid: SessionId) {
+		let citem = this.customIds.get(cid);
+		if (!citem) {
+			citem = {
+				sessionIds: new Set<SessionId>(),
+			};
+			this.customIds.set(cid, citem);
+		}
+
+		let item = this.clientSessionMap.get(sid);
+		if (item) {
+			citem.sessionIds.add(sid);
+			item.cid = cid;
+		}
+	}
+
+	//移除自定义id
+	unbindCustomID(cid: CustomId, sid: SessionId) {
+		let citem = this.customIds.get(cid);
+		if (citem && citem.sessionIds.has(sid)) {
+			citem.sessionIds.delete(sid);
+			this.deleteSession(sid);
+		}
+	}
+
+	//删除自定义id
+	removeCustomID(cid: CustomId) {
+		let citem = this.customIds.get(cid);
+		if (citem) {
+			citem.sessionIds.forEach((sid) => {
+				this.unbindCustomID(cid, sid);
+			});
+
+			citem.channel?.forEach((c) => {
+				this.leaveChannelByCustomId(cid, c);
+			});
+
+			this.customIds.delete(cid);
+		}
+	}
+
 	//加入频道
 	joinChannel(sessionId: string, channel: string): boolean {
 		let session = this.getClientSession(sessionId);
@@ -141,13 +204,19 @@ export default class SocketManager implements MsgHookService {
 		}
 
 		if (!this.channels.has(channel)) {
-			this.channels.set(channel, []);
+			this.channels.set(channel, new Set<string>());
 		}
 
 		let sessionIds = this.channels.get(channel);
-		if (!sessionIds?.includes(sessionId)) {
-			sessionIds?.push(sessionId);
+		if (!sessionIds?.has(sessionId)) {
+			sessionIds?.add(sessionId);
 		}
+
+		if (!session.channels) {
+			session.channels = new Set();
+		}
+
+		session.channels.add(channel);
 
 		return true;
 	}
@@ -163,34 +232,27 @@ export default class SocketManager implements MsgHookService {
 			return;
 		}
 
-		let index = sessionIds.indexOf(sessionId);
-		if (index != -1) {
-			sessionIds.splice(index, 1);
-			if (sessionIds.length == 0) {
-				this.channels.delete(channel);
-			}
+		sessionIds.delete(sessionId);
+		if (sessionIds.size == 0) {
+			this.channels.delete(channel);
 		}
+
+		session.channels?.delete(channel);
 	}
 
 	//根据sessionId获取所有的渠道
 	getChannelBySessionId(sessionId: SessionId): string[] {
-		if (!this.clientSessionMap.has(sessionId)) {
-			return [];
+		let session = this.getClientSession(sessionId);
+		if (session && session?.channels) {
+			return [...session.channels.keys()];
 		}
 
-		let list: string[] = [];
-		this.channels.forEach((sessionIds, channel) => {
-			if (sessionIds.includes(sessionId)) {
-				list.push(channel);
-			}
-		});
-
-		return list;
+		return [];
 	}
 
 	sendMsgByChannel(channel: string, msg: RpcMessage, excludeIds: SessionId[] = []): void {
 		let sessionIds = this.channels.get(channel);
-		if (!sessionIds || sessionIds.length == 0) {
+		if (!sessionIds || sessionIds.size == 0) {
 			return;
 		}
 
@@ -200,6 +262,59 @@ export default class SocketManager implements MsgHookService {
 			}
 
 			this.sendMsg(sessionId, msg);
+		});
+	}
+
+	joinChannelByCustomId(cid: CustomId, channel: string): boolean {
+		let csession = this.customIds.get(cid);
+		if (!csession) {
+			return false;
+		}
+
+		let ids = this.customChannel.get(channel);
+		if (!ids) {
+			ids = new Set<string>();
+			this.customChannel.set(channel, ids);
+		}
+
+		ids.add(channel);
+		if (!csession.channel) {
+			csession.channel = new Set();
+		}
+		csession.channel.add(channel);
+		return true;
+	}
+
+	leaveChannelByCustomId(cid: CustomId, channel: string): void {
+		let ids = this.customChannel.get(channel);
+		if (!ids || !ids.has(cid)) {
+			return;
+		}
+
+		ids.delete(cid);
+		if (ids.size == 0) {
+			this.customChannel.delete(channel);
+		}
+	}
+
+	//根据sessionId获取所有的渠道
+	getChannelByCustomId(cid: CustomId): string[] {
+		let sets = this.customIds.get(cid)?.channel;
+		return sets ? [...sets.values()] : [];
+	}
+
+	sendMsgToCustomIdByChannel(channel: string, msg: RpcMessage, excludeIds: CustomId[] = []): void {
+		let customIds = this.customChannel.get(channel);
+		if (!customIds || customIds.size == 0) {
+			return;
+		}
+
+		customIds.forEach((customId) => {
+			if (excludeIds.includes(customId)) {
+				return;
+			}
+
+			this.sendMsgByCustomId(customId, msg);
 		});
 	}
 
@@ -292,7 +407,22 @@ export default class SocketManager implements MsgHookService {
 
 	//销毁会话
 	deleteSession(sessionId: SessionId) {
-		this.clientSessionMap.delete(sessionId);
+		let item = this.clientSessionMap.get(sessionId);
+		if (item) {
+			//离开频道
+			item.channels?.forEach((channel) => {
+				this.leaveChannel(sessionId, channel);
+			});
+
+			item.channels?.clear();
+
+			let cid = item.cid;
+			if (cid) {
+				this.unbindCustomID(cid, sessionId);
+			}
+
+			this.clientSessionMap.delete(sessionId);
+		}
 	}
 
 	//获取一个网络服务器

@@ -3,7 +3,7 @@ import SocketServer from "../../SocketServer";
 import { WebSocketServer, WebSocket } from "ws";
 import { IncomingMessage } from "http";
 import { SocketEvents } from "../../../../types/SocketEvents";
-import { RpcMessage, InteractiveMode } from "../../../../types/RpcConfig";
+import { InteractiveMode, RpcMessage } from "../../../../types/RpcConfig";
 
 type SocketIOSession = {
 	id: SessionId; //会话id
@@ -42,6 +42,7 @@ export default class WsSocketServer extends SocketServer {
 
 			let socketId = session.sessionId;
 			this.connect(socket, socketId, request.socket.remoteAddress || "0.0.0.0");
+
 			socket.send(
 				this.encode({
 					url: SocketEvents.CONNECT_RECEIPT,
@@ -57,6 +58,13 @@ export default class WsSocketServer extends SocketServer {
 			socket.on("close", (code: number, reason: Buffer) => {
 				this.dropConnect(socketId, code + " " + reason.toString());
 			});
+
+			//增加超时返回
+			if (this.config.timeout != 0) {
+				request.socket.setTimeout(this.config.timeout || 60 * 1000, () => {
+					this.dropConnect(socketId, `timeout`);
+				});
+			}
 		});
 	}
 

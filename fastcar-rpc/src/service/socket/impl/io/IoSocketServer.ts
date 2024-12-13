@@ -67,6 +67,12 @@ export default class IoSocketServer extends SocketServer {
 			socket.on(SocketEvents.MESSAGE, (msg: string | Buffer) => {
 				this.receiveMsg(socketId, msg);
 			});
+
+			if (this.config.timeout != 0) {
+				socket.timeout(this.config.timeout || 60 * 1000);
+			}
+
+			// socket.compress(true);
 		});
 	}
 

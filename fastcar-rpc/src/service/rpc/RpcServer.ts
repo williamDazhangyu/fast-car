@@ -27,8 +27,6 @@ import MsgCallbackService from "../MsgCallbackService";
 import RpcAuthService from "../RpcAuthService";
 import { SocketMsgStatus } from "../../constant/SocketMsgStatus";
 import RPCErrorService from "../RPCErrorService";
-import { ProtoMeta } from "../../types/PBConfig";
-import ProtoBuffService from "../ProtoBuffService";
 
 //rpc 管理服务 用于和客户端进行同步异步消息发送
 @ApplicationStart(BootPriority.Lowest * 10, "start") //落后于koa执行
@@ -37,6 +35,7 @@ import ProtoBuffService from "../ProtoBuffService";
 export default class RpcServer implements MsgCallbackService {
 	@Autowired
 	protected app!: FastCarApplication;
+
 	@Log("rpc")
 	private rpcLogger!: Logger;
 
@@ -49,6 +48,14 @@ export default class RpcServer implements MsgCallbackService {
 	protected rpcConfig: RpcConfig;
 	protected failMsgQueue: RpcFailMsgQueue[];
 	protected checkStatus: boolean;
+	protected existClientIds: Set<string>;
+	protected currentMsgSize: number = 0; //当前消息的数量
+	protected sessionMsgSize: Map<
+		SessionId,
+		{
+			count: number;
+		}
+	> = new Map(); //当前会话的数量
 
 	constructor() {
 		this.middleware = [];
@@ -63,10 +70,19 @@ export default class RpcServer implements MsgCallbackService {
 				retryInterval: 100, //重试间隔 默认一秒
 				maxMsgNum: 10000, //最大消息并发数
 				timeout: 3000,
+				increase: false,
 			},
+			limit: {
+				//限流默认为关闭状态
+				open: false,
+				pendingMaxSize: 10000,
+				pendingSessionMaxSize: 5000,
+			},
+			slowRPCInterval: 500,
 		};
 		this.failMsgQueue = [];
 		this.checkStatus = false;
+		this.existClientIds = new Set();
 	}
 
 	//序列号递增
@@ -90,11 +106,85 @@ export default class RpcServer implements MsgCallbackService {
 		return -1;
 	}
 
+	//加一个重复消息的处理
+	handleDuplicateMsg(): Middleware {
+		return async (context: RpcContext, next?: Function) => {
+			let key = context.id ? `${context.sessionId}:${context.id}` : "";
+
+			if (key && this.existClientIds.has(key)) {
+				return;
+			}
+
+			this.existClientIds.add(key);
+			let nowTime = Date.now();
+
+			if (next) {
+				await next();
+			}
+
+			if (key) {
+				this.existClientIds.delete(key);
+			}
+
+			let diff = Date.now() - nowTime;
+			if (diff > this.rpcConfig.slowRPCInterval) {
+				this.rpcLogger.warn(`The rpc execution time took ${diff} ms, more than ${this.rpcConfig.slowRPCInterval} ms`);
+				this.rpcLogger.warn(`url:${context.url}`);
+			}
+		};
+	}
+
+	//加一个限流策略
+	trafficLimitStrategy(): Middleware {
+		return async (context: RpcContext, next?: Function) => {
+			let sessionId = context.sessionId;
+
+			if (this.currentMsgSize > this.rpcConfig.limit.pendingSessionMaxSize) {
+				return (context.body = {
+					code: RpcResponseCode.busy,
+				});
+			}
+
+			let item = this.sessionMsgSize.get(sessionId);
+			if (item && item.count > this.rpcConfig.limit.pendingSessionMaxSize) {
+				return (context.body = {
+					code: RpcResponseCode.busy,
+				});
+			}
+
+			this.currentMsgSize++;
+			// this.rpcLogger.debug(`处理队列入---->${this.currentMsgSize}`);
+			if (!item) {
+				this.sessionMsgSize.set(sessionId, {
+					count: 1,
+				});
+			} else {
+				item.count++;
+			}
+
+			if (next) {
+				await next();
+			}
+
+			this.currentMsgSize--;
+			// this.rpcLogger.debug(`当前处理队列大小---> ${this.currentMsgSize}`);
+			let sitem = this.sessionMsgSize.get(sessionId);
+			if (!!sitem) {
+				sitem.count--;
+				if (sitem.count <= 0) {
+					this.sessionMsgSize.delete(sessionId);
+				}
+			}
+		};
+	}
+
 	//封装请求 做出回应
 	response(): Middleware {
 		return async (context: RpcContext, next?: Function) => {
+			let sessionId = context.sessionId;
+
 			let result: RpcServerRequestType = {
-				sessionId: context.sessionId,
+				sessionId,
 				msg: { id: context.id, url: context.url, mode: InteractiveMode.response },
 			};
 
@@ -144,7 +234,7 @@ export default class RpcServer implements MsgCallbackService {
 			}
 
 			//绑定具体的protobuff协议
-			let protoMeta: ProtoMeta = Reflect.getMetadata(RpcMetaData.ProtoDataConfig, instance);
+			let protoMeta = Reflect.getMetadata(RpcMetaData.ProtoDataConfig, instance);
 
 			routerMap.forEach((item, url) => {
 				const callBack = async (ctx: RpcContext) => {
@@ -159,12 +249,17 @@ export default class RpcServer implements MsgCallbackService {
 				this.rcpRouterMap.set(url, callBack);
 
 				if (!!protoMeta) {
-					ProtoBuffService.addUrlMapping({
-						url,
-						protoPath: protoMeta.protoPath,
-						service: protoMeta.service,
-						method: item.method,
-					});
+					const ProtoBuffService = require("../ProtoBuffService").default;
+					const protoBuffService = this.app.getComponentByTarget<any>(ProtoBuffService);
+
+					if (protoBuffService) {
+						protoBuffService.addUrlMapping({
+							url,
+							protoPath: protoMeta.protoPath,
+							service: protoMeta.service,
+							method: item.method,
+						});
+					}
 				}
 			});
 		});
@@ -199,22 +294,13 @@ export default class RpcServer implements MsgCallbackService {
 		};
 	}
 
-	connect(session: ClientSession): void {
-		//传递调用
-		this.handleMsg(session, {
-			url: RpcUrlData.connect, //路由
-			data: session,
-			mode: InteractiveMode.request,
-		});
-	}
-
 	async auth(username: string, password: string, session: ClientSession): Promise<boolean> {
 		let config = this.socketManager.getSocketServerConfig(session.serverId);
 		if (!config) {
 			return false;
 		}
 
-		let service: RpcAuthService = this.app.getComponentByName(RpcMetaData.RPCAuthService);
+		let service = this.app.getComponentByName(RpcMetaData.RPCAuthService) as RpcAuthService;
 		if (!service) {
 			if (!config.secure?.password || !config.secure.username) {
 				return true;
@@ -443,9 +529,7 @@ export default class RpcServer implements MsgCallbackService {
 							});
 							continue;
 						}
-					}
-
-					if (nowTime > item.expiretime) {
+					} else if (nowTime > item.expiretime) {
 						this.handleFailMsg(item.msg, {
 							code: RpcResponseCode.timeout,
 							msg: `The message times out ${item.timeout} ms`,
@@ -498,7 +582,7 @@ export default class RpcServer implements MsgCallbackService {
 	}
 
 	private getResponseMiddleware(): Middleware {
-		let onerror: RPCErrorService = this.app.getComponentByName(RpcMetaData.RPCErrorService);
+		let onerror = this.app.getComponentByName(RpcMetaData.RPCErrorService) as RPCErrorService;
 		if (!!onerror) {
 			return onerror.response();
 		}
@@ -507,11 +591,17 @@ export default class RpcServer implements MsgCallbackService {
 	}
 
 	private setMiddleware() {
-		let newList = [this.getResponseMiddleware()];
 		let middlerList: Middleware[] = this.app.getSetting(RpcMetaData.RPCMIDDLEWARE) || [];
+		let newList = [this.handleDuplicateMsg(), this.getResponseMiddleware()];
+
+		if (this.rpcConfig.limit.open) {
+			newList.push(this.trafficLimitStrategy());
+		}
+
 		newList = [...newList, ...middlerList, ...this.middleware];
 
 		const routerMiddleware = this.loadRoute();
+
 		if (routerMiddleware) {
 			newList.push(routerMiddleware);
 		}

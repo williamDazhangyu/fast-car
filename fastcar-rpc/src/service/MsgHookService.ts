@@ -4,8 +4,6 @@ import { ServerConfig, ServerType } from "@fastcar/server";
 
 //消息钩子
 export default interface MsgHookService {
-	connect(sessionId: SessionId): void;
-
 	disconnect(sessionId: SessionId, reason: string, force?: boolean): void;
 
 	handleMsg(sessionId: SessionId, msg: Object): void;

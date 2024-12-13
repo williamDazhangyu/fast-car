@@ -21,31 +21,35 @@ export default class IoSocketClient extends SocketClient {
 		this.type = SocketEnum.SocketIO;
 	}
 
-	connect(): void {
-		if (this.connected) {
-			this.disconnect();
-		}
-
-		const io = ioClient.connect(this.config.url, this.config.extra);
-
-		io.on(SocketEvents.CONNECT_RECEIPT, (socketId: string) => {
-			this.sessionId = socketId;
-			this.connected = true;
-		});
-
-		io.on(SocketEvents.DISCONNECT, () => {
+	async connect(): Promise<boolean> {
+		return new Promise((resolve) => {
 			if (this.connected) {
-				this.connected = false;
-				// this.disconnect();
+				this.disconnect();
 			}
-		});
 
-		io.on(SocketEvents.MESSAGE, (msg: string | Buffer) => {
-			this.receiveMsg(msg);
-		});
+			const io = ioClient.connect(this.config.url, this.config.extra);
 
-		this.forceConnect = false;
-		this.io = io;
+			io.on(SocketEvents.CONNECT_RECEIPT, (socketId: string) => {
+				this.connected = true;
+				resolve(true);
+			});
+
+			io.on(SocketEvents.DISCONNECT, () => {
+				if (this.connected) {
+					this.connected = false;
+					// this.disconnect();
+				}
+
+				resolve(false);
+			});
+
+			io.on(SocketEvents.MESSAGE, (msg: string | Buffer) => {
+				this.receiveMsg(msg);
+			});
+
+			this.forceConnect = false;
+			this.io = io;
+		});
 	}
 
 	disconnect(reason?: string): void {
@@ -54,13 +58,10 @@ export default class IoSocketClient extends SocketClient {
 		this.logger.warn(`client disconnect ${reason}`);
 	}
 
-	async sendMsg(msg: RpcMessage): Promise<boolean> {
-		if (!this.connected) {
-			return false;
+	sendMsg(msg: RpcMessage): void {
+		if (this.connected) {
+			this.io.emit(SocketEvents.MESSAGE, this.encode(msg));
 		}
-
-		this.io.emit(SocketEvents.MESSAGE, this.encode(msg));
-		return true;
 	}
 
 	receiveMsg(msg: string | Buffer): void {

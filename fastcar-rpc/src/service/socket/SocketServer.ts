@@ -77,9 +77,7 @@ export default abstract class SocketServer {
 				sessionId: id,
 				reason: "connections too many",
 			});
-			return;
 		}
-		this.manager.connect(id);
 	}
 
 	//掉线处理

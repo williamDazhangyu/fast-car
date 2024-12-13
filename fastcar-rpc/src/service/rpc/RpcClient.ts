@@ -1,4 +1,4 @@
-import { Logger } from "@fastcar/core";
+import { FastCarApplication, Logger } from "@fastcar/core";
 import { InteractiveMode, RetryConfig, RpcClientConfig, RpcClientMsgBox, RpcMessage, RpcResponseCode, RpcResponseType } from "../../types/RpcConfig";
 import { SocketClientConfig } from "../../types/SocketConfig";
 import { SocketClient } from "../socket/SocketClient";
@@ -9,14 +9,14 @@ import { ValidationUtil } from "@fastcar/core/utils";
 import RpcAsyncService from "../RpcAsyncService";
 import MsgClientHookService from "../MsgClientHookService";
 import { RpcUrlData } from "../../constant/RpcUrlData";
-import { Log } from "@fastcar/core/annotation";
+import { Autowired, DemandInjection, Log } from "@fastcar/core/annotation";
 import { PBConfig, ProtoList } from "../../types/PBConfig";
-import ProtoBuffService from "../ProtoBuffService";
 
 //封装一个可用的rpc框架
+@DemandInjection
 @EnableScheduling
 export default class RpcClient implements MsgClientHookService {
-	protected client: SocketClient;
+	protected clients: SocketClient[];
 	protected msgQueue: Map<number, RpcClientMsgBox>; //序列号 消息队列
 	protected serialId: number; //序列号
 	protected config: RpcClientConfig; //消息配置
@@ -24,7 +24,14 @@ export default class RpcClient implements MsgClientHookService {
 	protected rpcAsyncService: RpcAsyncService;
 	protected checkConnectTimer: number;
 	@Log("rpc-client")
-	protected rpcLogger!: Logger;
+	protected rpcLogger: Logger = console;
+
+	@Autowired
+	private app!: FastCarApplication;
+
+	private pollIndex: number;
+
+	private maxPendingSize: number; //最大延迟并发量
 
 	constructor(config: SocketClientConfig, rpcAsyncService: RpcAsyncService, retry?: RetryConfig) {
 		let ClientClass = SocketClientFactory(config.type);
@@ -39,22 +46,42 @@ export default class RpcClient implements MsgClientHookService {
 				maxMsgNum: 10000, //最大消息瞬时并发数
 				timeout: 3000,
 				disconnectInterval: 10000, //断线重连十秒
+				increase: ValidationUtil.isBoolean(retry?.increase) ? !!retry?.increase : true,
 			},
 			config,
 			retry
 		);
-		this.client = new ClientClass(this.config, this);
+
+		this.config.timeout = this.getTimeOut({
+			interval: this.config.retryInterval,
+			count: this.config.retryCount,
+			timeout: this.config.timeout,
+			increase: retry?.increase,
+		});
+
+		this.clients = [];
 		this.msgQueue = new Map();
 		this.serialId = 0;
 		this.checkStatus = false;
 		this.rpcAsyncService = rpcAsyncService;
 		this.checkConnectTimer = this.config.disconnectInterval || 1000;
+		this.maxPendingSize = Math.floor(this.config.maxMsgNum / 2);
+
+		let connectionLimit = config.connectionLimit || 1;
+
+		for (let i = 0; i < connectionLimit; i++) {
+			this.clients.push(new ClientClass(this.config, this));
+		}
+
+		this.pollIndex = -1;
 	}
 
 	//初始化配置事件
 	addProtoBuf(p: ProtoList): void {
+		let ProtoBuffService = this.app.getComponentByName("ProtoBuffService") as any;
+
 		//先加载root节点
-		let root = ProtoBuffService.addProtoRoot(p.root.protoPath);
+		let root = ProtoBuffService?.addProtoRoot(p.root.protoPath);
 
 		if (p.prefixUrl && !p.prefixUrl.startsWith("/")) {
 			p.prefixUrl = `/${p.prefixUrl}`;
@@ -86,7 +113,7 @@ export default class RpcClient implements MsgClientHookService {
 					pp.url = p.prefixUrl + pp.url;
 				}
 			}
-			ProtoBuffService.addUrlMapping(pp);
+			ProtoBuffService?.addUrlMapping(pp);
 		});
 	}
 
@@ -110,38 +137,67 @@ export default class RpcClient implements MsgClientHookService {
 	}
 
 	async start() {
-		return new Promise((resolve) => {
-			this.client.connect();
-			setTimeout(() => {
-				resolve(this.client.connected);
-			}, 50);
-		});
+		for (let c of this.clients) {
+			if (!c.connected) {
+				await c.connect();
+			}
+		}
 	}
 
 	stop(reason: string) {
-		this.client.offline(reason);
+		this.clients.forEach((c) => {
+			c.offline(reason);
+		});
 	}
 
 	close() {
 		this.checkMsg(0, true);
-		this.client.close();
+		this.clients.forEach((c) => {
+			c.close();
+		});
 	}
 
-	getClient(): SocketClient {
-		return this.client;
+	getClient(): {
+		index: number;
+		client: SocketClient;
+	} {
+		let index = ++this.pollIndex;
+		if (index >= this.clients.length) {
+			index = 0;
+			this.pollIndex = 0;
+		}
+
+		return {
+			index: this.pollIndex,
+			client: this.clients[this.pollIndex],
+		};
+	}
+
+	getConnectedClient() {
+		for (let c of this.clients) {
+			if (c.connected) {
+				return c;
+			}
+		}
+
+		return null;
 	}
 
 	//是否已经连接
 	isConnect() {
-		return this.client.connected;
+		return this.clients.some((c) => {
+			return c.connected;
+		});
 	}
 
 	isForceConnect() {
-		return this.client.forceConnect;
+		return this.clients[0].forceConnect;
 	}
 
-	getSessionId() {
-		return this.client.sessionId;
+	private getTimeOut({ interval, count, timeout, increase = false }: { interval: number; count: number; timeout: number; increase?: boolean }) {
+		let sum = increase ? Math.ceil((interval * count * (1 + count)) / 2) : count * interval;
+
+		return Math.max(sum, timeout);
 	}
 
 	async handleMsg(msg: RpcMessage): Promise<void> {
@@ -150,6 +206,11 @@ export default class RpcClient implements MsgClientHookService {
 			if (ValidationUtil.isNumber(id)) {
 				let item = this.msgQueue.get(id as number);
 				if (item) {
+					if (msg.data && msg.data?.code == RpcResponseCode.busy) {
+						item.retryCount += 1;
+						return; //如果服务器显示繁忙则放入等待队列处理
+					}
+
 					item.cb.done(null, msg);
 				}
 				this.msgQueue.delete(id as number);
@@ -157,17 +218,21 @@ export default class RpcClient implements MsgClientHookService {
 		} else {
 			if (InteractiveMode.notify == msg.mode) {
 				if (msg.url == RpcUrlData.forceDisconnect) {
-					this.client.forceConnect = true;
 					let data: any = msg.data;
 					let reason: string = data?.reason;
-					this.client.offline(reason);
+
+					//集体下线
+					for (let c of this.clients) {
+						c.forceConnect = true;
+						c.offline(reason);
+					}
 				} else {
 					this.rpcAsyncService.handleMsg(msg.url, msg.data || {});
 				}
 			} else {
 				//向server端发送消息
 				let repData = await this.rpcAsyncService.handleMsg(msg.url, msg.data || {});
-				this.client.sendMsg({
+				this.getConnectedClient()?.sendMsg({
 					id: msg.id,
 					data: repData || {},
 					url: msg.url,
@@ -199,6 +264,13 @@ export default class RpcClient implements MsgClientHookService {
 			}
 		);
 
+		m.timeout = this.getTimeOut({
+			interval: m.retryInterval,
+			count: m.retryCount,
+			increase: opts?.increase,
+			timeout: m.timeout,
+		});
+
 		return new Promise((resolve) => {
 			// if (!this.client.connected) {
 			// 	resolve({ code: RpcResponseCode.disconnect, msg: "socket is disconnect" });
@@ -211,7 +283,7 @@ export default class RpcClient implements MsgClientHookService {
 				return;
 			}
 
-			let timeout = m.timeout || this.config.timeout;
+			let timeout = m.timeout;
 			let msg: RpcMessage = {
 				id,
 				url: m.url,
@@ -226,20 +298,32 @@ export default class RpcClient implements MsgClientHookService {
 				err ? resolve(err) : resolve({ code: RpcResponseCode.ok, data: res.data || {} });
 			});
 
+			//这边的逻辑要改下 timeout至少是间隔时间乘以间隔次数
+			let cres = this.getClient();
 			let rpcMsg: RpcClientMsgBox = {
 				id,
 				msg,
 				retryCount: 0,
-				retryInterval: Date.now() + m.retryInterval,
-				expiretime: Date.now() + timeout,
+				retryInterval: m.retryInterval,
+				expiretime: timeout,
 				timeout,
 				maxRetryCount: m.retryCount,
 				maxRetryInterval: m.retryInterval,
 				cb,
+				clientIndex: cres.index,
+				increase: opts?.increase || this.config.increase,
 			};
 
+			// this.rpcLogger.debug(`发送消息的序号----${client.index}`);
 			this.msgQueue.set(id, rpcMsg);
-			this.client.sendMsg(msg);
+
+			if (!cres.client.connected) {
+				//重置检测时间
+				this.checkConnectTimer = 0;
+				rpcMsg.retryInterval = 0; //重发消息的间隔为0
+			} else {
+				cres.client.sendMsg(msg);
+			}
 		});
 	}
 
@@ -255,34 +339,30 @@ export default class RpcClient implements MsgClientHookService {
 
 		try {
 			this.checkStatus = true;
-			let nowTime = Date.now();
 
 			//进行断线重连
-			if (!this.isConnect()) {
-				this.checkConnectTimer -= diff;
-				if (this.checkConnectTimer <= 0) {
-					this.checkConnectTimer = this.config.disconnectInterval || 1000;
-					await this.start();
-				}
+			this.checkConnectTimer -= diff;
+			if (this.checkConnectTimer <= 0) {
+				this.checkConnectTimer = this.config.disconnectInterval || 1000;
+				await this.start();
 			}
 
 			if (this.msgQueue.size > 0) {
+				let pending = this.maxPendingSize;
 				let cleanIds: Map<number, RpcResponseType> = new Map();
-				this.msgQueue.forEach((item, id) => {
-					if (nowTime > item.expiretime) {
-						cleanIds.set(id, {
-							code: RpcResponseCode.timeout,
-							msg: `The message times out ${item.timeout} ms`,
-						});
-						return;
+
+				let msgQueueList = this.msgQueue.values();
+				for (let item of msgQueueList) {
+					let id = item.id;
+					let client = this.clients[item.clientIndex];
+					if (!client.connected) {
+						continue;
 					}
 
-					//如果是断线的则进行堆积
-					if (!this.isConnect()) {
-						return;
-					}
+					item.retryInterval -= diff;
+					item.expiretime -= diff;
 
-					if (item.retryInterval <= nowTime) {
+					if (item.retryInterval <= 0) {
 						//发送消息
 						if (item.retryCount >= item.maxRetryCount) {
 							cleanIds.set(id, {
@@ -292,11 +372,21 @@ export default class RpcClient implements MsgClientHookService {
 						} else {
 							//重发消息
 							item.retryCount++;
-							this.client.sendMsg(item.msg);
+							client.sendMsg(item.msg);
+							item.retryInterval = item.increase ? item.maxRetryInterval * (item.retryCount + 1) : item.maxRetryInterval;
+							pending--;
 						}
-						item.retryInterval = nowTime + item.maxRetryInterval;
+					} else if (item.expiretime <= 0) {
+						cleanIds.set(id, {
+							code: RpcResponseCode.timeout,
+							msg: `The message times out ${item.timeout} ms`,
+						});
 					}
-				});
+
+					if (pending <= 0) {
+						break;
+					}
+				}
 
 				cleanIds.forEach((resp, id) => {
 					let item = this.msgQueue.get(id);

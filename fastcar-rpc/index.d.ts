@@ -82,19 +82,13 @@ export class RpcClient implements MsgClientHookService {
 }
 
 export class RpcServer implements MsgCallbackService {
-	private rpcLogger: Logger;
-	protected socketManager: SocketManager; //socket管理
-	protected middleware: Middleware[]; //压缩后的组件方法
-	protected composeMiddleware: (context: RpcContext) => void;
-	protected rcpRouterMap: Map<RpcUrl, Function>;
-	protected msgQueue: Map<number, RpcServerMsgBox>; //序列号 消息队列
-	protected serialId: number;
-	protected rpcConfig: RpcConfig;
-	protected failMsgQueue: RpcFailMsgQueue[];
-	protected checkStatus: boolean;
-
 	//序列号递增
 	protected addSerialId(): number;
+	//加一个重复消息的处理
+	handleDuplicateMsg(): Middleware;
+
+	//加一个限流策略
+	trafficLimitStrategy(): Middleware;
 
 	//封装请求 做出回应
 	response(): Middleware;
@@ -104,8 +98,6 @@ export class RpcServer implements MsgCallbackService {
 	 *
 	 */
 	protected loadRoute(): Middleware | null;
-
-	connect(session: ClientSession): void;
 
 	auth(username: string, password: string, session: ClientSession): Promise<boolean>;
 
@@ -117,6 +109,7 @@ export class RpcServer implements MsgCallbackService {
 
 	//给单个会话发送消息
 	protected sendMsgBySessionId(m: RpcServerRequestType): Promise<void>;
+
 	//重试消息
 	protected retrySendMsg(m: RpcFailMsgQueue): Promise<SocketMsgStatus>;
 
@@ -139,14 +132,21 @@ export class RpcServer implements MsgCallbackService {
 
 	//强制下线
 	kickSessionId(sessionId: SessionId, reason: string): void;
+
 	//失败的消息处理
 	handleFailMsg(msg: RpcMessage, res: RpcResponseType): void;
+
+	checkMsgQueue(diff: number, stop: boolean): Promise<void>;
 
 	use(m: Middleware): void;
 
 	private getResponseMiddleware(): Middleware;
 
 	private setMiddleware(): void;
+
+	start(): Promise<void>;
+
+	stop(): Promise<void>;
 }
 
 //封装客户端向服务端发起请求

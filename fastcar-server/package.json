@@ -24,7 +24,7 @@
 		"node": ">=16"
 	},
 	"devDependencies": {
-		"@fastcar/core": "^0.2.38"
+		"@fastcar/core": "^0.3.4"
 	},
 	"peerDependencies": {
 		"@fastcar/core": "*"

@@ -4,13 +4,14 @@ import SocketServer from "../../SocketServer";
 import * as grpc from "@grpc/grpc-js";
 import * as protoLoader from "@grpc/proto-loader";
 import { InteractiveMode, RpcMessage } from "../../../../types/RpcConfig";
-import { CallDependency, Log } from "@fastcar/core/annotation";
+import { CallDependency, DemandInjection, Log } from "@fastcar/core/annotation";
 import { FastCarApplication, Logger } from "@fastcar/core";
 import { SSLConfig } from "@fastcar/server";
-import { SocketEvents } from "../../../../types/SocketEvents";
 import ProtoBuffService from "../../../ProtoBuffService";
 import { DecodePBGrpcDefault, EncodePBGrpcDefault } from "../../../../constant/SocketCodingDefault";
+import { SocketEvents } from "../../../../types/SocketEvents";
 
+@DemandInjection
 export default class GrpcServer extends SocketServer {
 	private server!: grpc.Server;
 
@@ -20,12 +21,15 @@ export default class GrpcServer extends SocketServer {
 	@CallDependency
 	private app!: FastCarApplication;
 
+	@CallDependency
+	private protoBuffService!: ProtoBuffService;
+
 	constructor(config: SocketServerConfig, manager: MsgHookService) {
 		super(config, manager);
 	}
 
 	async listen(): Promise<void> {
-		const PROTO_PATH = ProtoBuffService.getRouterRootPath();
+		const PROTO_PATH = this.protoBuffService.getRouterRootPath();
 		const packageDefinition = protoLoader.loadSync(PROTO_PATH, { keepCase: true, longs: String, enums: String, defaults: true, oneofs: true });
 		const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 		const routerProto = protoDescriptor.router as any;

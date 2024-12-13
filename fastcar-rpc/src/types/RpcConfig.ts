@@ -86,6 +86,8 @@ export type RpcClientMsgBox = {
 	maxRetryCount: number;
 	maxRetryInterval: number;
 	cb: TaskAsync; //消息回调函数
+	clientIndex: number; //客户端消息编号
+	increase: boolean; //是否按照等差递增
 };
 
 //服务端盒子存储信息
@@ -98,12 +100,14 @@ export type RpcServerMsgBox = {
 
 export type RpcConfig = {
 	list: SocketServerConfig[];
-	retry: {
-		retryCount: number; //错误重试次数 默认三次
-		retryInterval: number; //重试间隔 默认一秒
-		maxMsgNum: number; //最大并发数
-		timeout: number; //超时时间
+	retry: Required<RetryConfig>;
+	limit: {
+		//限流策略
+		open: boolean; //是否开启
+		pendingMaxSize: number; //服务端并发最大请求数
+		pendingSessionMaxSize: number; //服务端单个会话的最大请求数
 	};
+	slowRPCInterval: number; //监控rpc的处理请求是否缓慢 默认为500ms
 };
 
 export type RpcClientConfig = {
@@ -118,6 +122,7 @@ export type RetryConfig = {
 	retryInterval?: number;
 	timeout?: number; //超时时间
 	maxMsgNum?: number;
+	increase?: boolean; //是否按照等差递增
 };
 
 export enum RpcResponseCode {

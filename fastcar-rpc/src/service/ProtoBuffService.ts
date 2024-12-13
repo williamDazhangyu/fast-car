@@ -3,11 +3,13 @@ import * as protobufjs from "protobufjs";
 import { Root } from "protobufjs";
 import path = require("path");
 import { RpcMessage } from "../types/RpcConfig";
+import { BeanName } from "@fastcar/core/annotation";
 
 /**
  * @version 1.0 protobuff 协议管理器
  */
-class ProtoBuffService {
+@BeanName("ProtoBuffService")
+export default class ProtoBuffService {
 	private urlMapping: Map<string, PBConfig>;
 	private rootMapping: Map<string, ProtoRoot>;
 	private routeRoot: Root;
@@ -125,5 +127,3 @@ class ProtoBuffService {
 		return this.routeHandleType.decode(buffer).toJSON();
 	}
 }
-
-export default new ProtoBuffService();

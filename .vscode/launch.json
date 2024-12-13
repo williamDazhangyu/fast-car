@@ -140,10 +140,10 @@
                 "${workspaceRoot}/fastcar-rpc/test/example/simple/app.ts",
                 "--no-timeouts"
             ],
-            "cwd": "${workspaceRoot}/fastcar-rpc",
+            "cwd": "${workspaceRoot}",
             "runtimeExecutable": null,
             "env": {
-                "TS_NODE_PROJECT": "${workspaceRoot}/fastcar-rpc/tsconfig.json"
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
             },
             "runtimeArgs": [
                 "-r",
@@ -160,10 +160,10 @@
                 "${workspaceRoot}/fastcar-rpc/test/example/simple/client.ts",
                 "--no-timeouts"
             ],
-            "cwd": "${workspaceRoot}/fastcar-rpc",
+            "cwd": "${workspaceRoot}",
             "runtimeExecutable": null,
             "env": {
-                "TS_NODE_PROJECT": "${workspaceRoot}/fastcar-rpc/tsconfig.json"
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
             },
             "runtimeArgs": [
                 "-r",

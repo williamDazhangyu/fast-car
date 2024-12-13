@@ -15,46 +15,64 @@ export default class WsSocketClient extends SocketClient {
 		this.type = SocketEnum.WS;
 	}
 
-	connect(): void {
-		if (this.connected) {
-			this.disconnect();
-		}
-
-		let headers = {
-			username: this.config.secure?.username || "",
-			password: this.config.secure?.password || "",
-		};
-
-		if (this.config.extra && this.config.extra.headers) {
-			headers = Object.assign({}, this.config.extra.headers, headers);
-		}
-
-		const io = new WebSocket(
-			this.config.url,
-			Object.assign({}, this.config.extra, {
-				headers,
-			})
-		);
-		io.on(SocketEvents.CLOSE, () => {
+	async connect(): Promise<boolean> {
+		return new Promise((resolve) => {
 			if (this.connected) {
-				this.connected = false;
+				this.disconnect();
 			}
-		});
 
-		io.on(SocketEvents.MESSAGE, (msg: string | Buffer) => {
-			this.receiveMsg(msg);
-		});
+			let headers = {
+				username: this.config.secure?.username || "",
+				password: this.config.secure?.password || "",
+			};
 
-		io.on("error", (e: any) => {
-			this.logger.error("ws error");
-			this.logger.error(e.code);
-			if (e.code == "ECONNREFUSED") {
-				this.disconnect("ws connect refuse");
+			if (this.config.extra && this.config.extra.headers) {
+				headers = Object.assign({}, this.config.extra.headers, headers);
 			}
-		});
 
-		this.forceConnect = false;
-		this.io = io;
+			const io = new WebSocket(
+				this.config.url,
+				Object.assign({}, this.config.extra, {
+					headers,
+				})
+			);
+
+			// io.on("open", () => {
+			// 	this.connected = true;
+			// 	resolve(this.connected);
+			// });
+
+			io.on(SocketEvents.CLOSE, () => {
+				if (this.connected) {
+					this.connected = false;
+				}
+
+				resolve(false);
+			});
+
+			io.on(SocketEvents.MESSAGE, (msg: string | Buffer) => {
+				if (!this.connected) {
+					let result: any = this.decode(msg);
+					if (!!result && result?.url == SocketEvents.CONNECT_RECEIPT) {
+						this.connected = true;
+						return resolve(true);
+					}
+				} else {
+					this.receiveMsg(msg);
+				}
+			});
+
+			io.on("error", (e: any) => {
+				this.logger.error("ws error");
+				this.logger.error(e.code);
+				if (e.code == "ECONNREFUSED") {
+					this.disconnect("ws connect refuse");
+				}
+			});
+
+			this.forceConnect = false;
+			this.io = io;
+		});
 	}
 
 	disconnect(reason?: string): void {
@@ -63,30 +81,23 @@ export default class WsSocketClient extends SocketClient {
 		this.logger.warn(`client disconnect ${reason}`);
 	}
 
-	async sendMsg(msg: RpcMessage): Promise<boolean> {
+	sendMsg(msg: RpcMessage) {
 		if (!this.io || !this.connected) {
 			return false;
 		}
 
-		return new Promise((resolve) => {
-			this.io.send(this.encode(msg), (err?: Error) => {
-				if (err) {
-					this.logger.error("send msg fail");
-					this.logger.error(err);
-				}
-				resolve(!err);
-			});
+		this.io.send(this.encode(msg), (err?: Error) => {
+			if (err) {
+				this.logger.error("send msg fail");
+				this.logger.error(err);
+			}
 		});
+
+		return true;
 	}
 
 	receiveMsg(msg: string | Buffer): void {
-		let result: any = this.decode(msg);
-		if (!!result && result?.url == SocketEvents.CONNECT_RECEIPT) {
-			this.sessionId = result.data?.socketId;
-			this.connected = true;
-			return;
-		}
-		this.manager.handleMsg(result);
+		this.manager.handleMsg(this.decode(msg));
 	}
 
 	offline(reason: string = "offline"): void {

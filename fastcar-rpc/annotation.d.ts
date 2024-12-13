@@ -17,3 +17,5 @@ export function RPCMiddleware(...args: Middleware[]): Ret; //中间件绑定
 export function RPCAuth(target: any): void; //声明rpc验证服务
 
 export function RPCError(target: any): void; //声明错误捕捉服务
+
+export function EnableProtobuff(target: Object): void; //开启pb

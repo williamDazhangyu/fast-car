@@ -31,12 +31,14 @@ npm install @fastcar/rpc
 //服务端配置
 type RpcConfig = {
  list: SocketServerConfig[];
- retry: {
-  retryCount: number; //错误重试次数 默认三次
-  retryInterval: number; //重试间隔 默认一秒
-  maxMsgNum: number; //最大并发数
-  timeout: number; //超时时间
+ retry: Required<RetryConfig>;
+ limit: {
+  //限流策略
+  open: boolean; //是否开启 默认关闭
+  pendingMaxSize: number; //服务端并发最大请求数
+  pendingSessionMaxSize: number; //服务端单个会话的最大请求数
  };
+ slowRPCInterval: number; //监控rpc的处理请求是否缓慢 默认为500ms
 };
 
 //客户端配置
@@ -46,6 +48,14 @@ type RpcClientConfig = {
  maxMsgNum: number; //最大并发数
  timeout: number; //超时时间
 } & SocketClientConfig;
+
+type RetryConfig = {
+ retryCount?: number;
+ retryInterval?: number;
+ timeout?: number; //超时时间
+ maxMsgNum?: number;
+ increase?: boolean; //是否按照等差递增 按照 1 2 3秒进行重发
+};
 ```
 
 ```ts
@@ -53,12 +63,15 @@ type RpcClientConfig = {
  type SocketServerConfig = {
  id: string; //编号名称
  type: SocketEnum; //具体为哪一种型号的连接器
- server: ServerConfig; //这边和@fastcar/server的配置一致
+ server: ServerConfig;
  extra?: any; //第三方拓展配置 用于灵活的调用第三方
  serviceType: string; //服务器用途类型 用于表名是何种服务器
  encode?: EncodeMsg; //编码解码
  decode?: DecodeMsg;
+ codeProtocol?: CodeProtocolEnum; //约定协议 json protobuf
  secure?: SecureClientOptions;
+ maxConnections?: number; //最大连接数 默认1024
+ timeout?: number; //空闲超时时间 针对ws和grpc有效
 } & { [key: string]: any };
 
 //长连接配置

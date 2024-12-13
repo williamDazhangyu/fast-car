@@ -16,41 +16,45 @@ export default class MqttSocketClient extends SocketClient {
 		this.type = SocketEnum.MQTT;
 	}
 
-	connect(): void {
-		//默认没有用户名和密码
-		if (!this.config.secure) {
-			this.config.secure = {
-				username: "",
-				password: "",
-			};
-		}
-
-		const io = mqtt.connect(this.config.url, Object.assign({ reconnecting: true }, this.config.extra, this.config.secure));
-
-		io.on(SocketEvents.CONNECT, () => {
-			this.connected = true;
-		});
-
-		io.on(SocketEvents.MESSAGE, (topic: string, message: string | Buffer) => {
-			if (topic == SocketEvents.CONNECT_RECEIPT) {
-				this.connected = true;
-				this.sessionId = message.toString();
-			} else {
-				this.receiveMsg(message);
+	async connect(): Promise<boolean> {
+		return new Promise((resolve) => {
+			//默认没有用户名和密码
+			if (!this.config.secure) {
+				this.config.secure = {
+					username: "",
+					password: "",
+				};
 			}
-		});
 
-		io.on("error", (error: any) => {
-			// this.disconnect(packet.reasonCode?.toString());
-			let code = error.code;
-			if (this.connected) {
-				if (code == "ECONNRESET" || code == "ECONNREFUSED") {
-					this.connected = false;
+			const io = mqtt.connect(this.config.url, Object.assign({ reconnecting: true }, this.config.extra, this.config.secure));
+
+			// io.on(SocketEvents.CONNECT, () => {
+			// 	this.connected = true;
+			// 	resolve(true);
+			// });
+
+			io.on(SocketEvents.MESSAGE, (topic: string, message: string | Buffer) => {
+				if (topic == SocketEvents.CONNECT_RECEIPT) {
+					this.connected = true;
+					resolve(true);
+				} else {
+					this.receiveMsg(message);
 				}
-			}
+			});
+
+			io.on("error", (error: any) => {
+				// this.disconnect(packet.reasonCode?.toString());
+				let code = error.code;
+				if (this.connected) {
+					if (code == "ECONNRESET" || code == "ECONNREFUSED") {
+						this.connected = false;
+						resolve(false);
+					}
+				}
+			});
+			this.io = io;
+			this.forceConnect = false;
 		});
-		this.io = io;
-		this.forceConnect = false;
 	}
 
 	disconnect(reason?: string): void {
@@ -60,7 +64,7 @@ export default class MqttSocketClient extends SocketClient {
 	}
 
 	async sendMsg(msg: RpcMessage): Promise<boolean> {
-		if (!this.connected) {
+		if (this.connected) {
 			return false;
 		}
 
