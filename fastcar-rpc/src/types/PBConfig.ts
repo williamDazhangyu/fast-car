@@ -1,5 +1,3 @@
-import { Root } from "protobufjs";
-
 export type ProtoMeta = {
 	protoPath: string;
 	service: string; //服务
@@ -20,5 +18,5 @@ export type ProtoList = {
 
 export type ProtoRoot = {
 	protoPath: string;
-	root: Root;
+	root: any; //import { Root } from "protobufjs";
 };

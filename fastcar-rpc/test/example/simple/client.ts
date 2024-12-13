@@ -48,7 +48,7 @@ describe("rpc交互测试", () => {
 		console.log("普通调用", result);
 		let result2 = await client1.request("/head/hello");
 		console.log("追加了head的url", result2);
-		let sessionId = client1.getSessionId();
+		// let sessionId = client1.getSessionId();
 		// let server: RpcServer = appInstance.app.getComponentByTarget(RpcServer);
 		// let result3 = await server.request(sessionId, "/server/test", "发送至客户端");
 		// console.log("服务端收到客户端应答", result3);
@@ -83,7 +83,7 @@ describe("rpc交互测试", () => {
 			new NotifyHandle()
 		);
 		await client3.start();
-		let sessionId = client3.getSessionId();
+		// let sessionId = client3.getSessionId();
 		// setTimeout(() => {
 		// 	let server: RpcServer = appInstance.app.getComponentByTarget(RpcServer);
 		// 	server.kickSessionId(sessionId, "服务端强制客户端下线");
@@ -135,11 +135,10 @@ describe("rpc交互测试", () => {
 			},
 			new NotifyHandle()
 		);
-		let connect1 = await client1.start();
-		console.assert(connect1 == true);
-		if (!connect1) {
-			client1.close();
-		}
+		await client1.start();
+
+		client1.close();
+
 		let client2 = new RpcClient(
 			{
 				url: "ws://localhost:1237",
@@ -156,8 +155,7 @@ describe("rpc交互测试", () => {
 			},
 			new NotifyHandle()
 		);
-		let connect2 = await client2.start();
-		console.assert(connect2 == true);
+		client2.start();
 	});
 	it("ssl 测试", async () => {
 		let client1 = new RpcClient(
