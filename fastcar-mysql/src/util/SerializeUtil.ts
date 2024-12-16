@@ -19,7 +19,7 @@ export default class SerializeUtil {
 				return DateUtil.toDateTime(value);
 			}
 			case "json": {
-				return value;
+				return typeof value == "string" ? value : JSON.stringify(value);
 			}
 			default: {
 				return JSON.stringify(value);

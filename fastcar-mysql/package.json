@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/mysql",
-	"version": "0.2.7",
+	"version": "0.2.8",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "基于@fastcar/core框架下对mysql的封装",
 	"main": "target/index.js",
@@ -31,7 +31,7 @@
 		"node": ">=16"
 	},
 	"dependencies": {
-		"mysql2": "^3.9.3"
+		"mysql2": "^3.11.5"
 	},
 	"devDependencies": {
 		"@fastcar/core": "*",
