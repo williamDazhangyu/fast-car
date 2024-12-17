@@ -57,12 +57,14 @@ export default class WsSocketServer extends SocketServer {
 
 			socket.on("close", (code: number, reason: Buffer) => {
 				this.dropConnect(socketId, code + " " + reason.toString());
+				request.socket.destroy();
 			});
 
 			//增加超时返回
 			if (this.config.timeout != 0) {
 				request.socket.setTimeout(this.config.timeout || 60 * 1000, () => {
 					this.dropConnect(socketId, `timeout`);
+					request.socket.destroy();
 				});
 			}
 		});
