@@ -1,6 +1,5 @@
 import { RpcMetaData } from "./constant/RpcMetaData";
 import { RpcUrlData } from "./constant/RpcUrlData";
-import ProtoBuffService from "./service/ProtoBuffService";
 import { ClientRequestStatic, ServerRequestStatic } from "./service/rpc/RequestStatic";
 import RpcClient from "./service/rpc/RpcClient";
 import RpcServer from "./service/rpc/RpcServer";
@@ -15,4 +14,4 @@ export * from "./service/RpcAsyncService";
 export * from "./constant/SocketEnum";
 export * from "./constant/SocketSymbol";
 
-export { RpcClient, RpcServer, RpcMetaData, RpcUrlData, ClientRequestStatic, ServerRequestStatic, ProtoBuffService };
+export { RpcClient, RpcServer, RpcMetaData, RpcUrlData, ClientRequestStatic, ServerRequestStatic };

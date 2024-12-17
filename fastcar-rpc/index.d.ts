@@ -140,6 +140,3 @@ export function ClientRequestStatic<T, K>(res: { client: RpcClient; url: string;
 
 //封装服务端向客户端发起请求
 export function ServerRequestStatic<T, K>(res: { sessionId: SessionId; client: RpcServer; url: string; data?: T; opts?: RetryConfig }): Promise<K>;
-
-//导出pb工具类
-export * as ProtoBuffService from "./src/service/ProtoBuffService";
