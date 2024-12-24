@@ -1,0 +1,11 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "experimentalDecorators": true, //启用注解
+    "emitDecoratorMetadata": true, //启用元数据
+    "moduleResolution": "node", //使用node作为模块解析
+    "strict": true, //启用严格模式
+  }
+}

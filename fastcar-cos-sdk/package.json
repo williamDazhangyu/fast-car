@@ -1,0 +1,32 @@
+{
+	"name": "@fastcar/cossdk",
+	"version": "0.0.1",
+	"homepage": "https://github.com/williamDazhangyu/fast-car",
+	"main": "./index.js",
+	"types": "index.d.ts",
+	"author": "william_zhong",
+	"license": "MIT",
+	"exports": {
+		".": "./index.js"
+	},
+	"keywords": [
+		"cos",
+		"file"
+	],
+	"files": [
+		"index.js",
+		"index.d.ts",
+		"types",
+		"LICENSE"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/williamDazhangyu/fast-car.git"
+	},
+	"scripts": {
+		"build": "tsc"
+	},
+	"dependencies": {
+		"axios": "^1.7.9"
+	}
+}
