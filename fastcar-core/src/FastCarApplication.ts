@@ -392,6 +392,10 @@ class FastCarApplication extends Events {
 				let beforeInstance = this.getBean(beforeKey);
 				if (!!beforeInstance) {
 					MixTool.assign(beforeInstance, classZ);
+					let cb = Reflect.getMetadata(FastCarMetaData.HotterCallback, classZ.prototype);
+					if (cb && Reflect.has(beforeInstance, cb)) {
+						Reflect.apply(Reflect.get(beforeInstance, cb), beforeInstance, []);
+					}
 					return;
 				}
 			}

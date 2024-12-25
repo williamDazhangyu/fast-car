@@ -53,6 +53,7 @@ import ComponentScanMust from "./annotation/scan/ComponentScanMust";
 import DemandInjection from "./annotation/bind/DemandInjection";
 import Value from "./annotation/bind/Value";
 import AppEnv from "./annotation/bind/AppEnv";
+import HotterCallBack from "./annotation/scan/HotterCallBack";
 
 //注解暴露出去
 export {
@@ -67,6 +68,7 @@ export {
 	ComponentInjection,
 	ComponentScanMust,
 	Hotter,
+	HotterCallBack,
 	BeanName,
 	Configure,
 	Controller,

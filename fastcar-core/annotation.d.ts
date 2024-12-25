@@ -43,6 +43,7 @@ export function ComponentScanExclusion(...names: string[]): Ret;
 export function ComponentInjection(target: any, ...names: string[]): void;
 export function ComponentScanMust(...names: string[]): Ret;
 export function Hotter(target: any): void;
+export function HotterCallBack(fn: string): Ret;
 
 /***
  * 用于描述不同组件的作用类
