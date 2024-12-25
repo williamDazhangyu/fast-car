@@ -333,8 +333,7 @@ export default class RpcClient implements MsgClientHookService {
 	})
 	async checkMsg(diff: number, stop: boolean) {
 		if (this.checkStatus) {
-			this.rpcLogger.warn("Client message detection time is too long");
-			return;
+			return this.rpcLogger.warn("Client message detection time is too long");
 		}
 
 		try {

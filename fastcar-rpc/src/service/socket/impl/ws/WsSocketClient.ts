@@ -9,6 +9,7 @@ import { RpcMessage } from "../../../../types/RpcConfig";
 export default class WsSocketClient extends SocketClient {
 	type: SocketEnum;
 	io!: WebSocket;
+	timer!: NodeJS.Timeout | null;
 
 	constructor(config: SocketClientConfig, manager: MsgClientHookService) {
 		super(config, manager);
@@ -17,6 +18,10 @@ export default class WsSocketClient extends SocketClient {
 
 	async connect(): Promise<boolean> {
 		return new Promise((resolve) => {
+			if (this.timer) {
+				resolve(this.connected);
+			}
+
 			if (this.connected) {
 				this.disconnect();
 			}
@@ -37,6 +42,12 @@ export default class WsSocketClient extends SocketClient {
 				})
 			);
 
+			this.cleanTimer();
+
+			this.timer = setTimeout(() => {
+				resolve(this.connected);
+			}, (this.config.timeout || 3) * 1000);
+
 			// io.on("open", () => {
 			// 	this.connected = true;
 			// 	resolve(this.connected);
@@ -47,6 +58,7 @@ export default class WsSocketClient extends SocketClient {
 					this.connected = false;
 				}
 
+				this.cleanTimer();
 				resolve(false);
 			});
 
@@ -55,6 +67,7 @@ export default class WsSocketClient extends SocketClient {
 					let result: any = this.decode(msg);
 					if (!!result && result?.url == SocketEvents.CONNECT_RECEIPT) {
 						this.connected = true;
+						this.cleanTimer();
 						return resolve(true);
 					}
 				} else {
@@ -81,17 +94,32 @@ export default class WsSocketClient extends SocketClient {
 		this.logger.warn(`client disconnect ${reason}`);
 	}
 
+	cleanTimer() {
+		if (this.timer) {
+			clearTimeout(this.timer);
+			this.timer = null;
+		}
+	}
+
 	sendMsg(msg: RpcMessage) {
 		if (!this.io || !this.connected) {
 			return false;
 		}
 
-		this.io.send(this.encode(msg), (err?: Error) => {
-			if (err) {
-				this.logger.error("send msg fail");
-				this.logger.error(err);
-			}
-		});
+		if (!this.io.OPEN) {
+			return false;
+		}
+
+		try {
+			this.io.send(this.encode(msg), (err?: Error) => {
+				if (err) {
+					this.logger.error("send msg fail");
+					this.logger.error(err);
+				}
+			});
+		} catch (e) {
+			return false;
+		}
 
 		return true;
 	}

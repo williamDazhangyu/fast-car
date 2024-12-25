@@ -22,6 +22,7 @@ export type SocketClientConfig = {
 	secure?: SecureClientOptions;
 	ssl?: SSLConfig;
 	connectionLimit?: number; //连接数限制 默认1
+	timeout?: number; //超时时间
 } & { [key: string]: any };
 
 //服务端连接配置
