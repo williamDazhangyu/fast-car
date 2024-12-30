@@ -173,7 +173,7 @@ export enum DesignMeta {
 	mapping = "db:mapping", //映射描述
 	dbFields = "db:fields", //数据库名-ts名
 	sqlSession = "SqlSession",
-	isSerial = "isSerial", //sql会话
+	isSerial = "db:isSerial", //sql会话
 }
 
 export interface DataSourceManager {

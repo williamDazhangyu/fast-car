@@ -245,6 +245,7 @@ export type MapperType = {
 	dbType: string; //数据类型
 	primaryKey?: boolean; //是否为主键 默认为false
 	serialize?: Function; //序列化对象方法
+	isSerial?: boolean; //是否递增
 };
 
 export enum DesignMeta {
