@@ -54,6 +54,7 @@ import DemandInjection from "./annotation/bind/DemandInjection";
 import Value from "./annotation/bind/Value";
 import AppEnv from "./annotation/bind/AppEnv";
 import HotterCallBack from "./annotation/scan/HotterCallBack";
+import IsSerial from "./annotation/data/IsSerial";
 
 //注解暴露出去
 export {
@@ -111,6 +112,7 @@ export {
 	Entity, //表和对应编程内的类型映射
 	SqlSession, //连接会话 如果需要使用同一连接或者使用事务是传递
 	Transactional, //事务管理
+	IsSerial, //自增管理
 };
 
 export { ENV, BaseFilePath, BasePath, BaseName, ApplicationSetting };

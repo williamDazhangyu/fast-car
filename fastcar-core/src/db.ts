@@ -160,6 +160,7 @@ export type MapperType = {
 	dbType: string; //数据类型
 	primaryKey?: boolean; //是否为主键 默认为false
 	serialize?: Function; //序列化对象方法
+	isSerial?: boolean; //是否递增
 };
 
 export enum DesignMeta {
@@ -171,7 +172,8 @@ export enum DesignMeta {
 	entity = "db:entity", //实例化的数据库类
 	mapping = "db:mapping", //映射描述
 	dbFields = "db:fields", //数据库名-ts名
-	sqlSession = "SqlSession", //sql会话
+	sqlSession = "SqlSession",
+	isSerial = "isSerial", //sql会话
 }
 
 export interface DataSourceManager {

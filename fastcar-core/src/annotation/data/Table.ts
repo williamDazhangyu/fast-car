@@ -16,6 +16,7 @@ export default function Table(name: string) {
 			let field = Reflect.getOwnMetadata(DesignMeta.field, proto, c) || c;
 			let dbType = Reflect.getOwnMetadata(DesignMeta.dbType, proto, c) || "varchar";
 			let primaryKey = !!Reflect.getOwnMetadata(DesignMeta.primaryKey, proto, c);
+			let isSerial = Reflect.getOwnMetadata(DesignMeta.isSerial, proto, c);
 
 			let tsName: string = tsType.name;
 			let customeType = Reflect.getOwnMetadata(FastCarMetaData.CustomType, proto, c);
@@ -26,6 +27,7 @@ export default function Table(name: string) {
 				field, //数据库列名
 				dbType: dbType, //数据类型
 				primaryKey, //是否为主键 默认为false
+				isSerial: isSerial || false,
 			};
 			dbFields.set(field, c);
 			mappingMap.set(c, m);

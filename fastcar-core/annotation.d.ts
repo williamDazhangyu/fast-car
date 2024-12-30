@@ -134,6 +134,9 @@ export function Field(name: string): PMRet;
 //是否为主键
 export function PrimaryKey(target: any, propertyKey: string): void;
 
+//是否为自增的
+export function IsSerial(target: any, propertyKey: string): void;
+
 //标记表名
 export function Table(name: string): Ret;
 
