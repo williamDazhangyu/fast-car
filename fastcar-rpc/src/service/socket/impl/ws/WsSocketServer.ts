@@ -61,8 +61,8 @@ export default class WsSocketServer extends SocketServer {
 			});
 
 			//增加超时返回
-			if (this.config.timeout != 0) {
-				request.socket.setTimeout(this.config.timeout || 60 * 1000, () => {
+			if (this.config.timeout != 0 && this.config.timeout) {
+				request.socket.setTimeout(this.config.timeout * 1000, () => {
 					this.dropConnect(socketId, `timeout`);
 					request.socket.destroy();
 				});
