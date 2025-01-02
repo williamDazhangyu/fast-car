@@ -1,0 +1,10 @@
+application:
+    name: "simple"
+    port: 1234
+settings:
+    pgsql:
+        printSQL: true
+        sessionTimeOut: 10000
+        dataSoucreConfig:
+            - { source: "test", database: "test", host: "localhost", user: "postgres", password: "123456", connectionLimit: 10 }
+            - { source: "test2", database: "test", host: "localhost", user: "postgres", password: "123456", connectionLimit: 10 }
