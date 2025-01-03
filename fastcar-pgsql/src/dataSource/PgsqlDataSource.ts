@@ -20,6 +20,11 @@ class PgsqlDataSource {
 		let counter = -1;
 		return sql.replace(/\?/g, () => {
 			counter++;
+			let val = values[counter];
+			if (KEY_WORDS.includes(val)) {
+				return val;
+			}
+
 			return `'${values[counter]}'`;
 		});
 	}

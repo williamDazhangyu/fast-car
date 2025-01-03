@@ -377,11 +377,15 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		let afterKeys: string[] = Array.of();
 		let beforeKeys: string[] = Array.of();
 
+		let primaryKeys: string[] = [];
+
 		this.mappingList.forEach((item) => {
 			let fieldKey = `"${item.field}"`;
 			beforeKeys.push(fieldKey);
 			if (!item.primaryKey) {
-				afterKeys.push(`${fieldKey} = VALUES (${fieldKey})`);
+				afterKeys.push(`${fieldKey} = (excluded.${item.field})`);
+			} else {
+				primaryKeys.push(`${fieldKey}`);
 			}
 		});
 
@@ -392,6 +396,14 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		for (let row of rows) {
 			for (let item of this.mappingList) {
 				let dbValue = this.toDBValue(row, item.name, item.type);
+
+				if (item.primaryKey) {
+					if (ValidationUtil.isNull(dbValue)) {
+						args.push("DEFAULT");
+						continue;
+					}
+				}
+
 				args.push(dbValue);
 			}
 			values.push(`(${paramsSymbol.join(",")})`);
@@ -400,7 +412,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		let valueStr = values.join(",");
 		let afterKeyStr = afterKeys.join(",");
 
-		let sql = `INSERT INTO ${this.tableName} (${beforeKeys.join(",")}) VALUES ${valueStr} ON DUPLICATE KEY UPDATE ${afterKeyStr}`;
+		let sql = `INSERT INTO ${this.tableName} (${beforeKeys.join(",")}) VALUES ${valueStr} ON CONFLICT (${primaryKeys.join(",")}) DO UPDATE SET ${afterKeyStr}`;
 		let res = await this.dsm.exec({ sql, args, ds, sessionId });
 
 		return res.oid;
@@ -438,7 +450,11 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		}
 
 		let res = await this.dsm.exec({ sql, args, ds, sessionId });
-		return res.rows[0].id ? parseInt(res.rows[0].id) : 0;
+		if (serialId) {
+			return res.rows[0][serialId] ? parseInt(res.rows[0][serialId]) : 0;
+		}
+
+		return 0;
 	}
 
 	/***
