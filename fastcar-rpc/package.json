@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/rpc",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"description": "rpc,socket集成",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "target/index.js",

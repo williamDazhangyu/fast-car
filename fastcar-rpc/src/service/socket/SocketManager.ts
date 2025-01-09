@@ -424,13 +424,12 @@ export default class SocketManager implements MsgHookService {
 			});
 
 			item.channels?.clear();
+			this.clientSessionMap.delete(sessionId);
 
 			let cid = item.cid;
 			if (cid) {
 				this.unbindCustomID(cid, sessionId);
 			}
-
-			this.clientSessionMap.delete(sessionId);
 		}
 	}
 
@@ -447,3 +446,5 @@ export default class SocketManager implements MsgHookService {
 		return server;
 	}
 }
+
+
