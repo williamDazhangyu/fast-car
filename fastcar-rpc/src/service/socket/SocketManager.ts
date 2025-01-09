@@ -25,7 +25,7 @@ export default class SocketManager implements MsgHookService {
 	protected customIds: DataMap<
 		CustomId,
 		{
-			sessionIds: Set<SessionId>;
+			sessionIds: Array<SessionId>;
 			channel?: Set<string>;
 		}
 	>; //自定义id和sessionId绑定
@@ -144,9 +144,13 @@ export default class SocketManager implements MsgHookService {
 	//发送自定义id的消息
 	async sendMsgByCustomId(customId: CustomId, msg: RpcMessage = { mode: InteractiveMode.notify, url: "" }): Promise<SocketMsgStatus> {
 		let s = this.customIds.get(customId);
-		if (s && s.sessionIds.size > 0) {
-			let index = Math.floor(Math.random() * s.sessionIds.size);
-			let sessionid = [...s.sessionIds][index];
+		if (s && s.sessionIds.length > 0) {
+			let sessionid = s.sessionIds[0];
+
+			if (s.sessionIds.length > 1) {
+				let index = Math.floor(Math.random() * s.sessionIds.length);
+				sessionid = s.sessionIds[index];
+			}
 
 			return await this.sendMsg(sessionid, msg);
 		}
@@ -159,14 +163,16 @@ export default class SocketManager implements MsgHookService {
 		let citem = this.customIds.get(cid);
 		if (!citem) {
 			citem = {
-				sessionIds: new Set<SessionId>(),
+				sessionIds: [],
 			};
 			this.customIds.set(cid, citem);
 		}
 
 		let item = this.clientSessionMap.get(sid);
 		if (item) {
-			citem.sessionIds.add(sid);
+			if (!citem.sessionIds.includes(sid)) {
+				citem.sessionIds.unshift(sid); //永远保持最新的
+			}
 			item.cid = cid;
 		}
 	}
@@ -174,9 +180,12 @@ export default class SocketManager implements MsgHookService {
 	//移除自定义id
 	unbindCustomID(cid: CustomId, sid: SessionId) {
 		let citem = this.customIds.get(cid);
-		if (citem && citem.sessionIds.has(sid)) {
-			citem.sessionIds.delete(sid);
-			this.deleteSession(sid);
+		if (citem) {
+			let index = citem.sessionIds.indexOf(sid);
+			if (index > -1) {
+				citem.sessionIds.splice(index, 1);
+				this.deleteSession(sid);
+			}
 		}
 	}
 
