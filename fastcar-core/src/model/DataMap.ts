@@ -1,7 +1,7 @@
 export type FIELDTYPE = {
 	field: string;
 	order?: boolean; //是否为倒序 order true为倒序
-	compare?: (a: any, b: any) => boolean;
+	compare?: (a: any, b: any) => -1 | 0 | 1; // -1 0 1 //-1为小 0为相等  1为大
 };
 
 export default class DataMap<K, V extends Object> extends Map<K, V> {
@@ -32,22 +32,35 @@ export default class DataMap<K, V extends Object> extends Map<K, V> {
 		if (!sorts || sorts?.length == 0) {
 			return list;
 		}
-		let total = sorts.length;
+
 		list.sort((a, b) => {
 			let resultNum = 0;
 			sorts.some((f, index) => {
+				let cindex = index + 1;
 				let field = f.field;
 				let aValue = Reflect.get(a, field);
 				let bValue = Reflect.get(b, field);
-				let flag = f.compare ? f.compare(aValue, bValue) : aValue > bValue;
-				resultNum = flag ? total - index : index - total;
+
+				if (f.compare) {
+					let flag = f.compare(aValue, bValue);
+					if (flag == 0) {
+						return false;
+					}
+					resultNum = flag > 0 ? cindex : -cindex;
+				} else {
+					if (aValue == bValue) {
+						return false;
+					}
+
+					resultNum = aValue > bValue ? cindex : -cindex;
+				}
 
 				//降序则倒着
 				if (f.order) {
 					resultNum = -resultNum;
 				}
 
-				return !!flag;
+				return true;
 			});
 			return resultNum;
 		});
