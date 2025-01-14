@@ -9,6 +9,13 @@ export default class DataMap<K, V extends Object> extends Map<K, V> {
 		super();
 	}
 
+	init(list: Array<V>, key: string) {
+		this.clear();
+		list.forEach((item) => {
+			this.set(Reflect.get(item, key) as K, item);
+		});
+	}
+
 	toValues(): V[] {
 		return [...this.values()];
 	}
@@ -83,7 +90,7 @@ export default class DataMap<K, V extends Object> extends Map<K, V> {
 				//这边判断 是不是一个复合属性
 				if (Reflect.has(item, key)) {
 					let itemV = Reflect.get(item, key);
-					return itemV == v;
+					return Array.isArray(v) ? v.includes(itemV) : itemV == v;
 				} else {
 					let keyList = key.split(".");
 					if (keyList.length > 1) {
@@ -100,7 +107,7 @@ export default class DataMap<K, V extends Object> extends Map<K, V> {
 							return false;
 						}
 
-						return tmpV == v;
+						return Array.isArray(v) ? v.includes(tmpV) : tmpV == v;
 					}
 				}
 

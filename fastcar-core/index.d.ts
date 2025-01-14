@@ -260,6 +260,8 @@ export class ValidError {
 }
 
 export class DataMap<K, V extends Object> extends Map<K, V> {
+	init(list: Array<V>, key: string): void;
+
 	toValues(): V[];
 
 	toKeys(): K[];
@@ -275,5 +277,5 @@ export class DataMap<K, V extends Object> extends Map<K, V> {
 	 * @params atts代表属性键值对匹配
 	 *
 	 */
-	findByAtts(atts: { [key: string]: any }): V[];
+	findByAtts(atts: { [key: string]: any | any[] }): V[];
 }
