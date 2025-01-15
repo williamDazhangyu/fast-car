@@ -445,6 +445,13 @@ export default class SocketManager implements MsgHookService {
 
 		return server;
 	}
+
+	getCustomId(cid: string):
+		| {
+				sessionIds: Array<SessionId>;
+				channel?: Set<string>;
+		  }
+		| undefined {
+		return this.customIds.get(cid);
+	}
 }
-
-
