@@ -142,12 +142,12 @@ export default class SocketManager implements MsgHookService {
 	}
 
 	//发送自定义id的消息
-	async sendMsgByCustomId(customId: CustomId, msg: RpcMessage = { mode: InteractiveMode.notify, url: "" }): Promise<SocketMsgStatus> {
+	async sendMsgByCustomId(customId: CustomId, msg: RpcMessage = { mode: InteractiveMode.notify, url: "", firstPriority: false }): Promise<SocketMsgStatus> {
 		let s = this.customIds.get(customId);
 		if (s && s.sessionIds.length > 0) {
 			let sessionid = s.sessionIds[0];
 
-			if (s.sessionIds.length > 1) {
+			if (s.sessionIds.length > 1 && !msg.firstPriority) {
 				let index = Math.floor(Math.random() * s.sessionIds.length);
 				sessionid = s.sessionIds[index];
 			}

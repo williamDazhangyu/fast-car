@@ -18,6 +18,7 @@ export type RpcMessage = {
 	data?: { [key: string]: any }; //请求数据
 	body?: Object; //回传数据
 	mode: InteractiveMode; //交互模式 request和response为同步模式的一问一答 notify则为异步通知
+	firstPriority?: boolean; //优先取第一个会话id
 };
 
 //通知数据回传
