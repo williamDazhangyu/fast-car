@@ -230,4 +230,9 @@ export class COSSDK {
 
 		return res.data;
 	}
+
+	async getAccountList(): Promise<string[]> {
+		let res = await axios.default.get(`${this.domain}/getAccountList`);
+		return res.data.data;
+	}
 }

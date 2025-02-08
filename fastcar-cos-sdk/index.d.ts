@@ -102,4 +102,6 @@ export class COSSDK {
 	setRedirect({ redirectUrl, flag, bucket }: { redirectUrl: string; flag: boolean; bucket?: string }): Promise<{
 		code: number;
 	}>;
+
+	getAccountList(): Promise<string[]>;
 }
