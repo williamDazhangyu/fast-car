@@ -1,8 +1,8 @@
 import { COSSDK, getSign } from "./index";
 
 let account = {
-	appid: "HIJ2odIuxdijosqfFHbls",
-	serectkey: "78a4750ce0e76f489fd5c023f01e2eb9",
+	appid: "mSaZM5ZsXXJxgWjNtlqeF",
+	serectkey: "c0ef11c3d3686164a0bbf4d99d23692a",
 };
 
 let sign = getSign(
@@ -23,36 +23,70 @@ if (!sign) {
 		sign,
 	});
 
-	cosSDK.genAccountInfo().then((res) => {
-		console.log(`生成账号信息---`, JSON.stringify(res));
-	});
+	// cosSDK.genAccountInfo().then((res) => {
+	// 	console.log(`生成账号信息---`, JSON.stringify(res));
+	// });
 
-	cosSDK.getFile("/test/hello/test.txt").then((res) => {
-		console.log(res.data);
-	});
+	// cosSDK.initAccount().then((res) => {
+	// 	console.log(res.data.appid);
+	// });
 
-	//带鉴权的
-	cosSDK
-		.getFile("/test.txt", true)
-		.then((res) => {
-			console.log(res.data);
-			console.log(res.headers["content-type"]);
-		})
-		.catch((e) => {
-			console.log(e);
-		});
-	let blob = new Blob(["hello world"], { type: "text/plain" });
-	let newBolb = new File([blob], "client.txt");
+	// cosSDK.addAccount().then((res) => {
+	// 	console.log(res.data);
+	// });
 
-	cosSDK.uploadfile("/test/text.txt", newBolb).then((res) => {
-		console.log(res.data.data);
-	});
+	// cosSDK.delAccount("nVOGBjReJ35c7ThUX5XSZ").then((res) => {
+	// 	console.log(res.code);
+	// });
 
-	cosSDK.deleteFile("/hello.txt").then((res) => {
-		console.log(res);
-	});
+	// cosSDK.getPermissions({ filename: "/test/b.txt" }).then((res) => {
+	// 	console.log(res);
+	// });
 
-	cosSDK.queryFilelist("/test").then((res) => {
-		console.log(JSON.stringify(res.data));
+	// cosSDK.setPermissions({ filename: "/test/b.txt", permission: "public" }).then((res) => {
+	// 	console.log(res.code);
+	// });
+
+	// cosSDK
+	// 	.delPermissions({
+	// 		filename: "/test/b.txt",
+	// 	})
+	// 	.then((res) => {
+	// 		console.log(res);
+	// 	});
+
+	// cosSDK.getFile("/test/hello/test.txt").then((res) => {
+	// 	console.log(res.data);
+	// });
+
+	// //带鉴权的
+	// cosSDK
+	// 	.getFile("/test.txt", true)
+	// 	.then((res) => {
+	// 		console.log(res.data);
+	// 		console.log(res.headers["content-type"]);
+	// 	})
+	// 	.catch((e) => {
+	// 		console.log(e);
+	// 	});
+	// let blob = new Blob(["hello world"], { type: "text/plain" });
+	// let newBolb = new File([blob], "client.txt");
+
+	// cosSDK.uploadfile("/test/text.txt", newBolb).then((res) => {
+	// 	console.log(res.data.data);
+	// });
+
+	// cosSDK.deleteFile("/hello.txt").then((res) => {
+	// 	console.log(res);
+	// });
+
+	// cosSDK.queryFilelist("/test").then((res) => {
+	// 	console.log(JSON.stringify(res.data));
+	// });
+
+	cosSDK.setRedirect({
+		redirectUrl: "/test/hello.txt",
+		flag: false,
+		bucket: "test",
 	});
 }

@@ -43,6 +43,18 @@ export class COSSDK {
 		}
 	}
 
+	//初始化账号
+	async initAccount(): Promise<{
+		code: number;
+		msg: string;
+		data: {
+			appid: string;
+			serectkey: string;
+		};
+	}> {
+		return (await axios.default.post(`${this.domain}/common/initAccount`)).data;
+	}
+
 	//生成账号信息
 	async genAccountInfo(): Promise<{
 		code: number;
@@ -53,6 +65,73 @@ export class COSSDK {
 		};
 	}> {
 		let res = await axios.default.get(`${this.domain}/common/getAccountInfo?sign=${this.sign}`);
+		return res.data;
+	}
+
+	//添加账号
+	async addAccount(): Promise<{
+		code: number;
+		msg: string;
+		data: {
+			appid: string;
+			serectkey: string;
+		};
+	}> {
+		let res = await axios.default.post(`${this.domain}/addAccount`, {
+			sign: this.sign,
+		});
+		return res.data;
+	}
+
+	//删除账号
+	async delAccount(account: string): Promise<{
+		code: number;
+	}> {
+		let res = await axios.default.delete(`${this.domain}/delAccount`, {
+			params: {
+				sign: this.sign,
+				account,
+			},
+		});
+		return res.data;
+	}
+
+	//设置文件/文件夹权限
+	async setPermissions({ filename, permission }: { filename: string; permission: "public" | "private" }): Promise<{
+		code: number;
+	}> {
+		let res = await axios.default.put(`${this.domain}/setPermissions`, {
+			sign: this.sign,
+			filename: filename.startsWith("/") ? filename : `/${filename}`,
+			permission,
+		});
+		return res.data;
+	}
+
+	//获取当前文件/文件夹的权限
+	async getPermissions({ filename }: { filename: string }): Promise<{
+		filename: string;
+		permission: "public" | "private";
+		source: "set" | "extend";
+	}> {
+		let res = await axios.default.get(`${this.domain}/getPermissions`, {
+			params: {
+				filename: encodeURI(filename),
+				sign: this.sign,
+			},
+		});
+		return res.data?.data;
+	}
+
+	async delPermissions({ filename }: { filename: string }): Promise<{
+		code: number;
+	}> {
+		let res = await axios.default.delete(`${this.domain}/delPermissions`, {
+			params: {
+				sign: this.sign,
+				filename,
+			},
+		});
 		return res.data;
 	}
 
@@ -116,6 +195,39 @@ export class COSSDK {
 				sign: this.sign,
 			},
 		});
+		return res.data;
+	}
+
+	//创建文件夹 允许带权限
+	async createDir(
+		dirname: string,
+		permission?: "public" | "private"
+	): Promise<{
+		code: number;
+	}> {
+		if (!dirname.startsWith("/")) {
+			dirname = `/${dirname}`;
+		}
+
+		let res = await axios.default.post(`${this.domain}/createDir`, {
+			dirname: encodeURI(dirname),
+			sign: this.sign,
+			permission,
+		});
+
+		return res.data;
+	}
+
+	//设置重定向
+	async setRedirect({ redirectUrl, flag, bucket }: { redirectUrl: string; flag: boolean; bucket?: string }): Promise<{
+		code: number;
+	}> {
+		let res = await axios.default.post(`${this.domain}/setRedirect`, {
+			redirectUrl: encodeURI(redirectUrl),
+			flag,
+			bucket,
+		});
+
 		return res.data;
 	}
 }
