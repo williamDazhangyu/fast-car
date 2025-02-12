@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/cossdk",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "./index.js",
 	"types": "index.d.ts",
@@ -17,7 +17,8 @@
 		"index.js",
 		"index.d.ts",
 		"types",
-		"LICENSE"
+		"LICENSE",
+		"index-test.ts"
 	],
 	"repository": {
 		"type": "git",

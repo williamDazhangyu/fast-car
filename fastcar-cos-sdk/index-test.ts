@@ -93,4 +93,8 @@ if (!sign) {
 	cosSDK.getAccountList().then((res) => {
 		console.log(res);
 	});
+
+	cosSDK.checkSign().then((res) => {
+		console.log(res);
+	});
 }

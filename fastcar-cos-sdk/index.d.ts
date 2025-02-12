@@ -104,4 +104,6 @@ export class COSSDK {
 	}>;
 
 	getAccountList(): Promise<string[]>;
+
+	checkSign(): Promise<number>;
 }

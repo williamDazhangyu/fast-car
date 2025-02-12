@@ -226,13 +226,31 @@ export class COSSDK {
 			redirectUrl: encodeURI(redirectUrl),
 			flag,
 			bucket,
+			sign: this.sign,
 		});
 
 		return res.data;
 	}
 
 	async getAccountList(): Promise<string[]> {
-		let res = await axios.default.get(`${this.domain}/getAccountList`);
+		let res = await axios.default.get(`${this.domain}/getAccountList`, {
+			params: {
+				sign: this.sign,
+			},
+		});
 		return res.data.data;
+	}
+
+	async checkSign() {
+		try {
+			let res = await axios.default.get(`${this.domain}/checkSign`, {
+				params: {
+					sign: this.sign,
+				},
+			});
+			return res.data.code;
+		} catch (e: any) {
+			return e.status;
+		}
 	}
 }
