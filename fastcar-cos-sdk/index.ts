@@ -43,6 +43,17 @@ export class COSSDK {
 		}
 	}
 
+	setSign(sign: string) {
+		this.sign = sign;
+	}
+
+	async createSign(t: SignType & { serectkey: string }): Promise<{
+		code: number;
+		data: string;
+	}> {
+		return (await axios.default.post(`${this.domain}/common/createSign`, t)).data;
+	}
+
 	//初始化账号
 	async initAccount(): Promise<{
 		code: number;

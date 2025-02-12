@@ -106,4 +106,11 @@ export class COSSDK {
 	getAccountList(): Promise<string[]>;
 
 	checkSign(): Promise<number>;
+
+	createSign(t: SignType & { serectkey: string }): Promise<{
+		code: number;
+		data: string;
+	}>;
+
+	setSign(sign: string): void;
 }
