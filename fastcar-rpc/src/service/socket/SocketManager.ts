@@ -152,6 +152,7 @@ export default class SocketManager implements MsgHookService {
 				sessionid = s.sessionIds[index];
 			}
 
+			Reflect.deleteProperty(msg, "firstPriority");
 			return await this.sendMsg(sessionid, msg);
 		}
 
