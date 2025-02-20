@@ -127,7 +127,7 @@ export class COSSDK {
 	}> {
 		let res = await axios.default.get(`${this.domain}/getPermissions`, {
 			params: {
-				filename: encodeURI(filename),
+				filename,
 				sign: this.sign,
 			},
 		});
@@ -168,7 +168,7 @@ export class COSSDK {
 	//上传文件
 	uploadfile(filename: string, file: string | Blob) {
 		let formData = new FormData();
-		formData.append(encodeURI(filename), file);
+		formData.append(filename, file);
 
 		return axios.default.post(`${this.domain}/uploadfile?sign=${this.sign}`, formData, {
 			headers: {
@@ -181,7 +181,7 @@ export class COSSDK {
 	async deleteFile(filename: string): Promise<boolean> {
 		let res = await axios.default.delete(`${this.domain}/deleteFile`, {
 			params: {
-				filename: encodeURI(filename),
+				filename,
 				sign: this.sign,
 			},
 		});
@@ -202,7 +202,7 @@ export class COSSDK {
 	}> {
 		let res = await axios.default.get(`${this.domain}/queryFilelist`, {
 			params: {
-				filename: encodeURI(filename),
+				filename,
 				sign: this.sign,
 			},
 		});
@@ -221,7 +221,7 @@ export class COSSDK {
 		}
 
 		let res = await axios.default.post(`${this.domain}/createDir`, {
-			dirname: encodeURI(dirname),
+			dirname,
 			sign: this.sign,
 			permission,
 		});
@@ -234,7 +234,7 @@ export class COSSDK {
 		code: number;
 	}> {
 		let res = await axios.default.post(`${this.domain}/setRedirect`, {
-			redirectUrl: encodeURI(redirectUrl),
+			redirectUrl,
 			flag,
 			bucket,
 			sign: this.sign,
