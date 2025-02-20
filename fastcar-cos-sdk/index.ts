@@ -264,4 +264,14 @@ export class COSSDK {
 			return e.status;
 		}
 	}
+
+	//重命名文件夹或者文件
+	async rename(filename: string, newFilename: string): Promise<boolean> {
+		let res = await axios.default.put(`${this.domain}/rename`, {
+			filename,
+			newname: newFilename,
+			sign: this.sign,
+		});
+		return res.data.code == 200;
+	}
 }

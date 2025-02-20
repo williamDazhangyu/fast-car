@@ -113,4 +113,6 @@ export class COSSDK {
 	}>;
 
 	setSign(sign: string): void;
+
+	rename(filename: string, newFilename: string): Promise<boolean>;
 }

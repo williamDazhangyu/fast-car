@@ -97,4 +97,8 @@ if (!sign) {
 	cosSDK.checkSign().then((res) => {
 		console.log(res);
 	});
+
+	cosSDK.rename("/test/earth/client.txt", "/test/earth/client1.txt").then((res) => {
+		console.log(res);
+	});
 }
