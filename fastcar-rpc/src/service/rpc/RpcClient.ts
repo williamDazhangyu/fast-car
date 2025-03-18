@@ -258,7 +258,7 @@ export default class RpcClient implements MsgClientHookService {
 				data: data,
 			},
 			{
-				retryCount: opts?.retryCount || this.config.retryCount,
+				retryCount: opts?.retryCount ?? this.config.retryCount, //允许为0的
 				retryInterval: opts?.retryInterval || this.config.retryInterval,
 				timeout: opts?.timeout || this.config.timeout, //超时时间
 			}
@@ -374,6 +374,8 @@ export default class RpcClient implements MsgClientHookService {
 							client.sendMsg(item.msg);
 							item.retryInterval = item.increase ? item.maxRetryInterval * (item.retryCount + 1) : item.maxRetryInterval;
 							pending--;
+
+							this.rpcLogger.warn(`The message ${item.msg.url} is in the ${item.retryCount} retransmissions`);
 						}
 					} else if (item.expiretime <= 0) {
 						cleanIds.set(id, {

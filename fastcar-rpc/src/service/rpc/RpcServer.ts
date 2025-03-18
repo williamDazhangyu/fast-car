@@ -115,8 +115,10 @@ export default class RpcServer implements MsgCallbackService {
 				return;
 			}
 
-			this.existClientIds.add(key);
 			let nowTime = Date.now();
+			if (key) {
+				this.existClientIds.add(key);
+			}
 
 			if (next) {
 				await next();
