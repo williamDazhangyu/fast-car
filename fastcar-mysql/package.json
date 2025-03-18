@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/mysql",
-	"version": "0.2.8",
+	"version": "0.2.9",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "基于@fastcar/core框架下对mysql的封装",
 	"main": "target/index.js",
