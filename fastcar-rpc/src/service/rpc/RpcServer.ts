@@ -639,10 +639,10 @@ export default class RpcServer implements MsgCallbackService {
 		this.checkMsgQueue(0, false);
 	}
 
-	async stop() {
+	stop() {
 		this.checkMsgQueue(0, true);
 		this.failMsgQueue = [];
 		this.msgQueue.clear();
-		await this.socketManager.stop();
+		this.socketManager.stop();
 	}
 }

@@ -392,9 +392,9 @@ export default class SocketManager implements MsgHookService {
 		});
 	}
 
-	async stop(): Promise<void> {
+	stop(): void {
 		for (let [serverId, server] of this.serverMap) {
-			await server.close();
+			server.close();
 			this.logger.info(`${serverId} is close`);
 		}
 

@@ -132,7 +132,7 @@ export class RpcServer implements MsgCallbackService {
 
 	start(): Promise<void>;
 
-	stop(): Promise<void>;
+	stop(): void;
 }
 
 //封装客户端向服务端发起请求
