@@ -89,6 +89,7 @@ export type RpcClientMsgBox = {
 	cb: TaskAsync; //消息回调函数
 	clientIndex: number; //客户端消息编号
 	increase: boolean; //是否按照等差递增
+	lastTime: number; //上次操作时间
 };
 
 //服务端盒子存储信息

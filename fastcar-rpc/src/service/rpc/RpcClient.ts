@@ -3,7 +3,6 @@ import { InteractiveMode, RetryConfig, RpcClientConfig, RpcClientMsgBox, RpcMess
 import { SocketClientConfig } from "../../types/SocketConfig";
 import { SocketClient } from "../socket/SocketClient";
 import { SocketClientFactory } from "../socket/SocketFactory";
-import { EnableScheduling, ScheduledInterval } from "@fastcar/timer";
 import TaskAsync from "../../model/TaskAsync";
 import { ValidationUtil } from "@fastcar/core/utils";
 import RpcAsyncService from "../RpcAsyncService";
@@ -11,10 +10,10 @@ import MsgClientHookService from "../MsgClientHookService";
 import { RpcUrlData } from "../../constant/RpcUrlData";
 import { Autowired, DemandInjection, Log } from "@fastcar/core/annotation";
 import { PBConfig, ProtoList } from "../../types/PBConfig";
+import { Heartbeat } from "@fastcar/timer";
 
 //封装一个可用的rpc框架
 @DemandInjection
-@EnableScheduling
 export default class RpcClient implements MsgClientHookService {
 	protected clients: SocketClient[];
 	protected msgQueue: Map<number, RpcClientMsgBox>; //序列号 消息队列
@@ -32,6 +31,8 @@ export default class RpcClient implements MsgClientHookService {
 	private pollIndex: number;
 
 	private maxPendingSize: number; //最大延迟并发量
+
+	private heartbeat: Heartbeat;
 
 	constructor(config: SocketClientConfig, rpcAsyncService: RpcAsyncService, retry?: RetryConfig) {
 		let ClientClass = SocketClientFactory(config.type);
@@ -74,6 +75,12 @@ export default class RpcClient implements MsgClientHookService {
 		}
 
 		this.pollIndex = -1;
+		this.heartbeat = new Heartbeat({
+			initialDelay: 1000, //初始化后第一次延迟多久后执行
+			fixedRate: 100, //大致100ms去check一次
+		});
+
+		this.heartbeat.start(this.checkMsg, this);
 	}
 
 	//初始化配置事件
@@ -151,7 +158,7 @@ export default class RpcClient implements MsgClientHookService {
 	}
 
 	close() {
-		this.checkMsg(0, true);
+		this.heartbeat.stop();
 		this.clients.forEach((c) => {
 			c.close();
 		});
@@ -312,6 +319,7 @@ export default class RpcClient implements MsgClientHookService {
 				cb,
 				clientIndex: cres.index,
 				increase: opts?.increase || this.config.increase,
+				lastTime: Date.now(),
 			};
 
 			// this.rpcLogger.debug(`发送消息的序号----${client.index}`);
@@ -321,19 +329,19 @@ export default class RpcClient implements MsgClientHookService {
 				//重置检测时间
 				this.checkConnectTimer = 0;
 				rpcMsg.retryInterval = 0; //重发消息的间隔为0
+				this.checkMsg(0); //立即调用检测
 			} else {
 				cres.client.sendMsg(msg);
 			}
 		});
 	}
 
-	@ScheduledInterval({
-		initialDelay: 1000, //初始化后第一次延迟多久后执行
-		fixedRate: 100, //大致100ms去check一次
-	})
-	async checkMsg(diff: number, stop: boolean) {
+	async checkMsg(diff: number) {
 		if (this.checkStatus) {
-			return this.rpcLogger.warn("Client message detection time is too long");
+			if (diff != 0) {
+				return this.rpcLogger.warn("Client message detection time is too long");
+			}
+			return;
 		}
 
 		try {
@@ -351,6 +359,8 @@ export default class RpcClient implements MsgClientHookService {
 				let cleanIds: Map<number, RpcResponseType> = new Map();
 
 				let msgQueueList = this.msgQueue.values();
+				let nowTime = Date.now();
+
 				for (let item of msgQueueList) {
 					let id = item.id;
 					let client = this.clients[item.clientIndex];
@@ -358,8 +368,10 @@ export default class RpcClient implements MsgClientHookService {
 						continue;
 					}
 
-					item.retryInterval -= diff;
-					item.expiretime -= diff;
+					let msgDiff = nowTime - item.lastTime; //修改为真实时间
+					item.retryInterval -= msgDiff;
+					item.expiretime -= msgDiff;
+					item.lastTime = nowTime;
 
 					if (item.retryInterval <= 0) {
 						//发送消息
@@ -375,7 +387,9 @@ export default class RpcClient implements MsgClientHookService {
 							item.retryInterval = item.increase ? item.maxRetryInterval * (item.retryCount + 1) : item.maxRetryInterval;
 							pending--;
 
-							this.rpcLogger.warn(`The message ${item.msg.url} is in the ${item.retryCount} retransmissions`);
+							if (diff != 0) {
+								this.rpcLogger.warn(`The message ${item.msg.url} is in ${item.retryCount} retransmissions`);
+							}
 						}
 					} else if (item.expiretime <= 0) {
 						cleanIds.set(id, {
