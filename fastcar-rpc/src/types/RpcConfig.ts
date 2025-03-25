@@ -117,6 +117,7 @@ export type RpcClientConfig = {
 	retryInterval: number; //重试间隔 默认一秒
 	maxMsgNum: number; //最大并发数
 	timeout: number; //超时时间
+	slowRPCInterval: number; //慢超时检测
 } & SocketClientConfig;
 
 export type RetryConfig = {

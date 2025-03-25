@@ -1,4 +1,4 @@
-import { BootPriority, ComponentKind, FastCarApplication, Logger } from "@fastcar/core";
+import { BootPriority, ComponentKind, DataMap, FastCarApplication, Logger } from "@fastcar/core";
 import { ApplicationStart, ApplicationStop, Autowired, Log } from "@fastcar/core/annotation";
 import {
 	Middleware,
@@ -20,18 +20,18 @@ import { ClientSession, SessionId } from "../../types/SocketConfig";
 import ComposeService from "../ComposeService";
 import SocketManager from "../socket/SocketManager";
 import TaskAsync from "../../model/TaskAsync";
-import { EnableScheduling, ScheduledInterval } from "@fastcar/timer";
+import { EnableScheduling, Heartbeat, ScheduledInterval } from "@fastcar/timer";
 import { RpcMetaData } from "../../constant/RpcMetaData";
 import { RpcUrlData } from "../../constant/RpcUrlData";
 import MsgCallbackService from "../MsgCallbackService";
 import RpcAuthService from "../RpcAuthService";
 import { SocketMsgStatus } from "../../constant/SocketMsgStatus";
 import RPCErrorService from "../RPCErrorService";
+import { RpcConnectConfigServer } from "../../constant/RpcConnectConfig";
 
 //rpc 管理服务 用于和客户端进行同步异步消息发送
 @ApplicationStart(BootPriority.Lowest * 10, "start") //落后于koa执行
 @ApplicationStop(BootPriority.Base, "stop")
-@EnableScheduling
 export default class RpcServer implements MsgCallbackService {
 	@Autowired
 	protected app!: FastCarApplication;
@@ -48,7 +48,8 @@ export default class RpcServer implements MsgCallbackService {
 	protected rpcConfig: RpcConfig;
 	protected failMsgQueue: RpcFailMsgQueue[];
 	protected checkStatus: boolean;
-	protected existClientIds: Set<string>;
+	protected existClientIds: Set<string>; //消息id
+	protected delayMsgIds: DataMap<string, number>; //待处理的延迟消息
 	protected currentMsgSize: number = 0; //当前消息的数量
 	protected sessionMsgSize: Map<
 		SessionId,
@@ -56,6 +57,8 @@ export default class RpcServer implements MsgCallbackService {
 			count: number;
 		}
 	> = new Map(); //当前会话的数量
+	protected checkMsgQueueHeart: Heartbeat;
+	protected checkDelayMsgIdsHeart: Heartbeat;
 
 	constructor() {
 		this.middleware = [];
@@ -63,26 +66,17 @@ export default class RpcServer implements MsgCallbackService {
 		this.socketManager = new SocketManager();
 		this.msgQueue = new Map();
 		this.serialId = 0;
-		this.rpcConfig = {
-			list: [],
-			retry: {
-				retryCount: 3, //错误重试次数 默认三次
-				retryInterval: 100, //重试间隔 默认一秒
-				maxMsgNum: 10000, //最大消息并发数
-				timeout: 3000,
-				increase: false,
-			},
-			limit: {
-				//限流默认为关闭状态
-				open: false,
-				pendingMaxSize: 10000,
-				pendingSessionMaxSize: 5000,
-			},
-			slowRPCInterval: 500,
-		};
+		this.rpcConfig = RpcConnectConfigServer;
 		this.failMsgQueue = [];
 		this.checkStatus = false;
 		this.existClientIds = new Set();
+		this.delayMsgIds = new DataMap();
+		this.checkMsgQueueHeart = new Heartbeat({
+			fixedRate: 100, //大致100ms执行一次
+		});
+		this.checkDelayMsgIdsHeart = new Heartbeat({
+			fixedRate: 100, //大致100ms执行一次
+		});
 	}
 
 	//序列号递增
@@ -124,14 +118,14 @@ export default class RpcServer implements MsgCallbackService {
 				await next();
 			}
 
+			let ntime = Date.now();
 			if (key) {
-				this.existClientIds.delete(key);
+				this.delayMsgIds.set(key, ntime);
 			}
 
-			let diff = Date.now() - nowTime;
+			let diff = ntime - nowTime;
 			if (diff > this.rpcConfig.slowRPCInterval) {
-				this.rpcLogger.warn(`The rpc execution time took ${diff} ms, more than ${this.rpcConfig.slowRPCInterval} ms`);
-				this.rpcLogger.warn(`url:${context.url}`);
+				this.rpcLogger.warn(`The rpc server execution time took ${diff} ms, more than ${this.rpcConfig.slowRPCInterval} ms by url ${context.url}`);
 			}
 		};
 	}
@@ -447,7 +441,13 @@ export default class RpcServer implements MsgCallbackService {
 				timeout: timeout,
 			};
 
+			let nowTime = Date.now();
 			let cb = new TaskAsync((err: RpcResponseType | null, res: RpcMessage) => {
+				let diff = Date.now() - nowTime;
+				if (diff > this.rpcConfig.slowRPCInterval) {
+					this.rpcLogger.warn(`The rpc client execution time took ${diff} ms, more than ${this.rpcConfig.slowRPCInterval} ms by url ${res.url}`);
+				}
+
 				err ? resolve(err) : resolve({ code: RpcResponseCode.ok, data: res.data });
 			});
 
@@ -455,7 +455,7 @@ export default class RpcServer implements MsgCallbackService {
 				id,
 				cb,
 				timeout: timeout,
-				expiretime: Date.now() + timeout,
+				expiretime: nowTime + timeout,
 			};
 			this.msgQueue.set(id, m);
 			this.sendMsgBySessionId(r);
@@ -489,11 +489,7 @@ export default class RpcServer implements MsgCallbackService {
 		}
 	}
 
-	@ScheduledInterval({
-		initialDelay: 1000, //初始化后第一次延迟多久后执行
-		fixedRate: 100, //大致100ms执行一次
-	})
-	async checkMsgQueue(diff: number, stop: boolean) {
+	async checkMsgQueue(diff: number) {
 		if (this.checkStatus) {
 			this.rpcLogger.warn("Client message detection time is too long");
 			return;
@@ -578,6 +574,24 @@ export default class RpcServer implements MsgCallbackService {
 		}
 	}
 
+	checkDelayMsgIds(diff: number) {
+		if (this.delayMsgIds.size > 0) {
+			let delIds: string[] = [];
+			let nowTime = Date.now();
+
+			for (let [id, time] of this.delayMsgIds) {
+				if (nowTime - time >= diff) {
+					this.existClientIds.delete(id);
+					delIds.push(id);
+				}
+			}
+
+			delIds.forEach((id) => {
+				this.delayMsgIds.delete(id);
+			});
+		}
+	}
+
 	use(m: Middleware) {
 		this.middleware.push(m);
 		this.setMiddleware();
@@ -618,14 +632,12 @@ export default class RpcServer implements MsgCallbackService {
 		//这个步骤放在最后做
 		let rpcConfig: RpcConfig = this.app.getSetting(RpcMetaData.RpcConfig);
 		if (!rpcConfig) {
-			this.rpcLogger.warn(`This ${RpcMetaData.RpcConfig} was not found`);
-			return;
+			return this.rpcLogger.warn(`This ${RpcMetaData.RpcConfig} was not found`);
 		}
 
 		let serverList = rpcConfig.list;
 		if (serverList.length == 0) {
-			this.rpcLogger.warn(`RPC Server list is empty`);
-			return;
+			return this.rpcLogger.warn(`RPC Server list is empty`);
 		}
 		this.socketManager.bind(this);
 		this.socketManager.start(serverList);
@@ -635,12 +647,17 @@ export default class RpcServer implements MsgCallbackService {
 		if (rpcConfig.retry) {
 			Object.assign(this.rpcConfig.retry, rpcConfig.retry);
 		}
+
+		this.rpcLogger.info(`rpc server retry config:`, this.rpcConfig.retry);
+
 		//开启定时检测
-		this.checkMsgQueue(0, false);
+		this.checkMsgQueueHeart.start(this.checkMsgQueue, this);
+		this.checkDelayMsgIdsHeart.start(this.checkDelayMsgIds, this);
 	}
 
 	stop() {
-		this.checkMsgQueue(0, true);
+		this.checkMsgQueueHeart.stop();
+		this.checkDelayMsgIdsHeart.stop();
 		this.failMsgQueue = [];
 		this.msgQueue.clear();
 		this.socketManager.stop();

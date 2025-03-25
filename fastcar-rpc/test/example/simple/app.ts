@@ -10,6 +10,7 @@ import RpcServerList from "./RpcServerList";
 @BaseFilePath(__filename)
 @EnableRPC
 @ComponentScanExclusion(path.join(__dirname, "client.ts"))
+@ComponentScanExclusion(path.join(__dirname, "batchClient.ts"))
 @ApplicationSetting(RpcServerList)
 class APP {
 	app!: FastCarApplication;

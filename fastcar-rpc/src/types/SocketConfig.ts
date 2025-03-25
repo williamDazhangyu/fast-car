@@ -23,6 +23,8 @@ export type SocketClientConfig = {
 	ssl?: SSLConfig;
 	connectionLimit?: number; //连接数限制 默认1
 	timeout?: number; //超时时间
+	slowRPCInterval?: number; //慢sql检测 默认500ms延迟
+	increase?: boolean; //消息延长发送模式 默认为true 在true模式下每次重试间隔为
 } & { [key: string]: any };
 
 //服务端连接配置

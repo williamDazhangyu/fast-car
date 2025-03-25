@@ -17,6 +17,7 @@ export * from "./src/constant/SocketSymbol";
 export * from "./src/constant/SocketCodingDefault";
 export * from "./src/types/CodeProtocolEnum";
 export * from "./src/types/PBConfig";
+export * from "./src/constant/RpcConnectConfig";
 export interface RpcAuthService {
 	auth(username: string, password: string, config: SocketServerConfig, session: ClientSession, request?: any): Promise<boolean>;
 

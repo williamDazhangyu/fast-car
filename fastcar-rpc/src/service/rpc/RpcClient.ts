@@ -11,6 +11,7 @@ import { RpcUrlData } from "../../constant/RpcUrlData";
 import { Autowired, DemandInjection, Log } from "@fastcar/core/annotation";
 import { PBConfig, ProtoList } from "../../types/PBConfig";
 import { Heartbeat } from "@fastcar/timer";
+import { RpcConnectConfigClient } from "../../constant/RpcConnectConfig";
 
 //封装一个可用的rpc框架
 @DemandInjection
@@ -40,18 +41,9 @@ export default class RpcClient implements MsgClientHookService {
 			this.rpcLogger.error(`Failed to create this client type by ${config.type}`);
 			throw new Error(`Failed to create this client type by ${config.type}`);
 		}
-		this.config = Object.assign(
-			{
-				retryCount: 3, //错误重试次数 默认三次
-				retryInterval: 1000, //重试间隔 默认一秒
-				maxMsgNum: 10000, //最大消息瞬时并发数
-				timeout: 3000,
-				disconnectInterval: 10000, //断线重连十秒
-				increase: ValidationUtil.isBoolean(retry?.increase) ? !!retry?.increase : true,
-			},
-			config,
-			retry
-		);
+		this.config = Object.assign(RpcConnectConfigClient, config, retry, {
+			increase: ValidationUtil.isBoolean(retry?.increase) ? !!retry?.increase : true,
+		});
 
 		this.config.timeout = this.getTimeOut({
 			interval: this.config.retryInterval,
@@ -301,7 +293,14 @@ export default class RpcClient implements MsgClientHookService {
 				msg.data = m.data;
 			}
 
+			let nowTime = Date.now();
 			let cb = new TaskAsync((err: RpcResponseType | null, res: RpcMessage) => {
+				let diff = Date.now() - nowTime;
+
+				if (diff > this.config.slowRPCInterval) {
+					this.rpcLogger.warn(`The rpc client execution time took ${diff} ms, more than ${this.config.slowRPCInterval} ms by url ${res.url}`);
+				}
+
 				err ? resolve(err) : resolve({ code: RpcResponseCode.ok, data: res.data || {} });
 			});
 
@@ -318,7 +317,7 @@ export default class RpcClient implements MsgClientHookService {
 				maxRetryInterval: m.retryInterval,
 				cb,
 				clientIndex: cres.index,
-				increase: opts?.increase || this.config.increase,
+				increase: opts?.increase ?? this.config?.increase ?? true,
 				lastTime: Date.now(),
 			};
 
@@ -365,6 +364,11 @@ export default class RpcClient implements MsgClientHookService {
 					let id = item.id;
 					let client = this.clients[item.clientIndex];
 					if (!client.connected) {
+						continue;
+					}
+
+					//实时检测时如果没发现该队列了则直接跳过
+					if (!this.msgQueue.has(id)) {
 						continue;
 					}
 
