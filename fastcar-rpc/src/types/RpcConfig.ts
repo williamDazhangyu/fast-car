@@ -110,6 +110,7 @@ export type RpcConfig = {
 		pendingSessionMaxSize: number; //服务端单个会话的最大请求数
 	};
 	slowRPCInterval: number; //监控rpc的处理请求是否缓慢 默认为500ms
+	cmidTTL?: number; //客户端消息延迟消费删除时间 默认100ms后删除
 };
 
 export type RpcClientConfig = {

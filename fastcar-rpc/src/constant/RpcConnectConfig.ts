@@ -17,6 +17,7 @@ export const RpcConnectConfigServer: RpcConfig = {
 		pendingSessionMaxSize: 5000,
 	},
 	slowRPCInterval: 500,
+	cmidTTL: 100,
 };
 
 //客户端默认配置

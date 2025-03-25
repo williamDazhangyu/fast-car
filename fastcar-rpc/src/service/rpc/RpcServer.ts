@@ -20,7 +20,7 @@ import { ClientSession, SessionId } from "../../types/SocketConfig";
 import ComposeService from "../ComposeService";
 import SocketManager from "../socket/SocketManager";
 import TaskAsync from "../../model/TaskAsync";
-import { EnableScheduling, Heartbeat, ScheduledInterval } from "@fastcar/timer";
+import { Heartbeat } from "@fastcar/timer";
 import { RpcMetaData } from "../../constant/RpcMetaData";
 import { RpcUrlData } from "../../constant/RpcUrlData";
 import MsgCallbackService from "../MsgCallbackService";
@@ -574,13 +574,14 @@ export default class RpcServer implements MsgCallbackService {
 		}
 	}
 
-	checkDelayMsgIds(diff: number) {
+	checkDelayMsgIds() {
+		let cmidTTL = this.rpcConfig.cmidTTL || (RpcConnectConfigServer.cmidTTL as number);
 		if (this.delayMsgIds.size > 0) {
 			let delIds: string[] = [];
 			let nowTime = Date.now();
 
 			for (let [id, time] of this.delayMsgIds) {
-				if (nowTime - time >= diff) {
+				if (nowTime - time >= cmidTTL) {
 					this.existClientIds.delete(id);
 					delIds.push(id);
 				}
