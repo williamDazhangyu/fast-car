@@ -2,7 +2,7 @@ import { CacheConfig, CacheConfigTarget, CacheSetOptions, DBItem, Item } from ".
 
 export * from "./src/CacheType";
 
-export function CacheMapping(target: CacheConfigTarget): void;
+export function CacheMapping(fp: string): (target: CacheConfigTarget) => void;
 
 export function EnableCache(target: any): void;
 

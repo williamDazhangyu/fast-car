@@ -16,7 +16,7 @@ class APP {
 let appInsatcne = new APP();
 
 import CacheApplication from "../../src/CacheApplication";
-let cacheApplication: CacheApplication = appInsatcne.app.getComponentByTarget(CacheApplication);
+let cacheApplication = appInsatcne.app.getComponentByTarget<CacheApplication>(CacheApplication) as CacheApplication;
 
 describe("缓存实例", () => {
 	it("无持久化缓存示例", () => {

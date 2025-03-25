@@ -1,12 +1,13 @@
 import CacheMapping from "../../../src/annotation/CacheMapping";
 import { CacheConfig, Item } from "../../../src/CacheType";
 import DBClientService from "../../../src/dbclient/DBClientService";
-import { CallDependency } from "@fastcar/core/annotation";
+import { Autowired, DemandInjection } from "@fastcar/core/annotation";
 import CacheMapper from "./sql/CacheMapper";
 import CacheModel from "./sql/CacheModel";
 import { DateUtil } from "@fastcar/core/utils";
 
-@CacheMapping
+@DemandInjection
+@CacheMapping(__filename)
 export default class MySqlClientMapping implements CacheConfig {
 	store: string = "mysqlStore";
 	initSync: boolean = true;
@@ -15,7 +16,7 @@ export default class MySqlClientMapping implements CacheConfig {
 	dbClient: DBClientService<String>;
 	dbSync: boolean = false;
 
-	@CallDependency
+	@Autowired
 	private cacheMapper!: CacheMapper;
 
 	constructor() {

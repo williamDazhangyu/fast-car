@@ -4,7 +4,7 @@ import { CacheConfig } from "../../../src/CacheType";
 import DBClientService from "../../../src/dbclient/DBClientService";
 import FSClient from "../../../src/dbclient/FSClient";
 
-@CacheMapping
+@CacheMapping(__filename)
 export default class FileClientMapping implements CacheConfig {
 	store: string = "fileStore";
 	initSync: boolean = true;

@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/cache",
-	"version": "0.0.9",
+	"version": "0.1.0",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "应用内缓存",
 	"main": "target/index.js",
@@ -25,11 +25,11 @@
 		"node": ">=16"
 	},
 	"devDependencies": {
-		"@fastcar/core": "^0.2.38",
-		"@fastcar/mysql": "^0.1.24",
-		"@fastcar/timer": "^0.1.6",
-		"tz-offset": "^0.0.2",
-		"@types/tz-offset": "^0.0.0"
+		"@fastcar/core": "^0.3.9",
+		"@fastcar/mysql": "^0.2.9",
+		"@fastcar/timer": "^0.1.8",
+		"@types/tz-offset": "^0.0.3",
+		"tz-offset": "^0.0.2"
 	},
 	"peerDependencies": {
 		"@fastcar/core": "*",

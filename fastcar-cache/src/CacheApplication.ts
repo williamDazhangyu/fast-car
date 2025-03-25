@@ -2,7 +2,7 @@ import { ApplicationStart, ApplicationStop, Log } from "@fastcar/core/annotation
 import { BootPriority, DataMap, Logger } from "@fastcar/core";
 import { CacheConfig, CacheConfigTarget, CacheMappingSymbol, CacheSetOptions, DBItem, Item, QueueItem, Store } from "./CacheType";
 import { EnableScheduling, ScheduledInterval } from "@fastcar/timer";
-import { ValidationUtil } from "@fastcar/core/utils";
+import { ClassLoader, ValidationUtil } from "@fastcar/core/utils";
 
 @ApplicationStart(BootPriority.Common, "start")
 @ApplicationStop(BootPriority.Common, "stop")
@@ -341,11 +341,17 @@ export default class CacheApplication {
 	}
 
 	async start(): Promise<void> {
-		let cacheList: CacheConfigTarget[] = Reflect.get(global, CacheMappingSymbol);
+		let cacheList: string[] = Reflect.get(global, CacheMappingSymbol);
 		if (cacheList && Array.isArray(cacheList)) {
 			cacheList.forEach((item) => {
-				let config = new item();
-				this.addStore(config);
+				let config = ClassLoader.loadModule(item);
+				if (!config) {
+					return this.logger.warn(`${item} Failed to inject cache configuration`);
+				} else {
+					config.forEach((value: CacheConfigTarget) => {
+						this.addStore(Reflect.construct(value, []));
+					});
+				}
 			});
 		}
 
