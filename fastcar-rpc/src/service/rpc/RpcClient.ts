@@ -298,7 +298,7 @@ export default class RpcClient implements MsgClientHookService {
 				let diff = Date.now() - nowTime;
 
 				if (diff > this.config.slowRPCInterval) {
-					this.rpcLogger.warn(`The rpc client execution time took ${diff} ms, more than ${this.config.slowRPCInterval} ms by url ${res.url}`);
+					this.rpcLogger.warn(`The rpc client execution time took ${diff} ms, more than ${this.config.slowRPCInterval} ms by url ${m.url}, code:${err ? err.code : ""}`);
 				}
 
 				err ? resolve(err) : resolve({ code: RpcResponseCode.ok, data: res.data || {} });
