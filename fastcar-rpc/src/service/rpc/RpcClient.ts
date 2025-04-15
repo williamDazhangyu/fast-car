@@ -136,9 +136,16 @@ export default class RpcClient implements MsgClientHookService {
 	}
 
 	async start() {
-		for (let c of this.clients) {
+		for (let i = 0; i < this.clients.length; i++) {
+			let c = this.clients[i];
 			if (!c.connected) {
 				await c.connect();
+				if (this.rpcAsyncService.loginAfter) {
+					let f = await this.rpcAsyncService.loginAfter(i);
+					if (!f) {
+						c.disconnect(`login after is error`);
+					}
+				}
 			}
 		}
 	}
@@ -156,10 +163,17 @@ export default class RpcClient implements MsgClientHookService {
 		});
 	}
 
-	getClient(): {
+	getClient(pollIndex?: number): {
 		index: number;
 		client: SocketClient;
 	} {
+		if (typeof pollIndex == "number") {
+			return {
+				index: pollIndex,
+				client: this.clients[pollIndex],
+			};
+		}
+
 		let index = ++this.pollIndex;
 		if (index >= this.clients.length) {
 			index = 0;
@@ -242,6 +256,7 @@ export default class RpcClient implements MsgClientHookService {
 	}
 
 	//发送消息
+	//用于连接池时指定特定的客户端
 	async request(url: string, data?: Object, opts?: RetryConfig): Promise<RpcResponseType> {
 		let id = this.addSerialId();
 
@@ -305,7 +320,7 @@ export default class RpcClient implements MsgClientHookService {
 			});
 
 			//这边的逻辑要改下 timeout至少是间隔时间乘以间隔次数
-			let cres = this.getClient();
+			let cres = this.getClient(opts?.clientIndex);
 			let rpcMsg: RpcClientMsgBox = {
 				id,
 				msg,

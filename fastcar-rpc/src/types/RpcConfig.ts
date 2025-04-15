@@ -100,9 +100,11 @@ export type RpcServerMsgBox = {
 	timeout: number;
 };
 
+export type RequiredWithOptional<T, K extends keyof T> = Omit<Required<T>, K> & Partial<Pick<T, K>>;
+
 export type RpcConfig = {
 	list: SocketServerConfig[];
-	retry: Required<RetryConfig>;
+	retry: RequiredWithOptional<RetryConfig, "clientIndex">;
 	limit: {
 		//限流策略
 		open: boolean; //是否开启
@@ -127,6 +129,7 @@ export type RetryConfig = {
 	timeout?: number; //超时时间
 	maxMsgNum?: number;
 	increase?: boolean; //是否按照等差递增
+	clientIndex?: number;
 };
 
 export enum RpcResponseCode {

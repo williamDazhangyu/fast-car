@@ -30,6 +30,8 @@ export interface RPCErrorService {
 
 export interface RpcAsyncService {
 	handleMsg(url: string, data: Object): Promise<Object | void>;
+
+	loginAfter?(index: number): Promise<Boolean>;
 }
 
 export class RpcClient implements MsgClientHookService {

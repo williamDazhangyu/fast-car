@@ -28,6 +28,7 @@ import RpcAuthService from "../RpcAuthService";
 import { SocketMsgStatus } from "../../constant/SocketMsgStatus";
 import RPCErrorService from "../RPCErrorService";
 import { RpcConnectConfigServer } from "../../constant/RpcConnectConfig";
+import { ValidationUtil } from "@fastcar/core/utils";
 
 //rpc 管理服务 用于和客户端进行同步异步消息发送
 @ApplicationStart(BootPriority.Lowest * 10, "start") //落后于koa执行
@@ -190,7 +191,7 @@ export default class RpcServer implements MsgCallbackService {
 				}
 
 				let res = context.body;
-				if (!res) {
+				if (ValidationUtil.isNull(res)) {
 					result.msg.data = {
 						code: RpcResponseCode.notfound,
 						msg: "not found",
