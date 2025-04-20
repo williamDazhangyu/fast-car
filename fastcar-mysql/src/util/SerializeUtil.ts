@@ -18,11 +18,10 @@ export default class SerializeUtil {
 			case "date": {
 				return DateUtil.toDateTime(value);
 			}
-			case "json": {
-				return typeof value == "string" ? value : JSON.stringify(value);
-			}
+			case "json":
 			default: {
-				return JSON.stringify(value);
+				//修正二次序列化错误
+				return typeof value == "string" ? value : JSON.stringify(value);
 			}
 		}
 	}
