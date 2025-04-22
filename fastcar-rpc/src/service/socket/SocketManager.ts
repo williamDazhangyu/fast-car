@@ -287,7 +287,7 @@ export default class SocketManager implements MsgHookService {
 			this.customChannel.set(channel, ids);
 		}
 
-		ids.add(channel);
+		ids.add(cid);
 		if (!csession.channel) {
 			csession.channel = new Set();
 		}
