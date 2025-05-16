@@ -177,6 +177,29 @@ export class COSSDK {
 		});
 	}
 
+	//解压文件
+	extractFile(filename: string, targetDir: string) {
+		return axios.default.post(`${this.domain}/extractFile`, {
+			sign: this.sign,
+			filename,
+			targetDir
+		});
+	}
+
+	//删除分块文件
+	async deleteChunkFile(filename: string,totalChunks:number): Promise<boolean> {
+		let res = await axios.default.delete(`${this.domain}/deleteChunkFile`, {
+			params: {
+				filename,
+				totalChunks,
+				sign: this.sign,
+			},
+		});
+		return res.status == 200;
+	}
+
+	
+
 	//删除资源文件
 	async deleteFile(filename: string): Promise<boolean> {
 		let res = await axios.default.delete(`${this.domain}/deleteFile`, {

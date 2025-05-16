@@ -73,6 +73,12 @@ export class COSSDK {
 			any
 		>
 	>;
+	extractFile(filename: string, targetDir: string):Promise<{
+		code: number;
+		msg:string
+	}>
+	//删除分块文件
+	deleteChunkFile(filename: string,totalChunks:number): Promise<boolean>;
 
 	//删除资源文件
 	deleteFile(filename: string): Promise<boolean>;
