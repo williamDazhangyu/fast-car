@@ -7,4 +7,5 @@ export type ServerConfig = {
 	ssl?: SSLConfig;
 	hostname?: string; //当填写0.0.0.0时则不开启ipv6了
 	options?: { [key: string]: any }; //这个是创建server时设置的自带参数设置
+	ssls?: { [key: string]: SSLConfig }; //ssls证书协议
 };

@@ -4,6 +4,7 @@ import { ServerConfig } from "./type/ServerConfig";
 import { Protocol } from "./type/Protocol";
 import { FastCarApplication } from "@fastcar/core";
 import { ServerType } from "./type/ServerType";
+import { SSLConfig } from "./type/SSLConfig";
 
 type port = number;
 type ServerDetail = {
@@ -26,6 +27,13 @@ export default class ServerApplication {
 		this.serverMap = new Map();
 	}
 
+	private createSecureContext(cert: SSLConfig) {
+		return require("tls").createSecureContext({
+			key: cert.key,
+			cert: cert.cert,
+		}).context;
+	}
+
 	private getServerOpts(config: ServerConfig) {
 		let serverOpts = config.options || {};
 		if (!!config.ssl) {
@@ -33,6 +41,29 @@ export default class ServerApplication {
 				key: this.app.getFileContent(config.ssl?.key),
 				cert: this.app.getFileContent(config.ssl?.cert),
 				ca: config.ssl?.ca ? this.app.getFileContent(config.ssl?.ca) : "",
+			});
+		}
+
+		if (!!config.ssls) {
+			Object.keys(config.ssls).forEach((key) => {
+				let sslInfo = config.ssls?.[key] as SSLConfig & { context: any };
+				Object.assign(sslInfo, {
+					key: this.app.getFileContent(sslInfo?.key),
+					cert: this.app.getFileContent(sslInfo?.cert),
+					ca: sslInfo?.ca ? this.app.getFileContent(sslInfo?.ca) : "",
+				});
+
+				sslInfo.context = this.createSecureContext(sslInfo);
+			});
+			//则添加动态的ssl证书
+			Object.assign(serverOpts, {
+				SNICallback: (servername: string, cb: (err: Error | null, ctx?: any) => void) => {
+					let sslInfo = config.ssls?.[servername] as any;
+					if (!sslInfo) {
+						return cb(new Error(`ssl cert not found`));
+					}
+					cb(null, sslInfo.context);
+				},
 			});
 		}
 
@@ -60,7 +91,7 @@ export default class ServerApplication {
 				break;
 			}
 			case Protocol.https: {
-				if (!config.ssl) {
+				if (!config.ssl && !config.ssls) {
 					this.serverlogger.error(`https requires ssl config`);
 					process.exit();
 				}
@@ -68,7 +99,7 @@ export default class ServerApplication {
 				break;
 			}
 			case Protocol.http2: {
-				if (!config.ssl) {
+				if (!config.ssl && !config.ssls) {
 					server = require("http2").createServer(this.getServerOpts(config));
 				} else {
 					server = require("http2").createSecureServer(this.getServerOpts(config), appCallBack);
@@ -80,7 +111,7 @@ export default class ServerApplication {
 				break;
 			}
 			case Protocol.tls: {
-				if (!config.ssl) {
+				if (!config.ssl && !config.ssls) {
 					this.serverlogger.error(`tsl requires ssl config`);
 					process.exit();
 				} else {
