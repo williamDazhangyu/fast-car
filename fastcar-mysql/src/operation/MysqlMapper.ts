@@ -576,11 +576,17 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let forceIndexStr = this.analysisForceIndex(conditions?.forceIndex);
 
 		let joinStr = this.analysisJoin(conditions.join);
+		let useServerPrepStmts = true;
+
+		if (joinStr.length > 0) {
+			//动态连接时sql语句失效
+			useServerPrepStmts = false;
+		}
 
 		let args = [...whereC.args, ...limitStr.args];
 		let sql = `SELECT ${fields} FROM ${this.tableName} ${conditions.tableAlias || ""} ${joinStr} ${forceIndexStr} ${whereC.sql} ${groupStr} ${orderStr} ${limitStr.str}`.trim();
 
-		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId });
+		let [rows] = await this.dsm.exec({ sql, args, ds, sessionId, useServerPrepStmts });
 
 		if (!Array.isArray(rows)) {
 			return [];
