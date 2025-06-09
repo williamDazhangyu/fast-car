@@ -565,16 +565,6 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		@DSIndex ds?: string,
 		@SqlSession sessionId?: string
 	): Promise<T[]> {
-		let fields = this.analysisFields(conditions.fields);
-		let whereC = this.analysisWhere(conditions.where);
-		let groupStr = this.analysisGroups(conditions.groups);
-		let orderStr = this.analysisOrders(conditions.orders);
-		let limitStr = this.analysisLimit({
-			limit: conditions?.limit,
-			offest: conditions?.offest,
-		});
-		let forceIndexStr = this.analysisForceIndex(conditions?.forceIndex);
-
 		let joinStr = this.analysisJoin(conditions.join);
 		let useServerPrepStmts = true;
 
@@ -582,6 +572,17 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			//动态连接时sql语句失效
 			useServerPrepStmts = false;
 		}
+
+		let fields = this.analysisFields(conditions.fields);
+		let whereC = this.analysisWhere(conditions.where);
+		let groupStr = this.analysisGroups(conditions.groups);
+		let orderStr = this.analysisOrders(conditions.orders);
+		let limitStr = this.analysisLimit({
+			limit: conditions?.limit,
+			offest: conditions?.offest,
+			useServerPrepStmts,
+		});
+		let forceIndexStr = this.analysisForceIndex(conditions?.forceIndex);
 
 		let args = [...whereC.args, ...limitStr.args];
 		let sql = `SELECT ${fields} FROM ${this.tableName} ${conditions.tableAlias || ""} ${joinStr} ${forceIndexStr} ${whereC.sql} ${groupStr} ${orderStr} ${limitStr.str}`.trim();
