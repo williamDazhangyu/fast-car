@@ -10,7 +10,7 @@ import MsgClientHookService from "../MsgClientHookService";
 import { RpcUrlData } from "../../constant/RpcUrlData";
 import { Autowired, DemandInjection, Log } from "@fastcar/core/annotation";
 import { PBConfig, ProtoList } from "../../types/PBConfig";
-import { Heartbeat } from "@fastcar/timer";
+import { Heartbeat, TimeUnitNum } from "@fastcar/timer";
 import { RpcConnectConfigClient } from "../../constant/RpcConnectConfig";
 
 //封装一个可用的rpc框架
@@ -23,6 +23,7 @@ export default class RpcClient implements MsgClientHookService {
 	protected checkStatus: boolean;
 	protected rpcAsyncService: RpcAsyncService;
 	protected checkConnectTimer: number;
+	protected checkTime: number = Date.now();
 	@Log("rpc-client")
 	protected rpcLogger: Logger = console;
 
@@ -140,6 +141,14 @@ export default class RpcClient implements MsgClientHookService {
 			let c = this.clients[i];
 			if (!c.connected) {
 				await c.connect();
+				if (!c.connected) {
+					continue; //未找到返回信息
+				}
+
+				if (!this.rpcAsyncService.loginAfter) {
+					continue;
+				}
+
 				if (this.rpcAsyncService.loginAfter) {
 					let f = await this.rpcAsyncService.loginAfter(i);
 					if (!f) {
@@ -351,7 +360,8 @@ export default class RpcClient implements MsgClientHookService {
 	}
 
 	async checkMsg(diff: number) {
-		if (this.checkStatus) {
+		//如果假死了且延迟超过一秒则直接跳过
+		if (this.checkStatus && Date.now() - this.checkTime < TimeUnitNum.second * 3) {
 			if (diff != 0) {
 				return this.rpcLogger.warn("Client message detection time is too long");
 			}
@@ -360,6 +370,7 @@ export default class RpcClient implements MsgClientHookService {
 
 		try {
 			this.checkStatus = true;
+			this.checkTime = Date.now();
 
 			//进行断线重连
 			this.checkConnectTimer -= diff;
