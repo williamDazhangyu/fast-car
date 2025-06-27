@@ -1,7 +1,17 @@
 {
-  "extends": "../tsconfig.json",
+  "compileOnSave": true,
   "compilerOptions": {
-    "outDir": "./target"
+    "module": "commonjs",
+    "target": "ES2020",
+    "outDir": "./target",
+    "types": [
+      "node",
+      "mocha"
+    ], //在node或mocha环境中运行
+    "experimentalDecorators": true, //启用注解
+    "emitDecoratorMetadata": true, //启用元数据
+    "moduleResolution": "node", //使用node作为模块解析
+    "strict": true, //启用严格模式
   },
   "include": [
     "src/**/*"
