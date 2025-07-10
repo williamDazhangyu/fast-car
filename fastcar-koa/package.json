@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/koa",
-	"version": "0.1.17",
+	"version": "0.1.18",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "fastcar框架下对koa的包装",
 	"main": "target/index.js",

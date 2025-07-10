@@ -24,7 +24,7 @@ export default function KoaCors(app: FastCarApplication) {
 
 					for (let o of origins) {
 						if (orign.startsWith(o) || o == "*") {
-							return o;
+							return orign;
 						}
 					}
 
