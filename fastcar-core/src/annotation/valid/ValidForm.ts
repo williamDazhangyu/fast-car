@@ -32,6 +32,11 @@ function getFormValue(value: any, prop: string, defaultValue?: any) {
 		return defaultValue;
 	}
 
+	//默认值为空字符串的情况
+	if (typeof defaultValue == "string" && defaultValue == "") {
+		return defaultValue;
+	}
+
 	return null;
 }
 
@@ -96,7 +101,7 @@ export default function ValidForm(target: any, methodName: string, descriptor: P
 						if (rule.required) {
 							throwErrMsg(rule, prop, rule.nullMessage);
 						} else {
-							if(TypeUtil.isObject(currObj) && !Reflect.has(currObj, prop)) {
+							if (TypeUtil.isObject(currObj) && !Reflect.has(currObj, prop)) {
 								delFormValue(currObj, prop);
 							}
 						}
