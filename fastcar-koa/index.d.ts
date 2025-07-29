@@ -7,7 +7,7 @@ type MiddleWareType = (...args: any) => Koa.Middleware | Koa.Middleware[];
 export class KoaApplication {
 	protected app: FastCarApplication;
 	protected sysLogger: Logger;
-	protected koaApp: Koa;
+	public koaApp: Koa;
 
 	/***
 	 * @version 1.0 加载中间件
@@ -60,5 +60,8 @@ export function Swagger(app: FastCarApplication): MiddleWareType;
 
 //增强multi文件解析
 export function KoaMulter(app: FastCarApplication): MiddleWareType;
+
+//校验header 头编码是否错误
+export function HeaderCoding(): MiddleWareType;
 
 export * from "./src/type/DesignMeta";

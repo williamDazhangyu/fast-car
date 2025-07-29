@@ -1,4 +1,5 @@
 import EnableKoa from "./annotation/EnableKoa";
+import KoaApp from "./annotation/KoaApp";
 import KoaMiddleware from "./annotation/KoaMiddleware";
 import AddMapping from "./annotation/router/AddMapping";
 import AllMapping from "./annotation/router/AllMapping";
@@ -40,4 +41,5 @@ export {
 	PATCH,
 	ALL,
 	REQUEST,
+	KoaApp,
 };

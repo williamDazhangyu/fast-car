@@ -8,7 +8,6 @@ import { DesignMeta } from "./type/DesignMeta";
 import { TypeUtil, ValidationUtil } from "@fastcar/core/utils";
 import { KoaConfig } from "./type/KoaConfig";
 import { ServerApplication } from "@fastcar/server";
-
 /***
  * @version 1.0 koa基础组件启动
  *
@@ -22,7 +21,7 @@ export default class KoaApplication {
 	@Log("koa")
 	protected koaLogger!: Logger;
 
-	protected koaApp: Koa;
+	public koaApp: Koa;
 
 	@Autowired
 	private serverApplication!: ServerApplication;

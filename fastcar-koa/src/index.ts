@@ -7,5 +7,6 @@ import KoaCors from "./middleware/KoaCors";
 import KoaStatic from "./middleware/KoaStatic";
 import { DesignMeta } from "./type/DesignMeta";
 import KoaMulter from "./middleware/KoaMulter";
+import HeaderCoding from "./middleware/HeaderCoding";
 
-export { KoaApplication, KoaConfig, ExceptionGlobalHandler, KoaBody, KoaBodyParser, KoaCors, KoaStatic, KoaMulter, DesignMeta };
+export { KoaApplication, KoaConfig, ExceptionGlobalHandler, KoaBody, KoaBodyParser, KoaCors, KoaStatic, KoaMulter, HeaderCoding, DesignMeta };

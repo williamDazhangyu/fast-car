@@ -6,6 +6,8 @@ type Ret = (target: any) => void;
 
 type MRet = (target: any, name: string, descriptor: PropertyDescriptor) => void;
 
+type PMRet = (target: any, propertyKey: string) => void;
+
 type MiddleWareType = (...args: any) => Koa.Middleware | Koa.Middleware[];
 
 //关于请求方式注解
@@ -44,3 +46,5 @@ export function EnableKoa(target: any): void;
 
 //中间件添加拓展
 export function KoaMiddleware(...args: MiddleWareType[]): Ret;
+
+export function KoaApp(): PMRet;
