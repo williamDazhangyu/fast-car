@@ -182,12 +182,12 @@ export class COSSDK {
 		return axios.default.post(`${this.domain}/extractFile`, {
 			sign: this.sign,
 			filename,
-			targetDir
+			targetDir,
 		});
 	}
 
 	//删除分块文件
-	async deleteChunkFile(filename: string,totalChunks:number): Promise<boolean> {
+	async deleteChunkFile(filename: string, totalChunks: number): Promise<boolean> {
 		let res = await axios.default.delete(`${this.domain}/deleteChunkFile`, {
 			params: {
 				filename,
@@ -197,8 +197,6 @@ export class COSSDK {
 		});
 		return res.status == 200;
 	}
-
-	
 
 	//删除资源文件
 	async deleteFile(filename: string): Promise<boolean> {
@@ -296,5 +294,35 @@ export class COSSDK {
 			sign: this.sign,
 		});
 		return res.data.code == 200;
+	}
+
+	//查询重定向信息
+	async getRedirect(): Promise<{
+		code: number;
+		data: {
+			redirect: { [key: string]: string };
+			defaultredirect: string;
+		};
+	}> {
+		let res = await axios.default.get(`${this.domain}/getRedirect`, {
+			params: {
+				sign: this.sign,
+			},
+		});
+		return res.data;
+	}
+
+	//查询单个重定向信息
+	async queryRedirect({ bucketUrl }: { bucketUrl?: string }): Promise<{
+		code: number;
+		data: string;
+	}> {
+		let res = await axios.default.get(`${this.domain}/queryRedirect`, {
+			params: {
+				sign: this.sign,
+				bucketUrl,
+			},
+		});
+		return res.data;
 	}
 }

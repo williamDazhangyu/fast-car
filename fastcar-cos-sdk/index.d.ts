@@ -73,12 +73,15 @@ export class COSSDK {
 			any
 		>
 	>;
-	extractFile(filename: string, targetDir: string):Promise<{
+	extractFile(
+		filename: string,
+		targetDir: string
+	): Promise<{
 		code: number;
-		msg:string
-	}>
+		msg: string;
+	}>;
 	//删除分块文件
-	deleteChunkFile(filename: string,totalChunks:number): Promise<boolean>;
+	deleteChunkFile(filename: string, totalChunks: number): Promise<boolean>;
 
 	//删除资源文件
 	deleteFile(filename: string): Promise<boolean>;
@@ -121,4 +124,17 @@ export class COSSDK {
 	setSign(sign: string): void;
 
 	rename(filename: string, newFilename: string): Promise<boolean>;
+
+	getRedirect(): Promise<{
+		code: number;
+		data: {
+			redirect: { [key: string]: string };
+			defaultredirect: string;
+		};
+	}>;
+
+	queryRedirect({ bucketUrl }: { bucketUrl?: string }): Promise<{
+		code: number;
+		data: string;
+	}>;
 }
