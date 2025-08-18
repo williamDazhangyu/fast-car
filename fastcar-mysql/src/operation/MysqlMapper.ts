@@ -156,10 +156,9 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 							break;
 						}
 						case OperatorEnum.in:
-						case "NOT IN": {
+						case OperatorEnum.notin: {
 							if (Array.isArray(operatorValue)) {
-								clist.push(`${alias} ${formatOperatorKeys} ( ${operatorValue.map(() => "?").join(",")} )`);
-								params = [...params, ...operatorValue];
+								clist.push(`${alias} ${formatOperatorKeys} (${operatorValue.map((v) => `'${v}'`).join(",")})`);
 							} else {
 								clist.push(`${alias} ${formatOperatorKeys} ( ? )`);
 								params.push(operatorValue);
@@ -174,7 +173,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 							params.push(operatorValue);
 							break;
 						}
-						case "CUSTOM": {
+						case OperatorEnum.custom: {
 							clist.push(`${alias} ${operatorValue}`); //当为自定义时则不管了
 							break;
 						}

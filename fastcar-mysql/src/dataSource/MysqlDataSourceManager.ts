@@ -43,6 +43,12 @@ class MysqlDataSourceManager implements DataSourceManager {
 			this.sysLogger.info(finalSQL);
 		}
 
+		if (useServerPrepStmts) {
+			if (args.length > 100) {
+				useServerPrepStmts = false; //如果参数过长 说明一直处于动态的
+			}
+		}
+
 		//检查sql执行时间
 		let beforeTime = Date.now();
 		//这边做一个改变 如果没有传参则选用query
