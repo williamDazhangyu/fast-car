@@ -4,7 +4,7 @@
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "index.js",
 	"repository": "https://github.com/williamDazhangyu/fast-car.git",
-	"author": "zhongjx <1433589043@qq.com>",
+	"author": "zhongjx",
 	"license": "MIT",
 	"devDependencies": {
 		"@types/mocha": "^9.0.0",

@@ -1,0 +1,34 @@
+{
+	"name": "@fastcar/timewheel",
+	"version": "0.0.1",
+	"description": "构造一个时间轮以便处理更好地定时任务",
+	"homepage": "https://github.com/williamDazhangyu/fast-car",
+	"main": "index.js",
+	"author": "william_zhong",
+	"license": "MIT",
+	"types": "index.d.ts",
+	"exports": {
+		".": "index.js"
+	},
+	"files": [
+		"index.js",
+		"HashedWheelTimer.js",
+		"index.d.ts",
+		"LICENSE"
+	],
+	"keywords": [
+		"timewheel",
+		"hash"
+	],
+	"devDependencies": {
+		"typescript": "^4.4.2"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/williamDazhangyu/fast-car.git"
+	},
+	"peerDependenciesMeta": {},
+	"scripts": {
+		"build": "tsc"
+	}
+}
