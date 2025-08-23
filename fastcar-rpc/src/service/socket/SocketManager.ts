@@ -359,7 +359,7 @@ export default class SocketManager implements MsgHookService {
 				item.extra = {};
 			}
 
-			item.server = Object.assign({ port: 80, protocol: Protocol.http }, item.server);
+			item.server = { port: 80, protocol: Protocol.http, ...item.server };
 
 			return true;
 		});

@@ -29,6 +29,7 @@ import { SocketMsgStatus } from "../../constant/SocketMsgStatus";
 import RPCErrorService from "../RPCErrorService";
 import { RpcConnectConfigServer } from "../../constant/RpcConnectConfig";
 import { ValidationUtil } from "@fastcar/core/utils";
+import { AsyncLocalStorage } from "node:async_hooks";
 
 //rpc 管理服务 用于和客户端进行同步异步消息发送
 @ApplicationStart(BootPriority.Lowest * 10, "start") //落后于koa执行
@@ -60,6 +61,8 @@ export default class RpcServer implements MsgCallbackService {
 	> = new Map(); //当前会话的数量
 	protected checkMsgQueueHeart: Heartbeat;
 	protected checkDelayMsgIdsHeart: Heartbeat;
+
+	protected ctxStorage: AsyncLocalStorage<ClientSession> | null = null;
 
 	constructor() {
 		this.middleware = [];
@@ -334,7 +337,13 @@ export default class RpcServer implements MsgCallbackService {
 		}
 		let ctx = Object.assign({}, msg, session);
 		//调用绑定的组件
-		this.composeMiddleware(ctx);
+		if (this.ctxStorage) {
+			this.ctxStorage.run(session, () => {
+				this.composeMiddleware(ctx);
+			});
+		} else {
+			this.composeMiddleware(ctx);
+		}
 	}
 
 	public getSocketManager() {
@@ -439,7 +448,7 @@ export default class RpcServer implements MsgCallbackService {
 				},
 				retryCount: opts?.retryCount || this.rpcConfig.retry.retryCount,
 				retryInterval: opts?.retryInterval || this.rpcConfig.retry.retryInterval,
-				timeout: timeout,
+				timeout,
 			};
 
 			let nowTime = Date.now();
@@ -455,7 +464,7 @@ export default class RpcServer implements MsgCallbackService {
 			let m: RpcServerMsgBox = {
 				id,
 				cb,
-				timeout: timeout,
+				timeout,
 				expiretime: nowTime + timeout,
 			};
 			this.msgQueue.set(id, m);
@@ -478,8 +487,7 @@ export default class RpcServer implements MsgCallbackService {
 
 	//失败的消息处理
 	handleFailMsg(msg: RpcMessage, res: RpcResponseType) {
-		this.rpcLogger.error(res.msg);
-		this.rpcLogger.error(msg);
+		this.rpcLogger.error(`fail msg:${msg.url} req:${res.data || ""} res:${res.code}:${res.msg ? res.msg : ""}`);
 
 		if (msg.id) {
 			let msgItem = this.msgQueue.get(msg.id);
@@ -645,9 +653,14 @@ export default class RpcServer implements MsgCallbackService {
 		this.socketManager.start(serverList);
 
 		this.rpcConfig.list = serverList;
+		this.rpcConfig.asyncLocalStorage = rpcConfig.asyncLocalStorage || false;
 
 		if (rpcConfig.retry) {
 			Object.assign(this.rpcConfig.retry, rpcConfig.retry);
+		}
+
+		if (this.rpcConfig.asyncLocalStorage) {
+			this.ctxStorage = new AsyncLocalStorage();
 		}
 
 		this.rpcLogger.info(`rpc server retry config:`, this.rpcConfig.retry);
@@ -663,5 +676,9 @@ export default class RpcServer implements MsgCallbackService {
 		this.failMsgQueue = [];
 		this.msgQueue.clear();
 		this.socketManager.stop();
+	}
+
+	get currentContext(): ClientSession | undefined {
+		if (this.ctxStorage) return this.ctxStorage.getStore();
 	}
 }

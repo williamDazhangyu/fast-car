@@ -90,6 +90,7 @@ export type RpcClientMsgBox = {
 	clientIndex: number; //客户端消息编号
 	increase: boolean; //是否按照等差递增
 	lastTime: number; //上次操作时间
+	slotId: number; //卡槽id
 };
 
 //服务端盒子存储信息
@@ -113,6 +114,7 @@ export type RpcConfig = {
 	};
 	slowRPCInterval: number; //监控rpc的处理请求是否缓慢 默认为500ms
 	cmidTTL?: number; //客户端消息延迟消费删除时间 默认100ms后删除
+	asyncLocalStorage?: boolean; //默认不开启 启用session会话上下文
 };
 
 export type RpcClientConfig = {

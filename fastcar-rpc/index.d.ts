@@ -136,6 +136,8 @@ export class RpcServer implements MsgCallbackService {
 	start(): Promise<void>;
 
 	stop(): void;
+
+	get currentContext(): ClientSession | undefined;
 }
 
 //封装客户端向服务端发起请求

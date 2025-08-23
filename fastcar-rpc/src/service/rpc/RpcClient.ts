@@ -10,8 +10,9 @@ import MsgClientHookService from "../MsgClientHookService";
 import { RpcUrlData } from "../../constant/RpcUrlData";
 import { Autowired, DemandInjection, Log } from "@fastcar/core/annotation";
 import { PBConfig, ProtoList } from "../../types/PBConfig";
-import { Heartbeat, TimeUnitNum } from "@fastcar/timer";
+import { Heartbeat } from "@fastcar/timer";
 import { RpcConnectConfigClient } from "../../constant/RpcConnectConfig";
+import { HashedWheelTimer } from "@fastcar/timewheel";
 
 //封装一个可用的rpc框架
 @DemandInjection
@@ -35,6 +36,10 @@ export default class RpcClient implements MsgClientHookService {
 	private maxPendingSize: number; //最大延迟并发量
 
 	private heartbeat: Heartbeat;
+
+	private msgHearbeat: Heartbeat;
+
+	private hashedWheelTimer: HashedWheelTimer<number>;
 
 	constructor(config: SocketClientConfig, rpcAsyncService: RpcAsyncService, retry?: RetryConfig) {
 		let ClientClass = SocketClientFactory(config.type);
@@ -61,7 +66,7 @@ export default class RpcClient implements MsgClientHookService {
 		this.checkConnectTimer = this.config.disconnectInterval || 1000;
 		this.maxPendingSize = Math.floor(this.config.maxMsgNum / 2);
 
-		let connectionLimit = config.connectionLimit || 1;
+		let connectionLimit = config.connectionLimit || 1; //以后可做成动态扩容
 
 		for (let i = 0; i < connectionLimit; i++) {
 			this.clients.push(new ClientClass(this.config, this));
@@ -73,7 +78,19 @@ export default class RpcClient implements MsgClientHookService {
 			fixedRate: 100, //大致100ms去check一次
 		});
 
-		this.heartbeat.start(this.checkMsg, this);
+		this.msgHearbeat = new Heartbeat({
+			initialDelay: 3000,
+			fixedRate: 100,
+		});
+
+		this.heartbeat.start(this.checkConnPool, this);
+		this.msgHearbeat.start(this.checkMsg, this);
+
+		this.hashedWheelTimer = new HashedWheelTimer({
+			tickDuration: 100,
+			wheelSize: 600,
+			slotMaxSize: this.maxPendingSize,
+		});
 	}
 
 	//初始化配置事件
@@ -229,10 +246,11 @@ export default class RpcClient implements MsgClientHookService {
 				let item = this.msgQueue.get(id as number);
 				if (item) {
 					if (msg.data && msg.data?.code == RpcResponseCode.busy) {
-						item.retryCount += 1;
-						return; //如果服务器显示繁忙则放入等待队列处理
+						item.retryCount++;
+						return;
 					}
 
+					this.hashedWheelTimer.removeId(item.id, item.slotId);
 					item.cb.done(null, msg);
 				}
 				this.msgQueue.delete(id as number);
@@ -275,17 +293,14 @@ export default class RpcClient implements MsgClientHookService {
 			retryCount: number;
 			retryInterval: number;
 			timeout: number; //超时时间
-		} = Object.assign(
-			{
-				url,
-				data: data,
-			},
-			{
-				retryCount: opts?.retryCount ?? this.config.retryCount, //允许为0的
-				retryInterval: opts?.retryInterval || this.config.retryInterval,
-				timeout: opts?.timeout || this.config.timeout, //超时时间
-			}
-		);
+		} = {
+			url,
+			data,
+
+			retryCount: opts?.retryCount ?? this.config.retryCount, //允许为0的
+			retryInterval: opts?.retryInterval || this.config.retryInterval,
+			timeout: opts?.timeout || this.config.timeout, //超时时间
+		};
 
 		m.timeout = this.getTimeOut({
 			interval: m.retryInterval,
@@ -322,7 +337,7 @@ export default class RpcClient implements MsgClientHookService {
 				let diff = Date.now() - nowTime;
 
 				if (diff > this.config.slowRPCInterval) {
-					this.rpcLogger.warn(`The rpc client execution time took ${diff} ms, more than ${this.config.slowRPCInterval} ms by url ${m.url}, code:${err ? err.code : ""}`);
+					this.rpcLogger.warn(`The rpc client execution time took ${diff} ms, more than ${this.config.slowRPCInterval} ms by url ${m.url} ${err ? `errcode:${err.code}` : ""}`);
 				}
 
 				err ? resolve(err) : resolve({ code: RpcResponseCode.ok, data: res.data || {} });
@@ -343,28 +358,25 @@ export default class RpcClient implements MsgClientHookService {
 				clientIndex: cres.index,
 				increase: opts?.increase ?? this.config?.increase ?? true,
 				lastTime: Date.now(),
+				slotId: this.hashedWheelTimer.addId(id, m.retryInterval),
 			};
 
 			// this.rpcLogger.debug(`发送消息的序号----${client.index}`);
 			this.msgQueue.set(id, rpcMsg);
-
 			if (!cres.client.connected) {
 				//重置检测时间
 				this.checkConnectTimer = 0;
 				rpcMsg.retryInterval = 0; //重发消息的间隔为0
-				this.checkMsg(0); //立即调用检测
+				this.checkConnPool(0); //立即调用检测
 			} else {
 				cres.client.sendMsg(msg);
 			}
 		});
 	}
 
-	async checkMsg(diff: number) {
-		//如果假死了且延迟超过一秒则直接跳过
-		if (this.checkStatus && Date.now() - this.checkTime < TimeUnitNum.second * 3) {
-			if (diff != 0) {
-				return this.rpcLogger.warn("Client message detection time is too long");
-			}
+	//检测连接池
+	async checkConnPool(diff: number) {
+		if (this.checkStatus) {
 			return;
 		}
 
@@ -378,76 +390,61 @@ export default class RpcClient implements MsgClientHookService {
 				this.checkConnectTimer = this.config.disconnectInterval || 1000;
 				await this.start();
 			}
-
-			if (this.msgQueue.size > 0) {
-				let pending = this.maxPendingSize;
-				let cleanIds: Map<number, RpcResponseType> = new Map();
-
-				let msgQueueList = this.msgQueue.values();
-				let nowTime = Date.now();
-
-				for (let item of msgQueueList) {
-					let id = item.id;
-					let client = this.clients[item.clientIndex];
-					if (!client.connected) {
-						continue;
-					}
-
-					//实时检测时如果没发现该队列了则直接跳过
-					if (!this.msgQueue.has(id)) {
-						continue;
-					}
-
-					let msgDiff = nowTime - item.lastTime; //修改为真实时间
-					item.retryInterval -= msgDiff;
-					item.expiretime -= msgDiff;
-					item.lastTime = nowTime;
-
-					if (item.retryInterval <= 0) {
-						//发送消息
-						if (item.retryCount >= item.maxRetryCount) {
-							cleanIds.set(id, {
-								code: RpcResponseCode.retryTimes,
-								msg: `The message retries more than ${item.retryCount} times`,
-							});
-						} else {
-							//重发消息
-							item.retryCount++;
-							client.sendMsg(item.msg);
-							item.retryInterval = item.increase ? item.maxRetryInterval * (item.retryCount + 1) : item.maxRetryInterval;
-							pending--;
-
-							if (diff != 0) {
-								this.rpcLogger.warn(`The message ${item.msg.url} is in ${item.retryCount} retransmissions`);
-							}
-						}
-					} else if (item.expiretime <= 0) {
-						cleanIds.set(id, {
-							code: RpcResponseCode.timeout,
-							msg: `The message times out ${item.timeout} ms`,
-						});
-					}
-
-					if (pending <= 0) {
-						break;
-					}
-				}
-
-				cleanIds.forEach((resp, id) => {
-					let item = this.msgQueue.get(id);
-					if (item) {
-						this.rpcLogger.error(resp);
-						this.rpcLogger.error(`${JSON.stringify(item.msg)}`);
-						item.cb.done(resp, null);
-					}
-					this.msgQueue.delete(id);
-				});
-			}
 		} catch (e) {
-			this.rpcLogger.error("rpc client checkMsgQueue error");
-			this.rpcLogger.error(e);
+			this.rpcLogger.error("rpc client checkConnPool error", e);
 		} finally {
 			this.checkStatus = false;
+		}
+	}
+
+	checkMsg() {
+		let msgIds = this.hashedWheelTimer.tick();
+
+		if (!msgIds || msgIds.length == 0) {
+			return;
+		}
+
+		let nowTime = Date.now();
+		for (let id of msgIds) {
+			let item = this.msgQueue.get(id);
+			if (!item) {
+				continue;
+			}
+
+			let msgDiff = nowTime - item.lastTime; //修改为真实时间
+
+			item.expiretime -= msgDiff;
+			item.lastTime = nowTime;
+
+			//发送消息
+			if (item.retryCount >= item.maxRetryCount || item.expiretime <= 0) {
+				let resp = {
+					code: RpcResponseCode.retryTimes,
+					msg: `The message retries more than ${item.retryCount} times`,
+				};
+
+				if (item.expiretime <= 0) {
+					resp = {
+						code: RpcResponseCode.timeout,
+						msg: `The message times out ${item.timeout} ms`,
+					};
+				}
+
+				this.rpcLogger.error(`${item.msg.url} ${resp.code}:${resp.msg}`);
+				item.cb.done(resp, null);
+				this.msgQueue.delete(id);
+			} else {
+				item.retryCount++;
+				item.retryInterval = item.increase ? item.maxRetryInterval * (item.retryCount + 1) : item.maxRetryInterval;
+				item.slotId = this.hashedWheelTimer.addId(id, item.retryInterval);
+
+				this.rpcLogger.warn(`The message ${item.msg.url} is in ${item.retryCount} retransmissions`);
+
+				let client = this.clients[item.clientIndex];
+				if (client.connected) {
+					client.sendMsg(item.msg);
+				}
+			}
 		}
 	}
 }

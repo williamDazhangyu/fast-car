@@ -25,6 +25,9 @@ export type SocketClientConfig = {
 	timeout?: number; //超时时间
 	slowRPCInterval?: number; //慢sql检测 默认500ms延迟
 	increase?: boolean; //消息延长发送模式 默认为true 在true模式下每次重试间隔为
+	retryCount?: number; //错误重试次数 默认三次
+	retryInterval?: number; //重试间隔 默认一秒
+	maxMsgNum?: number; //最大消息瞬时并发数
 } & { [key: string]: any };
 
 //服务端连接配置
