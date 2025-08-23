@@ -101,6 +101,6 @@
 		"build": "tsc"
 	},
 	"dependencies": {
-		"@fastcar/timewheel": "^0.0.1"
+		"@fastcar/timewheel": "^0.0.2"
 	}
 }
