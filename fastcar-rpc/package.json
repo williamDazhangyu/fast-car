@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/rpc",
-	"version": "0.2.8",
+	"version": "0.2.9",
 	"description": "rpc,socket集成",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "target/index.js",
@@ -45,7 +45,7 @@
 		"@types/ws": "^8.5.3",
 		"aedes": "^0.46.3",
 		"mqtt": "^4.3.7",
-		"nanoid": "^3.3.2",
+		"nanoid": "3.3.4",
 		"protobufjs": "^6.11.3",
 		"socket.io": "^4.4.1",
 		"socket.io-client": "^4.4.1",
