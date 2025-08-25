@@ -153,7 +153,13 @@ export class ClassLoader {
 	 * @version 1.0 监听某个文件或者文件夹
 	 * @params eventName default reload
 	 */
-	static watchServices(fp: string, context: any, eventName?: string): boolean;
+	static watchServices(
+		fp: string,
+		context: {
+			emit: (eventName: string | symbol, ...args: any) => boolean;
+		},
+		eventName?: string
+	): boolean;
 }
 interface MixClass<T> {
 	new (): T;

@@ -134,10 +134,10 @@ class FastCarApplication extends Events {
 
 	reloadFiles() {
 		this.delayHotIds.forEach(({ fp, loadType }) => {
+			this.sysLogger.info(`hot update----${fp}`);
 			switch (loadType) {
 				case HotReloadEnum.reload: {
 					let moduleClass = ClassLoader.loadModule(fp, true);
-					this.sysLogger.info("hot update---" + fp);
 					if (moduleClass != null) {
 						moduleClass.forEach((func) => {
 							this.convertInstance(func, fp);
@@ -146,7 +146,6 @@ class FastCarApplication extends Events {
 					break;
 				}
 				case HotReloadEnum.sysReload: {
-					this.sysLogger.info("sysConfig hot update----" + fp);
 					this.loadSysConfig();
 					break;
 				}

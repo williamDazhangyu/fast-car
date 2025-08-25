@@ -1,8 +1,7 @@
 import TypeUtil from "./TypeUtil";
 import FileUtil from "./FileUtil";
-import * as fs from "fs";
-import * as path from "path";
 import { HotReloadEnum } from "../type/FileHotterDesc";
+import chokidar from "chokidar";
 
 export default class ClassLoader {
 	/***
@@ -49,24 +48,31 @@ export default class ClassLoader {
 	/**
 	 * @version 1.0 监听某个文件或者文件夹
 	 */
-	static watchServices(fp: string, context: any, eventName: HotReloadEnum = HotReloadEnum.reload): boolean {
+	static watchServices(
+		fp: string,
+		context: {
+			emit: (eventName: string | symbol, ...args: any) => boolean;
+		},
+		eventName: HotReloadEnum = HotReloadEnum.reload
+	): boolean {
 		if (typeof context.emit != "function") {
 			return false;
 		}
 
-		const currStats = fs.statSync(fp);
-		let fileFlag = currStats.isFile();
-
 		//添加热更方法
-		fs.watch(fp, function (event, filename) {
-			if (event === "change") {
-				if (!fileFlag && filename) {
-					context.emit(eventName, path.join(fp, filename));
-				} else {
-					context.emit(eventName, fp);
-				}
-			}
-		});
+		chokidar
+			.watch(fp, {
+				persistent: true,
+				ignoreInitial: true,
+				awaitWriteFinish: {
+					stabilityThreshold: 200,
+					pollInterval: 100,
+				},
+				usePolling: false,
+			})
+			.on("change", (path) => {
+				context.emit(eventName, path);
+			});
 
 		return true;
 	}
