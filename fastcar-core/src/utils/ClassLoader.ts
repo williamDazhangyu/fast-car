@@ -60,19 +60,26 @@ export default class ClassLoader {
 		}
 
 		//添加热更方法
-		chokidar
-			.watch(fp, {
-				persistent: true,
-				ignoreInitial: true,
-				awaitWriteFinish: {
-					stabilityThreshold: 200,
-					pollInterval: 100,
-				},
-				usePolling: false,
-			})
-			.on("change", (path) => {
-				context.emit(eventName, path);
-			});
+		const watcher = chokidar.watch(fp, {
+			persistent: true,
+			ignoreInitial: true,
+			awaitWriteFinish: {
+				stabilityThreshold: 500,
+				pollInterval: 100,
+			},
+			usePolling: false,
+			atomic: true,
+		});
+
+		watcher.on("change", (path) => {
+			context.emit(eventName, path);
+			watcher.unwatch(path); //防止因为git等操作造成inotify失效
+			watcher.add(path);
+		});
+
+		watcher.on("unlink", (path) => {
+			watcher.unwatch(path);
+		});
 
 		return true;
 	}
