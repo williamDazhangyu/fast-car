@@ -67,18 +67,13 @@ export default class ClassLoader {
 				stabilityThreshold: 500,
 				pollInterval: 100,
 			},
-			usePolling: false,
+			usePolling: true,
 			atomic: true,
+			interval: 1000,
 		});
 
 		watcher.on("change", (path) => {
 			context.emit(eventName, path);
-			watcher.unwatch(path); //防止因为git等操作造成inotify失效
-			watcher.add(path);
-		});
-
-		watcher.on("unlink", (path) => {
-			watcher.unwatch(path);
 		});
 
 		return true;
