@@ -180,3 +180,13 @@ export class MixTool {
 export class IPUtils {
 	static isInnerIP(ip: string): boolean;
 }
+
+export class FilterCondition {
+	constructor(where?: { [key: string]: any }, info?: { field?: string[]; excludeField?: string[] });
+
+	filterNull(excludeField?: string[]): this;
+
+	addFiled(where: { [key: string]: any }, info?: { field?: string[]; excludeField?: string[] }): this;
+
+	toObject(): { [key: string]: any };
+}

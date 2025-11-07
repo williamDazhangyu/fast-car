@@ -9,6 +9,7 @@ import MixTool from "./utils/Mix";
 import TypeUtil from "./utils/TypeUtil";
 import ValidationUtil from "./utils/ValidationUtil";
 import IPUtils from "./utils/IPUtils";
+import FilterCondition from "./utils/FilterCondition";
 
 //实用工具集合类
-export { DateUtil, DataFormat, CryptoUtil, FileUtil, TypeUtil, ValidationUtil, FormatStr, ClassUtils, ClassLoader, MixTool, IPUtils };
+export { DateUtil, DataFormat, CryptoUtil, FileUtil, TypeUtil, ValidationUtil, FormatStr, ClassUtils, ClassLoader, MixTool, IPUtils, FilterCondition };

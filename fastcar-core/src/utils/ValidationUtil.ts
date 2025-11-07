@@ -68,7 +68,15 @@ export default class ValidationUtil {
 			return param.length >= value;
 		}
 
-		let v = ValidationUtil.isNotNull(param) ? param.toString() : "";
+		if (TypeUtil.isMap(param) || TypeUtil.isSet(param)) {
+			return param.size >= value;
+		}
+
+		if (ValidationUtil.isNull(param)) {
+			return 0 >= value;
+		}
+
+		let v = param.toString();
 		return v.length >= value;
 	}
 
