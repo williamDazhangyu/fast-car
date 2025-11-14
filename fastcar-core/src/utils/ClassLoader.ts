@@ -1,7 +1,7 @@
 import TypeUtil from "./TypeUtil";
 import FileUtil from "./FileUtil";
 import { HotReloadEnum } from "../type/FileHotterDesc";
-import chokidar from "chokidar";
+import { WatchSingleton } from "@fastcar/watchfile";
 
 export default class ClassLoader {
 	/***
@@ -60,20 +60,15 @@ export default class ClassLoader {
 		}
 
 		//添加热更方法
-		const watcher = chokidar.watch(fp, {
-			persistent: true,
-			ignoreInitial: true,
-			awaitWriteFinish: {
-				stabilityThreshold: 500,
-				pollInterval: 100,
-			},
-			usePolling: true,
-			atomic: true,
-			interval: 1000,
+		const watcher = WatchSingleton({
+			pollInterval: 1000,
+			notifyTime: 3000,
 		});
 
-		watcher.on("change", (path) => {
-			context.emit(eventName, path);
+		watcher.addWatch({
+			fp,
+			context,
+			eventName,
 		});
 
 		return true;
