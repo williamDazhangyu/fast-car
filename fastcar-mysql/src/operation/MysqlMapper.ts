@@ -572,6 +572,11 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			useServerPrepStmts = false;
 		}
 
+		//如果配置不启用预处理则不进行处理
+		if (!this.dsm.isUseServerPrepStmts()) {
+			useServerPrepStmts = false;
+		}
+
 		let fields = this.analysisFields(conditions.fields);
 		let whereC = this.analysisWhere(conditions.where);
 		let groupStr = this.analysisGroups(conditions.groups);

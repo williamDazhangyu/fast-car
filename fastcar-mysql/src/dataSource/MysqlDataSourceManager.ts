@@ -310,6 +310,10 @@ class MysqlDataSourceManager implements DataSourceManager {
 			this.sessionList.clear();
 		}
 	}
+
+	isUseServerPrepStmts() {
+		return this.config.useServerPrepStmts;
+	}
 }
 
 export default MysqlDataSourceManager;
