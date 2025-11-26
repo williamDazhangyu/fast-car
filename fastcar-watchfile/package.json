@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/watchfile",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "动态监听文件",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "index.js",

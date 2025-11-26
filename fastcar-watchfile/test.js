@@ -12,7 +12,7 @@ const context = {
     },
 };
 w.addWatch({
-    fs: path.join(__dirname, "aa.txt"),
+    fp: path.join(__dirname, "aa.txt"),
     context,
     eventName: "test",
 });
