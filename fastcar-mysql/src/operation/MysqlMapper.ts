@@ -425,7 +425,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 			} else if (item.dbType == "json") {
 				//赋值json空对象
 				params.push(`\`${item.field}\``);
-				args.push({});
+				args.push("{}");
 			}
 		}
 
