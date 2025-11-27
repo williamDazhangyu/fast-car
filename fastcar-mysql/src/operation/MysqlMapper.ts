@@ -685,6 +685,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let whereC = this.analysisWhere(conditions.where);
 		let limitStr = this.analysisLimit({
 			limit: conditions.limit,
+			useServerPrepStmts: this.dsm.isUseServerPrepStmts(),
 		});
 
 		let sql = `DELETE FROM ${this.tableName} ${forceIndexStr} ${whereC.sql} ${limitStr.str}`;
