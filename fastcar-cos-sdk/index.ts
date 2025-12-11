@@ -1,5 +1,6 @@
 import * as axios from "axios";
 import { SignType } from "./types/SignType";
+import { Method } from "axios";
 
 //获取签名 仅支持node服务端使用
 export function getSign(t: SignType, serect: string) {
@@ -324,5 +325,32 @@ export class COSSDK {
 			},
 		});
 		return res.data;
+	}
+
+	async request<T, K>({ url, data, method }: { url: string; data?: T; method: Method }): Promise<K | null> {
+		let params = {};
+
+		if (method == "GET") {
+			params = Object.assign(
+				{
+					sign: this.sign,
+				},
+				data || {}
+			);
+		} else {
+			params = Object.assign({ sign: this.sign });
+		}
+
+		try {
+			let res = await axios.default.request({
+				url: `${this.domain}${url}`,
+				data,
+				params,
+				method,
+			});
+			return res.data as K;
+		} catch (e: any) {
+			return null;
+		}
 	}
 }

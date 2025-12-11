@@ -14,10 +14,8 @@
 	"files": [
 		"src",
 		"target",
-		"test",
 		"index.d.ts",
 		"annotation.d.ts",
-		"test",
 		"LICENSE"
 	],
 	"keywords": [

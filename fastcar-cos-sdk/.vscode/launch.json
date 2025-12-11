@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "Run TS",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${relativeFile}"
+            ],
+            "cwd": "${workspaceRoot}",
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "env": {
+                "TS_NODE_PROJECT": "${workspaceRoot}/tsconfig.json"
+            }
+        },
+        {
+            "name": "Run JS",
+            "type": "node",
+            "request": "launch",
+            "program": "${file}"
+        }
+    ]
+}

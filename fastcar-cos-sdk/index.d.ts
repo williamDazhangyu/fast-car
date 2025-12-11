@@ -2,6 +2,7 @@ export * from "./types/SignType";
 
 import * as axios from "axios";
 import { SignType } from "./types/SignType";
+import { Method } from "axios";
 
 //获取签名 仅支持node服务端使用
 export function getSign(t: SignType, serect: string): string | null;
@@ -137,4 +138,6 @@ export class COSSDK {
 		code: number;
 		data: string;
 	}>;
+
+	request<T, K>({ url, data, method }: { url: string; data?: T; method: Method }): Promise<K | null>;
 }
