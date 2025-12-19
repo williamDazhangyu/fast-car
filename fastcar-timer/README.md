@@ -13,7 +13,7 @@ npm install @fastcar/timer
 * 基于时间间隔的调用
 
 ```ts
-import { EnableScheduling, ScheduledInterval } from "@fastcar/timer";
+import { EnableScheduling, ScheduledInterval, destoryHeartbet } from "@fastcar/timer/scheduling2";
 
 //开启调度计划
 @EnableScheduling
@@ -29,6 +29,11 @@ class TimerTest {
    @ScheduledInterval({ fixedRate: 1000, initialDelay: 1 })
    run() {
     console.log(this.hello);
+   }
+
+   //销毁定时器
+   stop() {
+      destoryHeartbet(this, "run")
    }
 }
 

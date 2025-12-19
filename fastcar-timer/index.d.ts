@@ -31,15 +31,17 @@ export class Heartbeat {
 	constructor({ fixedRate, fixedRateString, initialDelay, cron, timezone }: ScheduledConfig);
 
 	//开启任务
-	start(fn: Function, context: any): void;
+	start(fn: Function | string, context: any): this;
 
 	/***
 	 * @version 1.0 每次跳动执行函数
 	 * @default delay = this.interval
 	 */
-	pacemaker(fn: Function, context: any, delay?: number): void;
+	pacemaker(fn: Function | string, context: any, delay?: number): void;
 
 	stop(): void;
+
+	pause(): void;
 
 	getStatus(): boolean;
 

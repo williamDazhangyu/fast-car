@@ -71,7 +71,7 @@ export class Heartbeat {
 	}
 
 	//开启任务
-	start(fn: Function, context: any) {
+	start(fn: Function | string, context: any) {
 		const self = this;
 		self.lastTime = Date.now();
 
@@ -80,15 +80,20 @@ export class Heartbeat {
 				this.task.schedule(() => {
 					self.diff = Date.now() - self.lastTime;
 					self.lastTime = Date.now();
-					Reflect.apply(fn, context, [self.diff]);
+
+					let fun = typeof fn == "string" ? context[fn] : fn;
+
+					Reflect.apply(fun, context, [self.diff]);
 				});
 			}, this.initialDelay);
 		} else {
 			self.pacemaker(fn, context, this.initialDelay);
 		}
+
+		return this;
 	}
 
-	pacemaker(fn: Function, context: any, delay: number = this.interval) {
+	pacemaker(fn: Function | string, context: any, delay: number = this.interval) {
 		const self = this;
 		clearTimeout(self.timerId);
 
@@ -100,7 +105,8 @@ export class Heartbeat {
 				self.lastTime = timeStamp;
 
 				try {
-					Reflect.apply(fn, context, [self.diff]);
+					let fun = typeof fn == "string" ? context[fn] : fn;
+					Reflect.apply(fun, context, [self.diff]);
 				} catch (e) {
 					console.error("error", e);
 				}
@@ -110,7 +116,7 @@ export class Heartbeat {
 		}
 	}
 
-	stop() {
+	pause() {
 		if (this.timerId) {
 			clearTimeout(this.timerId);
 			Reflect.deleteProperty(this, "timerId");
@@ -118,11 +124,14 @@ export class Heartbeat {
 
 		if (Reflect.has(this, "task")) {
 			process.nextTick(() => {
-				this.task.stop();
+				this.task?.stop();
 				Reflect.deleteProperty(this, "task");
 			});
 		}
+	}
 
+	stop() {
+		this.pause();
 		this.status = true;
 	}
 

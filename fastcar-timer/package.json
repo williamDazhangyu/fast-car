@@ -1,13 +1,14 @@
 {
 	"name": "@fastcar/timer",
-	"version": "0.1.7",
+	"version": "0.2.0",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"main": "./target/index.js",
 	"types": "index.d.ts",
 	"author": "william_zhong",
 	"license": "MIT",
 	"exports": {
-		".": "./target/index.js"
+		".": "./target/index.js",
+		"./scheduling2": "./target/Scheduling2.js"
 	},
 	"keywords": [
 		"timer",
@@ -19,6 +20,7 @@
 		"src",
 		"target",
 		"index.d.ts",
+		"scheduling2.d.ts",
 		"LICENSE"
 	],
 	"engines": {
@@ -26,10 +28,10 @@
 	},
 	"dependencies": {
 		"croner": "^5.3.4",
-		"reflect-metadata": "^0.1.13",
 		"tz-offset": "^0.0.2"
 	},
 	"devDependencies": {
+		"reflect-metadata": "^0.2.2",
 		"@types/reflect-metadata": "^0.1.0",
 		"@types/tz-offset": "^0.0.0"
 	},

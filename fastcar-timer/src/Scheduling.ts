@@ -55,8 +55,8 @@ function Scheduled(config: ScheduledConfig) {
 //开启定时任务 会在实例化的时候自动执行
 export function EnableScheduling(target: any) {
 	let proxy = new Proxy(target, {
-		construct: (target: any, args: any) => {
-			let service = new target(...args);
+		construct: (target: any, args: any, newTarget: any) => {
+			let service = Reflect.construct(target, args, newTarget) as any;
 
 			const emptyMap = new Map<string, any>();
 			Reflect.defineMetadata(TimerMapModule, emptyMap, service);
