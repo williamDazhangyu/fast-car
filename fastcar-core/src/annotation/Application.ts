@@ -4,7 +4,7 @@ import TypeUtil from "../utils/TypeUtil";
 
 //基础服务的应用
 export default function Application(target: any) {
-	return new Proxy(target, {
+	const proxy = new Proxy(target, {
 		construct: (target: ClassConstructor<Object>, args: any, newTarget?: any) => {
 			const FastCarApplication = require("../FastCarApplication").default;
 
@@ -46,4 +46,7 @@ export default function Application(target: any) {
 			return appProxy;
 		},
 	});
+
+	ClassUtils.cloneMetadata(target, proxy);
+	return proxy;
 }

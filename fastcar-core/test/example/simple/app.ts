@@ -54,6 +54,7 @@ import NotFoundController from "./controller/NotFoundController";
 import HotConfig from "./config/HotConfig";
 import HelloConfig from "./config/HelloConfig";
 import TestValue from "./service/TestValue";
+import DemandService from "./service/DemandService";
 
 describe("程序应用测试", () => {
 	it("获取配置", () => {
@@ -117,5 +118,18 @@ describe("程序应用测试", () => {
 		console.log(testValue.c);
 		console.log(testValue.env);
 		console.log(testValue.hello_c);
+	});
+
+	it("按需服务测试", () => {
+		let testValue = new DemandService();
+		// let testValue2 = new DemandService();
+		setInterval(() => {
+			console.log(testValue.sayHello());
+			// console.log(testValue2.sayHello());
+		}, 1000);
+
+		// setTimeout(() => {
+		// 	appInsatcne.app.deleteDemandInstance(testValue);
+		// }, 3000);
 	});
 });

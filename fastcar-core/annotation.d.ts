@@ -75,6 +75,9 @@ export function CallDependency(target: any, propertyKey: string): void;
 //按需注入加载
 export function DemandInjection(target: any): any;
 
+//启用按需加载热更
+export function HotterDemand(fp: string): Ret;
+
 //异常方法类
 export function ExceptionMonitor(target: any): void;
 

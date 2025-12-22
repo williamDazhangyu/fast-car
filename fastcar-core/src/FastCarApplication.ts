@@ -28,6 +28,7 @@ import { WinstonLoggerType } from "./type/WinstonLoggerType";
 import { ClassConstructor } from "./type/ClassConstructor";
 import ReflectUtil from "./utils/ReflectUtil";
 import Log from "./annotation/stereotype/Log";
+import DataMap from "./model/DataMap";
 
 @Component
 class FastCarApplication extends Events {
@@ -51,6 +52,8 @@ class FastCarApplication extends Events {
 	protected componentAliasMap: Map<string | symbol, string | symbol>;
 	protected hotConfigure: Map<string, string[]>;
 
+	protected demandInstanceMap: DataMap<string, DataMap<string, Set<ClassConstructor<Object> | Object>>>;
+
 	constructor() {
 		super();
 
@@ -65,6 +68,7 @@ class FastCarApplication extends Events {
 		this.componentAliasMap = new Map();
 		this.hotConfigure = new Map();
 
+		this.demandInstanceMap = new DataMap();
 		this.sysLogger = console;
 
 		this.loadSelf();
@@ -115,6 +119,14 @@ class FastCarApplication extends Events {
 		this.on(HotReloadEnum.configReload, (fp: string) => {
 			this.addDelayHot(fp, HotReloadEnum.configReload);
 		});
+
+		this.on(HotReloadEnum.demandload, (fp: string) => {
+			if (this.applicationStatus != AppStatusEnum.RUN) {
+				return;
+			}
+
+			this.addDelayHot(fp, HotReloadEnum.demandload);
+		});
 	}
 
 	addDelayHot(fp: string, loadType: HotReloadEnum) {
@@ -156,6 +168,30 @@ class FastCarApplication extends Events {
 							let instance = this.getComponentByName(item);
 							if (instance) {
 								this.updateConfig(instance, fp);
+							}
+						});
+					}
+					break;
+				}
+				case HotReloadEnum.demandload: {
+					let moduleClass = ClassLoader.loadModule(fp, true);
+					if (moduleClass != null) {
+						moduleClass.forEach((classZ) => {
+							let m = this.demandInstanceMap.get(fp);
+							if (m) {
+								let key = classZ.name;
+								if (key) {
+									let instances = m.get(key);
+									if (instances) {
+										instances.forEach((beforeInstance) => {
+											MixTool.assign(beforeInstance, classZ);
+											let cb = Reflect.getMetadata(FastCarMetaData.HotterCallback, classZ.prototype);
+											if (cb && Reflect.has(beforeInstance, cb)) {
+												Reflect.apply(Reflect.get(beforeInstance, cb), beforeInstance, []);
+											}
+										});
+									}
+								}
 							}
 						});
 					}
@@ -922,6 +958,48 @@ class FastCarApplication extends Events {
 		}
 
 		return logger;
+	}
+
+	addClassHot(fp: string, instance: ClassConstructor<Object> | Object, key: string) {
+		ClassLoader.watchServices(fp, this, HotReloadEnum.demandload);
+
+		let m = this.demandInstanceMap.get(fp);
+		if (!m) {
+			m = new DataMap();
+			this.demandInstanceMap.set(fp, m);
+		}
+
+		let methods = m.get(key);
+		if (!methods) {
+			methods = new Set();
+			m.set(key, methods);
+		}
+
+		methods.add(instance);
+	}
+
+	deleteDemandInstance(instance: ClassConstructor<Object> | Object) {
+		let fp = Reflect.getMetadata(FastCarMetaData.HotterFilePath, instance);
+		if (fp) {
+			let m = this.demandInstanceMap.get(fp);
+			if (m) {
+				let key = instance.constructor.name;
+				if (key) {
+					let instances = m.get(key);
+					if (instances && instances?.size > 0) {
+						instances.delete(instance);
+					}
+
+					if (instances?.size == 0) {
+						m.delete(key);
+					}
+
+					if (m.size == 0) {
+						this.demandInstanceMap.delete(fp);
+					}
+				}
+			}
+		}
 	}
 }
 

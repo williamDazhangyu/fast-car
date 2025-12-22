@@ -252,6 +252,12 @@ export class FastCarApplication extends Events {
 	 *
 	 */
 	getMemoryUsage(): ProcessType;
+
+	/**
+	 *
+	 * @version 0.3.17 删除按需加载实例
+	 */
+	deleteDemandInstance(instance: ClassConstructor<Object> | Object): void;
 }
 
 //校验错误

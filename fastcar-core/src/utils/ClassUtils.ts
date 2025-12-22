@@ -35,4 +35,13 @@ export default class ClassUtils {
 
 		return ClassUtils.getProtoDesc(parentObj, key);
 	}
+
+	//拷贝元数据
+	static cloneMetadata(src: any, dst: any): void {
+		const keys: any[] = Reflect.getMetadataKeys(src);
+		for (const k of keys) {
+			const val = Reflect.getMetadata(k, src);
+			Reflect.defineMetadata(k, val, dst);
+		}
+	}
 }

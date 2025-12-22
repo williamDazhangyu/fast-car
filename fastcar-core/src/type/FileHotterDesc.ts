@@ -7,4 +7,5 @@ export enum HotReloadEnum {
 	reload = "reload",
 	sysReload = "sysReload",
 	configReload = "configReload",
+	demandload = "demandload",
 }

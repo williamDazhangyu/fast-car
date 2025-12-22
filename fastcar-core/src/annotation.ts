@@ -55,6 +55,7 @@ import Value from "./annotation/bind/Value";
 import AppEnv from "./annotation/bind/AppEnv";
 import HotterCallBack from "./annotation/scan/HotterCallBack";
 import IsSerial from "./annotation/data/IsSerial";
+import HotterDemand from "./annotation/scan/HotterDemand";
 
 //注解暴露出去
 export {
@@ -100,6 +101,7 @@ export {
 	CustomType,
 	Value,
 	AppEnv,
+	HotterDemand,
 };
 
 export {
