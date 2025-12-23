@@ -38,6 +38,17 @@ export type KoaConfig = {
 	koaBodyOptions?: { [key: string]: any }; //文件上传的解析
 	koaBodyParser?: { [key: string]: any }; //解析请求
 	extra?: { [key: string]: any }; //拓展设置
+	koaProxy?: {
+		//基于http-proxy-middleware来进行拓展
+		[key: string]: {
+			target: string;
+			changeOrigin?: boolean;
+			pathRewrite?: {
+				[key: string]: string;
+			};
+			ws: boolean;
+		} & any;
+	};
 };
 
 //全局异常捕捉 可以用自定义的替换这个函数
@@ -54,6 +65,9 @@ export function KoaCors(app: FastCarApplication): MiddleWareType;
 
 //解析静态文件
 export function KoaStatic(app: FastCarApplication): MiddleWareType;
+
+//反向代理文件
+export function KoaProxy(app: FastCarApplication): MiddleWareType;
 
 //支持api说明
 export function Swagger(app: FastCarApplication): MiddleWareType;

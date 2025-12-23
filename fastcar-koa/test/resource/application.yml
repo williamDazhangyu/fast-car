@@ -8,6 +8,7 @@ settings:
         swagger:
             enable: true
             api: { "index": "/public/api/index.yaml" }
+        koaProxy: { "/:path(.*).php": { target: "http://localhost.better.lg", changeOrigin: true }, "/api/:path*": { target: "https://localhost.better.lg", "changeOrigin": true } }
         extra: #额外配置支持
             cors: #跨域支持示范
                 origin: "https://localhost:1234"

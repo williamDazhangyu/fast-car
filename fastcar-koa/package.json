@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/koa",
-	"version": "0.1.19",
+	"version": "0.1.20",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "fastcar框架下对koa的包装",
 	"main": "target/index.js",
@@ -51,12 +51,15 @@
 		"@types/koa-range": "^0.3.2",
 		"@types/koa-static": "^4.0.2",
 		"@types/koa2-cors": "^2.0.2",
+		"http-proxy-middleware": "^3.0.5",
 		"koa-body": "^4.2.0",
 		"koa-mount": "^4.0.0",
 		"koa-range": "^0.3.0",
 		"koa-static": "^5.0.0",
+		"koa2-connect": "^1.0.2",
 		"koa2-cors": "^2.0.6",
-		"multer": "*"
+		"multer": "*",
+		"path-to-regexp": "^8.3.0"
 	},
 	"peerDependenciesMeta": {
 		"@types/koa-mount": {

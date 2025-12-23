@@ -7,4 +7,15 @@ export type KoaConfig = {
 	koaBodyOptions?: { [key: string]: any }; //文件上传的解析
 	koaBodyParser?: { [key: string]: any }; //bodyParser.Options; //解析请求
 	extra?: { [key: string]: any }; //拓展设置
+	koaProxy?: {
+		//基于http-proxy-middleware来进行拓展
+		[key: string]: {
+			target: string;
+			changeOrigin?: boolean;
+			pathRewrite?: {
+				[key: string]: string;
+			};
+			ws: boolean;
+		} & any;
+	};
 };

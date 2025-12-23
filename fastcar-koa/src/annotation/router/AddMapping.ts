@@ -3,8 +3,7 @@ import { MethodType } from "../../type/MethodType";
 import { DesignMeta } from "../../type/DesignMeta";
 
 export default function AddMapping(target: any, info: MethodType) {
-
-	if(!info.url) {
+	if (!info.url) {
 		info.url = info.method;
 	}
 
@@ -19,13 +18,18 @@ export default function AddMapping(target: any, info: MethodType) {
 		Reflect.defineMetadata(DesignMeta.ROUTER_MAP, routerMap, target);
 	}
 
-	let curr = routerMap.get(info.url);
-	if (!curr) {
-		routerMap.set(info.url, info);
-	} else {
-		if (info.url != curr.url) {
-			console.warn(`The two URL names are inconsisten in (${info.url},${curr.url})`);
+	//修改主键 根据url-method作为唯一主键
+	info.request.forEach((m) => {
+		let urlKey = `${info.url}:${m}`;
+
+		let curr = routerMap.get(urlKey);
+		if (!curr) {
+			routerMap.set(urlKey, info);
+		} else {
+			if (info.url != curr.url) {
+				console.warn(`The two URL names are inconsisten in (${info.url},${curr.url})`);
+			}
+			curr.request = [...info.request, ...curr.request];
 		}
-		curr.request = [...info.request, ...curr.request];
-	}
+	});
 }
