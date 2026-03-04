@@ -53,6 +53,7 @@ class FastCarApplication extends Events {
 	protected hotConfigure: Map<string, string[]>;
 
 	protected demandInstanceMap: DataMap<string, DataMap<string, Set<ClassConstructor<Object> | Object>>>;
+	protected demandTargetMap: DataMap<string, DataMap<string, ClassConstructor<Object>>>;
 
 	constructor() {
 		super();
@@ -70,6 +71,7 @@ class FastCarApplication extends Events {
 
 		this.demandInstanceMap = new DataMap();
 		this.sysLogger = console;
+		this.demandTargetMap = new DataMap();
 
 		this.loadSelf();
 		this.addHot();
@@ -181,6 +183,12 @@ class FastCarApplication extends Events {
 							if (m) {
 								let key = classZ.name;
 								if (key) {
+									this?.addDemandTargetMap({
+										fp,
+										targetName: key,
+										Target: classZ,
+									});
+
 									let instances = m.get(key);
 									if (instances) {
 										instances.forEach((beforeInstance) => {
@@ -1000,6 +1008,21 @@ class FastCarApplication extends Events {
 				}
 			}
 		}
+	}
+
+	private addDemandTargetMap({ fp, targetName, Target }: { fp: string; targetName: string; Target: ClassConstructor<any> }) {
+		let sets = this.demandTargetMap.get(fp);
+		if (!sets) {
+			sets = new DataMap();
+			this.demandTargetMap.set(fp, sets);
+		}
+
+		sets.set(targetName, Target);
+	}
+
+	getDemandTarget(fp: string, targetName: string) {
+		let sets = this.demandTargetMap.get(fp);
+		return sets?.get(targetName);
 	}
 }
 

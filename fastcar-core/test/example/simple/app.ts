@@ -128,6 +128,11 @@ describe("程序应用测试", () => {
 			// console.log(testValue2.sayHello());
 		}, 1000);
 
+		setInterval(() => {
+			let testValue2 = new DemandService();
+			console.log("v2---", testValue2.sayHello());
+		}, 10000);
+
 		// setTimeout(() => {
 		// 	appInsatcne.app.deleteDemandInstance(testValue);
 		// }, 3000);
