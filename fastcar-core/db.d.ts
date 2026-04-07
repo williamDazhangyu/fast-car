@@ -55,7 +55,8 @@ export type SqlQuery = {
 	groups?: string[]; //分组排序
 	orders?: OrderType; //排序
 	limit?: number; //限制行数
-	offest?: number; //偏移量
+	offest?: number; //偏移量 之前拼错了 目前启用
+	offset?: number; //偏移量
 };
 
 export type SqlUpdate = {
