@@ -276,7 +276,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		};
 	}
 
-	protected analysisLimit({ limit, offest, useServerPrepStmts = true }: { limit?: number; offest?: number; useServerPrepStmts?: boolean }): { str: string; args: Array<number | string> } {
+	protected analysisLimit({ limit, offset, useServerPrepStmts = true }: { limit?: number; offset?: number; useServerPrepStmts?: boolean }): { str: string; args: Array<number | string> } {
 		if (typeof limit != "number" || limit < 0) {
 			return {
 				str: "",
@@ -288,12 +288,12 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let str = `LIMIT ? `;
 		args = [useServerPrepStmts ? limit.toString() : limit];
 
-		if (typeof offest == "number" && offest > 0) {
+		if (typeof offset == "number" && offset > 0) {
 			str = `LIMIT ?, ? `;
 			if (useServerPrepStmts) {
-				args = [offest.toString(), limit.toString()];
+				args = [offset.toString(), limit.toString()];
 			} else {
-				args = [offest, limit];
+				args = [offset, limit];
 			}
 		}
 
@@ -583,7 +583,7 @@ class MysqlMapper<T extends Object> extends BaseMapper<T> {
 		let orderStr = this.analysisOrders(conditions.orders);
 		let limitStr = this.analysisLimit({
 			limit: conditions?.limit,
-			offest: conditions?.offest,
+			offset: conditions.offset || conditions?.offest, //兼容以前老版本
 			useServerPrepStmts,
 		});
 		let forceIndexStr = this.analysisForceIndex(conditions?.forceIndex);
