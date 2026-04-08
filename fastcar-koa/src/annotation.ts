@@ -5,6 +5,7 @@ import AddMapping from "./annotation/router/AddMapping";
 import AllMapping from "./annotation/router/AllMapping";
 import DeleteMapping from "./annotation/router/DeleteMapping";
 import GetMapping from "./annotation/router/GetMapping";
+import HeadMapping from "./annotation/router/HeadMapping";
 import PatchMapping from "./annotation/router/PatchMapping";
 import PostMapping from "./annotation/router/PostMapping";
 import PutMapping from "./annotation/router/PutMapping";
@@ -18,6 +19,7 @@ const PUT = PutMapping;
 const PATCH = PatchMapping;
 const ALL = AllMapping;
 const REQUEST = RequestMapping;
+const HEAD = HeadMapping;
 
 export {
 	//关于请求方式注解
@@ -29,6 +31,7 @@ export {
 	PostMapping,
 	PutMapping,
 	RequestMapping,
+	HeadMapping,
 	//开启koa应用
 	EnableKoa,
 	//追加koa中间件
@@ -42,4 +45,5 @@ export {
 	ALL,
 	REQUEST,
 	KoaApp,
+	HEAD,
 };

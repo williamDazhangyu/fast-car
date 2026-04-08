@@ -114,6 +114,14 @@ export default class UserController {
     const userId = ctx.params.id;
     return { code: 200, data: { id: userId } };
   }
+
+  @HEAD("/users/:id")
+  async checkUserExists(data: { id: string }, ctx: Context) {
+    // HEAD 请求通常用于检查资源是否存在，不返回响应体
+    const userId = ctx.params.id;
+    const exists = await checkUser(userId); // 假设的检查方法
+    ctx.status = exists ? 200 : 404;
+  }
 }
 ```
 
@@ -183,6 +191,7 @@ type KoaConfig = {
 | `@PutMapping(path)` | PUT | `@PUT` | `string` - 路由路径 |
 | `@DeleteMapping(path)` | DELETE | `@DELETE` | `string` - 路由路径 |
 | `@PatchMapping(path)` | PATCH | `@PATCH` | `string` - 路由路径 |
+| `@HeadMapping(path)` | HEAD | `@HEAD` | `string` - 路由路径 |
 | `@AllMapping(path)` | ALL | `@ALL` | `string` - 路由路径 |
 | `@RequestMapping(path)` | - | `@REQUEST` | `string` - 基础路径前缀 |
 
@@ -392,7 +401,7 @@ export default class UploadController {
 import { KoaApplication, KoaConfig } from "@fastcar/koa";
 
 // 装饰器
-import { EnableKoa, KoaMiddleware, GET, POST, ... } from "@fastcar/koa/annotation";
+import { EnableKoa, KoaMiddleware, GET, POST, HEAD, ... } from "@fastcar/koa/annotation";
 ```
 
 ### KoaApplication 类

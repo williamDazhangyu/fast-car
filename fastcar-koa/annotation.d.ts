@@ -25,6 +25,8 @@ export function PatchMapping(url?: string): MRet;
 
 export function PutMapping(url?: string): MRet;
 
+export function HeadMapping(url?: string): MRet;
+
 export function RequestMapping(url: string): Ret;
 
 export function ALL(url?: string): MRet;

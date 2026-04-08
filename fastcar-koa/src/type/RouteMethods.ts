@@ -5,4 +5,5 @@ export enum RouteMethods {
 	DeleteMapping = "delete",
 	PatchMapping = "patch",
 	AllMapping = "all",
+	HeadMapping = "head",
 }
