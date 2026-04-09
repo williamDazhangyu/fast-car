@@ -109,7 +109,7 @@ export class COSSDK {
 	}>;
 
 	//设置重定向文件
-	setRedirect({ redirectUrl, flag, bucket }: { redirectUrl: string; flag: boolean; bucket?: string }): Promise<{
+	setRedirect({ redirectUrl, flag, bucket, domain }: { redirectUrl: string; flag: boolean; bucket?: string; domain?: string }): Promise<{
 		code: number;
 	}>;
 
@@ -129,14 +129,25 @@ export class COSSDK {
 	getRedirect(): Promise<{
 		code: number;
 		data: {
-			redirect: { [key: string]: string };
+			redirect: { [key: string]: string | { [path: string]: string } };
 			defaultredirect: string;
 		};
 	}>;
 
-	queryRedirect({ bucketUrl }: { bucketUrl?: string }): Promise<{
+	queryRedirect({ bucketUrl, domain }: { bucketUrl?: string; domain?: string }): Promise<{
 		code: number;
 		data: string;
+	}>;
+
+	//获取域名列表
+	getDomains(): Promise<{
+		code: number;
+		data: string[];
+	}>;
+
+	//保存域名列表
+	saveDomains(domains: string[]): Promise<{
+		code: number;
 	}>;
 
 	request<T, K>({ url, data, method }: { url: string; data?: T; method: Method }): Promise<K | null>;

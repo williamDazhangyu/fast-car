@@ -252,13 +252,14 @@ export class COSSDK {
 	}
 
 	//设置重定向
-	async setRedirect({ redirectUrl, flag, bucket }: { redirectUrl: string; flag: boolean; bucket?: string }): Promise<{
+	async setRedirect({ redirectUrl, flag, bucket, domain }: { redirectUrl: string; flag: boolean; bucket?: string; domain?: string }): Promise<{
 		code: number;
 	}> {
 		let res = await axios.default.post(`${this.domain}/setRedirect`, {
 			redirectUrl,
 			flag,
 			bucket,
+			domain,
 			sign: this.sign,
 		});
 
@@ -301,7 +302,7 @@ export class COSSDK {
 	async getRedirect(): Promise<{
 		code: number;
 		data: {
-			redirect: { [key: string]: string };
+			redirect: { [key: string]: string | { [path: string]: string } };
 			defaultredirect: string;
 		};
 	}> {
@@ -314,7 +315,7 @@ export class COSSDK {
 	}
 
 	//查询单个重定向信息
-	async queryRedirect({ bucketUrl }: { bucketUrl?: string }): Promise<{
+	async queryRedirect({ bucketUrl, domain }: { bucketUrl?: string; domain?: string }): Promise<{
 		code: number;
 		data: string;
 	}> {
@@ -322,7 +323,32 @@ export class COSSDK {
 			params: {
 				sign: this.sign,
 				bucketUrl,
+				domain,
 			},
+		});
+		return res.data;
+	}
+
+	//获取域名列表
+	async getDomains(): Promise<{
+		code: number;
+		data: string[];
+	}> {
+		let res = await axios.default.get(`${this.domain}/getDomains`, {
+			params: {
+				sign: this.sign,
+			},
+		});
+		return res.data;
+	}
+
+	//保存域名列表
+	async saveDomains(domains: string[]): Promise<{
+		code: number;
+	}> {
+		let res = await axios.default.post(`${this.domain}/saveDomains`, {
+			domains,
+			sign: this.sign,
 		});
 		return res.data;
 	}
