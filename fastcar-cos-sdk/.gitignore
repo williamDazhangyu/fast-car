@@ -4,5 +4,4 @@ yarn.lock
 **/*.out
 logs/*
 *.log
-*.js
 *.txt

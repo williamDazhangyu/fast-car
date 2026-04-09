@@ -150,6 +150,11 @@ export class COSSDK {
 		code: number;
 	}>;
 
+	//删除重定向配置
+	delRedirect({ bucket, domain }: { bucket: string; domain?: string }): Promise<{
+		code: number;
+	}>;
+
 	request<T, K>({
 		url,
 		data,

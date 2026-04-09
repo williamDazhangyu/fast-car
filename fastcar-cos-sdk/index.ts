@@ -353,6 +353,20 @@ export class COSSDK {
 		return res.data;
 	}
 
+	//删除重定向配置
+	async delRedirect({ bucket, domain }: { bucket: string; domain?: string }): Promise<{
+		code: number;
+	}> {
+		let res = await axios.default.delete(`${this.domain}/delRedirect`, {
+			params: {
+				bucket,
+				domain,
+				sign: this.sign,
+			},
+		});
+		return res.data;
+	}
+
 	async request<T, K>({
 		url,
 		data,
