@@ -150,5 +150,15 @@ export class COSSDK {
 		code: number;
 	}>;
 
-	request<T, K>({ url, data, method }: { url: string; data?: T; method: Method }): Promise<K | null>;
+	request<T, K>({
+		url,
+		data,
+		method,
+		axiosConfig,
+	}: {
+		url: string;
+		data?: T;
+		method: Method;
+		axiosConfig?: Omit<axios.AxiosRequestConfig, "url" | "data" | "method" | "params">;
+	}): Promise<K | null>;
 }

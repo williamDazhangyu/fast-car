@@ -353,7 +353,17 @@ export class COSSDK {
 		return res.data;
 	}
 
-	async request<T, K>({ url, data, method }: { url: string; data?: T; method: Method }): Promise<K | null> {
+	async request<T, K>({
+		url,
+		data,
+		method,
+		axiosConfig = {},
+	}: {
+		url: string;
+		data?: T;
+		method: Method;
+		axiosConfig?: Omit<axios.AxiosRequestConfig, "url" | "data" | "method" | "params">;
+	}): Promise<K | null> {
 		let params = {};
 
 		if (method == "GET") {
@@ -373,6 +383,7 @@ export class COSSDK {
 				data,
 				params,
 				method,
+				...axiosConfig,
 			});
 			return res.data as K;
 		} catch (e: any) {
