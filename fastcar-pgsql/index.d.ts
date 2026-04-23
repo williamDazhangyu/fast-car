@@ -5,6 +5,74 @@ import { BaseMapper, DataSourceManager, OrderType, RowData, RowType, SqlDelete, 
 import { PgSqlConfig } from "./src";
 export * from "./src/type/DataTypeEnum";
 
+/**
+ * 向量相似度操作符 - pgvector 扩展
+ */
+export enum VectorOperatorEnum {
+	/** 欧几里得距离（L2）- 越小越相似 */
+	l2Distance = "<->",
+	/** 余弦距离 - 越小越相似 */
+	cosineDistance = "<=>",
+	/** 负内积 - 越小越相似（用于最大内积搜索） */
+	innerProduct = "<#>",
+}
+
+/**
+ * 向量查询配置
+ */
+export type VectorQuery = {
+	/** 向量字段名 */
+	field: string;
+	/** 查询向量 */
+	vector: number[] | Float32Array;
+	/** 相似度操作符 */
+	operator: VectorOperatorEnum;
+	/** 返回TopK，默认10 */
+	limit?: number;
+};
+
+/**
+ * 向量索引类型 - pgvector 扩展
+ */
+export enum VectorIndexType {
+	/** 倒排文件平面索引 - 适合中等规模数据 */
+	ivfflat = "ivfflat",
+	/** 层次可导航小世界图 - 适合大规模数据，查询更快 */
+	hnsw = "hnsw",
+}
+
+/**
+ * 向量索引配置
+ */
+export type VectorIndexConfig = {
+	/** 表名 */
+	table: string;
+	/** 向量列名 */
+	column: string;
+	/** 索引类型 */
+	type: VectorIndexType;
+	/** 距离操作符类型，默认 L2 */
+	opClass?: "vector_l2_ops" | "vector_cosine_ops" | "vector_ip_ops";
+	/** 
+	 * ivfflat 参数: 倒排列表数
+	 * 数据量越大，该值应越大（通常 100-1000）
+	 * 默认 100
+	 */
+	lists?: number;
+	/**
+	 * hnsw 参数: 每层最大连接数
+	 * 越大召回率越高，但索引越大
+	 * 默认 16
+	 */
+	m?: number;
+	/**
+	 * hnsw 参数: 构建时的 ef（探索因子）
+	 * 越大构建越慢，但召回率越高
+	 * 默认 64
+	 */
+	efConstruction?: number;
+};
+
 declare type SqlExecType = {
 	sql: string;
 	args?: any[];
@@ -19,6 +87,10 @@ export class PgsqlDataSource {
 
 	check(): Promise<void>;
 
+	/**
+	 * ⚠️ 警告：此方法仅用于日志打印/调试，不要用于实际的 SQL 执行！
+	 * 实际的 SQL 执行请使用 replacePlaceholders + 参数化查询
+	 */
 	static format(sql: string, values?: any[]): string;
 
 	static replacePlaceholders(
@@ -94,6 +166,19 @@ export class PgsqlDataSourceManager implements DataSourceManager {
 	getConnection(name: string): Promise<pg.PoolClient | null>;
 
 	checkSession(): void;
+
+	/**
+	 * @version 1.0 创建向量索引
+	 * @param config 向量索引配置
+	 * @param ds 数据源名称
+	 */
+	createVectorIndex(config: VectorIndexConfig, ds?: string): Promise<void>;
+
+	/**
+	 * @version 1.0 启用 pgvector 扩展
+	 * @param ds 数据源名称
+	 */
+	enableVectorExtension(ds?: string): Promise<void>;
 }
 
 export class PgsqlMapper<T extends Object> extends BaseMapper<T> {
@@ -239,6 +324,23 @@ export class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 	 * @version 1.0 自定义sql执行 动态sql优先使用这个
 	 */
 	query(sql: string, args?: any[], ds?: string, sessionId?: string): Promise<pg.QueryResult<any>>;
+
+	/**
+	 * @version 1.0 向量相似度搜索
+	 * @param vectorQuery 向量查询条件
+	 * @param ds 数据源
+	 * @param sessionId 会话ID
+	 */
+	selectByVector(vectorQuery: VectorQuery, ds?: string, sessionId?: string): Promise<T[]>;
+
+	/**
+	 * @version 1.0 向量相似度搜索（带额外过滤条件）
+	 * @param vectorQuery 向量查询条件
+	 * @param where 过滤条件
+	 * @param ds 数据源
+	 * @param sessionId 会话ID
+	 */
+	selectByVectorWithWhere(vectorQuery: VectorQuery, where?: SqlWhere, ds?: string, sessionId?: string): Promise<T[]>;
 }
 
 /**
@@ -273,6 +375,8 @@ export class ReverseGenerate {
 
 	static formatClassName(name: string): string;
 
+	static parseTableInfo(name: string, defaultSchema: string): { schema: string; tableName: string; fullName: string };
+
 	//创建文件夹
 	static createDir(dir: string): void;
 
@@ -295,6 +399,7 @@ export class ReverseGenerate {
 		modelDir: string; //绝对路径
 		mapperDir: string; //mapper绝对路径文件夹
 		dbConfig: pg.PoolConfig;
+		schema?: string;
 		style?: prettier.Options;
 		ignoreCamelcase?: boolean;
 	}): Promise<void>;

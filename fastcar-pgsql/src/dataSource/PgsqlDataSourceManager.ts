@@ -1,4 +1,5 @@
 import { SqlExecType } from "../type/SqlExecType";
+import { VectorIndexConfig, VectorIndexType } from "../type/VectorIndex";
 import PgsqlDataSource from "./PgsqlDataSource";
 import { ApplicationStart, ApplicationStop, Autowired, Log } from "@fastcar/core/annotation";
 import { BootPriority, FastCarApplication, Logger } from "@fastcar/core";
@@ -25,7 +26,7 @@ class PgsqlDataSourceManager implements DataSourceManager {
 
 	protected sourceMap: Map<string, PgsqlDataSource>;
 	protected config!: PgSqlConfig;
-	protected defaultSource!: string; //默认数据源
+	protected defaultSource!: string; //默认数据
 	protected writeDefaultSource!: string; //默认写数据源
 	protected readDefaultSource!: string; //默认读数据源
 	protected sessionList: Map<string, number>; //session会话管理 如果超时或者释放时间过长则进行释放
@@ -70,11 +71,17 @@ class PgsqlDataSourceManager implements DataSourceManager {
 		}
 	}
 
-	stop(): void {
-		//结束销毁
-		this.sourceMap.forEach((db) => {
-			db.close();
-		});
+	async stop(): Promise<void> {
+		(this as any).checkSession(0, true);
+
+		let sessionIds = Array.from(this.sessionList.keys());
+		for (let sessionId of sessionIds) {
+			await this.destorySession(sessionId, true);
+		}
+
+		for (let db of this.sourceMap.values()) {
+			await db.close();
+		}
 		this.sourceMap.clear();
 	}
 
@@ -101,7 +108,7 @@ class PgsqlDataSourceManager implements DataSourceManager {
 				this.writeDefaultSource = source;
 			}
 
-			//将不必要的属性不要传给Pgsql了
+			//将不必要的属性不要传给Pgsql
 			let tmpConfig = Object.assign({}, item);
 			["source", "readDefault", "writeDefault", "default"].forEach((key) => {
 				Reflect.deleteProperty(tmpConfig, key);
@@ -144,10 +151,10 @@ class PgsqlDataSourceManager implements DataSourceManager {
 		if (connMap) {
 			for (let [ds, conns] of connMap) {
 				let db = this.getDataSoucreByName(ds);
-				conns.forEach(async (conn) => {
+				for (let conn of conns) {
 					status ? await db?.rollback(conn) : await db?.commit(conn);
 					db?.releaseConnection(conn);
-				});
+				}
 			}
 			connMap.clear();
 		}
@@ -281,6 +288,34 @@ class PgsqlDataSourceManager implements DataSourceManager {
 		return conn;
 	}
 
+	/**
+	 * @version 1.0 创建向量索引
+	 * @param config 向量索引配置
+	 * @param ds 数据源名称
+	 */
+	async createVectorIndex(config: VectorIndexConfig, ds?: string): Promise<void> {
+		let opClass = config.opClass || "vector_l2_ops";
+		let indexName = `idx_${config.table}_${config.column}_${config.type}`;
+		let withSql = "";
+
+		if (config.type == VectorIndexType.ivfflat) {
+			withSql = ` WITH (lists = ${config.lists || 100})`;
+		} else if (config.type == VectorIndexType.hnsw) {
+			withSql = ` WITH (m = ${config.m || 16}, ef_construction = ${config.efConstruction || 64})`;
+		}
+
+		let sql = `CREATE INDEX IF NOT EXISTS ${indexName} ON ${config.table} USING ${config.type} (${config.column} ${opClass})${withSql}`;
+		await this.execute({ sql, ds, args: [] });
+	}
+
+	/**
+	 * @version 1.0 启用 pgvector 扩展
+	 * @param ds 数据源名称
+	 */
+	async enableVectorExtension(ds?: string): Promise<void> {
+		await this.execute({ sql: 'CREATE EXTENSION IF NOT EXISTS "vector"', ds, args: [] });
+	}
+
 	@ScheduledInterval({ fixedRate: 1, fixedRateString: TimeUnit.second })
 	checkSession(): void {
 		if (this.sessionList.size > 0) {
@@ -296,10 +331,10 @@ class PgsqlDataSourceManager implements DataSourceManager {
 			}
 
 			if (cleanSessions.length > 0) {
-				cleanSessions.forEach(async (sessionId) => {
+				for (let sessionId of cleanSessions) {
 					this.sysLogger.error(`${sessionId}: The session was longer than ${sessionTimeOut} milliseconds`);
 					this.destorySession(sessionId, true);
-				});
+				}
 			}
 
 			this.sessionList.clear();

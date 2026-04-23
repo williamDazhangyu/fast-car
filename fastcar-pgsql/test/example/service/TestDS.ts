@@ -12,24 +12,22 @@ export default class TestDS {
 	myMapper2!: TestMapper2;
 
 	async switchDS() {
-		await this.myMapper.saveOne(new Test({ name: "test", caseName: "数据源TEST1" }));
-		await this.myMapper2.saveOne(new Test({ name: "test", caseName: "数据源TEST2" }));
+		await this.myMapper.saveOne(new Test({ name: "test-ds1", caseName: "数据源TEST1" }));
+		await this.myMapper2.saveOne(new Test({ name: "test-ds2", caseName: "数据源TEST2" }));
 
-		let result = await Promise.all([
+		return await Promise.all([
 			this.myMapper.selectOne({
 				where: {
-					name: "test",
+					name: "test-ds1",
 				},
 				fields: ["caseName"],
 			}),
 			this.myMapper2.selectOne({
 				where: {
-					name: "test",
+					name: "test-ds2",
 				},
 				fields: ["caseName"],
 			}),
 		]);
-
-		return result;
 	}
 }

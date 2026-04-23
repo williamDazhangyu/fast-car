@@ -8,19 +8,29 @@ import * as pg from "pg";
 import { DataMap } from "@fastcar/core";
 
 const DESCSQL =
-	"SELECT A.attname AS COLUMN_NAME,pgd.description AS column_comment,i.DATA_TYPE,i.COLUMN_DEFAULT,i.IS_NULLABLE,i.CHARACTER_MAXIMUM_LENGTH,i.NUMERIC_PRECISION,i.NUMERIC_SCALE " +
-	" FROM pg_attribute A LEFT JOIN pg_description pgd ON A.attrelid = pgd.objoid AND A.attnum = pgd.objsubid LEFT JOIN information_schema.COLUMNS AS i ON i.COLUMN_NAME = A.attname " +
-	" WHERE A.attrelid = $1 :: REGCLASS AND A.attnum > 0 AND NOT A.attisdropped AND i.TABLE_NAME = $2 ORDER BY i.ordinal_position";
+	"SELECT c.column_name, pgd.description AS column_comment, CASE WHEN c.data_type = 'USER-DEFINED' THEN format_type(a.atttypid, a.atttypmod) ELSE c.data_type END AS data_type, " +
+	"c.column_default, c.is_nullable, c.character_maximum_length, c.numeric_precision, c.numeric_scale " +
+	"FROM information_schema.columns c " +
+	"LEFT JOIN pg_catalog.pg_namespace n ON n.nspname = c.table_schema " +
+	"LEFT JOIN pg_catalog.pg_class cls ON cls.relname = c.table_name AND cls.relnamespace = n.oid " +
+	"LEFT JOIN pg_catalog.pg_attribute a ON a.attrelid = cls.oid AND a.attname = c.column_name " +
+	"LEFT JOIN pg_catalog.pg_description pgd ON pgd.objoid = cls.oid AND pgd.objsubid = a.attnum " +
+	"WHERE c.table_schema = $1 AND c.table_name = $2 ORDER BY c.ordinal_position";
 
 const PrimarySQL =
 	"SELECT col.column_name, tc.constraint_type FROM information_schema.key_column_usage col INNER JOIN information_schema.table_constraints tc " +
-	" ON col.constraint_schema = tc.constraint_schema AND col.constraint_name = tc.constraint_name AND col.table_name = tc.table_name " +
-	" WHERE tc.constraint_type = 'PRIMARY KEY' AND col.table_schema = 'public' AND col.table_name = $1";
+	"ON col.constraint_schema = tc.constraint_schema AND col.constraint_name = tc.constraint_name AND col.table_name = tc.table_name " +
+	"WHERE tc.constraint_type = 'PRIMARY KEY' AND col.table_schema = $1 AND col.table_name = $2";
 
 //从数据库表逆向生成类
 class ReverseGenerate {
 	//根据数据库名称生成
 	static formatType(dbtype: string): string {
+		// 处理 vector(n) 类型
+		if (dbtype.startsWith("vector(")) {
+			return "Float32Array";
+		}
+
 		let dt = dbtype.split(" ");
 		if (dt.length > 1) {
 			return Reflect.get(DataTypeEnum, dt[0]) || "any";
@@ -30,14 +40,31 @@ class ReverseGenerate {
 	}
 
 	static formatClassName(name: string): string {
-		let className = camelcase(name);
+		let tableName = name.includes(".") ? name.split(".").pop() || name : name;
+		let className = camelcase(tableName);
 		return className.charAt(0).toUpperCase() + className.substring(1);
+	}
+
+	static parseTableInfo(name: string, defaultSchema: string): { schema: string; tableName: string; fullName: string } {
+		let schema = defaultSchema || "public";
+		let tableName = name;
+		if (name.includes(".")) {
+			let nameInfo = name.split(".");
+			schema = nameInfo[0] || schema;
+			tableName = nameInfo.slice(1).join(".") || tableName;
+		}
+
+		return {
+			schema,
+			tableName,
+			fullName: schema == "public" && !name.includes(".") ? tableName : `${schema}.${tableName}`,
+		};
 	}
 
 	//创建文件夹
 	static createDir(dir: string): void {
 		if (!fs.existsSync(dir)) {
-			fs.mkdirSync(dir);
+			fs.mkdirSync(dir, { recursive: true });
 		}
 
 		let tmpStats = fs.statSync(dir);
@@ -217,6 +244,7 @@ class ReverseGenerate {
 		modelDir,
 		mapperDir,
 		dbConfig,
+		schema = "public",
 		style = {
 			tabWidth: 4,
 			printWidth: 200,
@@ -230,31 +258,37 @@ class ReverseGenerate {
 		modelDir: string; //绝对路径
 		mapperDir: string; //mapper绝对路径文件夹
 		dbConfig: pg.PoolConfig;
+		schema?: string;
 		style?: prettier.Options;
 		ignoreCamelcase?: boolean;
 	}): Promise<void> {
+		if (tables.length == 0) {
+			throw new Error("table is empty");
+		}
+
+		//生成路径
+		ReverseGenerate.createDir(modelDir);
+		ReverseGenerate.createDir(mapperDir);
+
+		let dbres = new pg.Client(dbConfig);
+		await dbres.connect();
+
 		try {
-			if (tables.length == 0) {
-				throw new Error("table is empty");
-			}
-
-			//生成路径
-			ReverseGenerate.createDir(modelDir);
-			ReverseGenerate.createDir(mapperDir);
-
-			let dbres = new pg.Client(dbConfig);
-			await dbres.connect();
-
 			//求相对路径
 			let rp = path.relative(mapperDir, modelDir);
 			rp = rp.replace(/\\/g, "/") || "."; //系统不一致时 分隔符替换
 
 			for (let name of tables) {
-				let res: pg.QueryResult<FiledType> = await dbres.query(DESCSQL, [name, name]);
+				let tableInfo = ReverseGenerate.parseTableInfo(name, schema);
+				let res: pg.QueryResult<FiledType> = await dbres.query(DESCSQL, [tableInfo.schema, tableInfo.tableName]);
+				if (!res.rows || res.rows.length == 0) {
+					throw new Error(`The table does not exist or is empty: ${tableInfo.fullName}`);
+				}
+
 				let pres: pg.QueryResult<{
 					column_name: string;
 					constraint_type: string;
-				}> = await dbres.query(PrimarySQL, [name]);
+				}> = await dbres.query(PrimarySQL, [tableInfo.schema, tableInfo.tableName]);
 
 				let dmap = new DataMap<string, string>();
 				pres.rows.forEach((r) => {
@@ -266,13 +300,13 @@ class ReverseGenerate {
 					return r;
 				});
 
-				ReverseGenerate.genModel({ taleName: name, dir: modelDir, fieldInfo: res.rows, style, ignoreCamelcase });
-				ReverseGenerate.genMapper({ taleName: name, mapperDir, rp, style });
+				ReverseGenerate.genModel({ taleName: tableInfo.fullName, dir: modelDir, fieldInfo: res.rows, style, ignoreCamelcase });
+				await ReverseGenerate.genMapper({ taleName: tableInfo.fullName, mapperDir, rp, style });
 			}
-
-			dbres.end();
 		} catch (e) {
-			console.error(e);
+			throw e;
+		} finally {
+			await dbres.end();
 		}
 	}
 }

@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/pgsql",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"main": "target/index.js",
 	"exports": {
 		".": "./target/index.js",
@@ -22,17 +22,26 @@
 	],
 	"license": "MIT",
 	"dependencies": {
-		"@fastcar/core": "^0.3.7",
-		"@fastcar/timer": "^0.1.8",
-		"camelcase": "^6.2.1",
-		"pg": "^8.13.1",
-		"prettier": "^2.5.1"
+		"@fastcar/core": "*",
+		"@fastcar/timer": "*",
+		"camelcase": "*",
+		"nanoid": "^3.3.7",
+		"pg": "*",
+		"prettier": "*"
 	},
 	"devDependencies": {
 		"@types/camelcase": "^5.2.0",
+		"@types/chai": "^5.2.3",
+		"@types/mocha": "^9.1.1",
 		"@types/pg": "^8.11.10",
 		"@types/prettier": "^2.4.2",
+		"@types/sinon": "^21.0.0",
 		"@types/tz-offset": "^0.0.3",
+		"chai": "^6.2.2",
+		"mocha": "^9.2.2",
+		"sinon": "^21.0.3",
+		"ts-node": "^10.9.2",
+		"tsconfig-paths": "^4.2.0",
 		"tz-offset": "^0.0.2"
 	},
 	"peerDependencies": {
@@ -43,6 +52,11 @@
 		"prettier": "*"
 	},
 	"scripts": {
-		"build": "tsc"
+		"build": "tsc",
+		"test": "mocha -r ts-node/register -r tsconfig-paths/register 'test/**/*.test.ts' --timeout 30000 --exit",
+		"test:unit": "mocha -r ts-node/register -r tsconfig-paths/register 'test/unit/**/*.test.ts' --timeout 10000",
+		"test:integration": "mocha -r ts-node/register -r tsconfig-paths/register 'test/integration/**/*.test.ts' --timeout 30000 --exit",
+		"test:example": "mocha -r ts-node/register -r tsconfig-paths/register 'test/example/app.ts' --timeout 30000 --exit",
+		"test:system": "npm run test:unit && npm run test:integration && npm run test:example"
 	}
 }

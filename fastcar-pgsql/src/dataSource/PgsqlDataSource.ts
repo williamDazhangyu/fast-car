@@ -16,6 +16,10 @@ class PgsqlDataSource {
 		this.releaseConnection(conn);
 	}
 
+	/**
+	 * ⚠️ 警告：此方法仅用于日志打印/调试，不要用于实际的 SQL 执行！
+	 * 实际的 SQL 执行请使用 replacePlaceholders + 参数化查询
+	 */
 	static format(sql: string, values: any[] = []): string {
 		let counter = -1;
 		return sql.replace(/\?/g, () => {
@@ -25,7 +29,9 @@ class PgsqlDataSource {
 				return val;
 			}
 
-			return `'${values[counter]}'`;
+			// 转义单引号，防止基本的 SQL 注入
+			let strVal = String(values[counter]).replace(/'/g, "''");
+			return `'${strVal}'`;
 		});
 	}
 

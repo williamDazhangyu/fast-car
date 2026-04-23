@@ -34,4 +34,7 @@ export enum DataTypeEnum {
 	inet = "string", //网络ip
 	cidr = "string",
 	macaddr = "string",
+
+	// 向量类型 - pgvector 扩展
+	vector = "Float32Array",  // 对应 pgvector 的 vector 类型
 }

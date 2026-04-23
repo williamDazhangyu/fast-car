@@ -1,6 +1,6 @@
 import { Repository, Entity } from "@fastcar/core/annotation";
 import Test from "../model/Test";
-import { PgsqlMapper } from "../../..";
+import { PgsqlMapper } from "../../../src";
 
 @Entity(Test)
 @Repository

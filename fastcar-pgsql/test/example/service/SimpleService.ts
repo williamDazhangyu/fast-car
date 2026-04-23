@@ -64,8 +64,8 @@ class SimpleService {
 		return res;
 	}
 
-	async updateByPrimaryKey() {
-		let test = new Test({ id: 1, name: "hello world" });
+	async updateByPrimaryKey(id: number = 1) {
+		let test = { id, name: "hello world" } as Test;
 		let res = await this.myMapper.updateByPrimaryKey(test);
 		return res;
 	}
@@ -128,16 +128,18 @@ class SimpleService {
 	//测试索引信息
 	async forceIndex() {
 		return await this.myMapper.select({
-			forceIndex: ["caseTime"],
-			orders: { caseTime: OrderEnum.desc },
+			forceIndex: ["name"],
+			orders: { id: OrderEnum.desc },
 			limit: 1,
 		});
 	}
 
 	//使用函数测试
 	async testFormat() {
-		return await this.myMapper.select({
-			fields: ['DATE_FORMAT( case_time, "%Y-%m-%d %H:%I:%s" ) as caseTime'],
+		return await this.myMapper.selectByCustom<{ createTimeText: string }>({
+			fields: ["TO_CHAR(create_time, 'YYYY-MM-DD HH24:MI:SS') as create_time_text"],
+			limit: 1,
+			camelcaseStyle: true,
 		});
 	}
 
@@ -155,14 +157,16 @@ class SimpleService {
 	//测试左连接
 	async testLeftJoin() {
 		let res = await this.myMapper.selectByCustom({
+			fields: ["t.id", "t.name", "t2.name as other_name"],
 			join: [
 				{
 					type: "LEFT",
-					table: "cache c",
-					on: "c.key = t.name",
+					table: "test t2",
+					on: "t2.id = t.id",
 				},
 			],
 			tableAlias: "t",
+			camelcaseStyle: true,
 		});
 
 		return res;
@@ -173,7 +177,7 @@ class SimpleService {
 		//SELECT * FROM test WHERE () = 'hello'
 		return await this.myMapper.select({
 			where: {
-				"list -> 'h' ->> 'hh'": "hello", //嵌套式搜索
+				"list -> 0 ->> 'a'": "1",
 			},
 		});
 	}

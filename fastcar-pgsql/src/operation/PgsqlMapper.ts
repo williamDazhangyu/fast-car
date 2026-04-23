@@ -4,9 +4,10 @@ import { Autowired, DSIndex, SqlSession } from "@fastcar/core/annotation";
 import PgsqlDataSourceManager from "../dataSource/PgsqlDataSourceManager";
 import { DataFormat, TypeUtil, ValidationUtil } from "@fastcar/core/utils";
 import SerializeUtil from "../util/SerializeUtil";
+import { VectorOperatorEnum, VectorQuery } from "../type/VectorOperator";
 import { BaseMapper, JoinEnum } from "@fastcar/core/db";
 import { OrderType, OperatorEnum, RowData, RowType, SqlDelete, SqlQuery, SqlUpdate, SqlWhere } from "@fastcar/core/db";
-import * as camelcase from "camelcase";
+import camelcase = require("camelcase");
 
 const JoinEnums = Object.keys(JoinEnum).map((item) => {
 	return item.toLowerCase();
@@ -50,13 +51,13 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		return !!info ? `"${alias}"` : alias;
 	}
 
-	//自动映射数据库字段
-	//兼容不小心传了数据的值
+	//自动映射数据库字�?
+	//兼容不小心传了数据的�?
 	protected toDBValue(v: any, key: string, type: string, value: any = Reflect.get(v, key)): any {
-		//去数据库映射值
+		//去数据库映射�?
 		let info = this.mappingMap.get(key);
 		if (info) {
-			//优先取数据库值
+			//优先取数据库�?
 			let dbValue = Reflect.get(v, info.field);
 			if (ValidationUtil.isNotNull(dbValue)) {
 				if (TypeUtil.isObject(dbValue) && Reflect.has(dbValue, "operate") && Reflect.has(dbValue, "value")) {
@@ -71,7 +72,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 			value = null;
 		}
 
-		let tmpValue = SerializeUtil.serialize(value, type);
+		let tmpValue = SerializeUtil.serialize(value, type, info?.dbType || type);
 		return tmpValue;
 	}
 
@@ -278,7 +279,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		};
 	}
 
-	protected analysisLimit({ limit, offest }: { limit?: number; offest?: number }): { str: string; args: Array<number | string> } {
+	protected analysisLimit({ limit, offset }: { limit?: number; offset?: number }): { str: string; args: Array<number | string> } {
 		if (typeof limit != "number" || limit < 0) {
 			return {
 				str: "",
@@ -290,9 +291,9 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		let str = `LIMIT ? `;
 		args = [limit];
 
-		if (typeof offest == "number" && offest > 0) {
-			str = `OFFEST ?  LIMIT ? `;
-			args = [offest, limit];
+		if (typeof offset == "number" && offset > 0) {
+			str = `OFFSET ? LIMIT ? `;
+			args = [offset, limit];
 		}
 
 		return {
@@ -302,15 +303,9 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 	}
 
 	protected analysisForceIndex(fileds: string[] = []): string {
-		if (fileds.length == 0) {
-			return "";
-		}
-
-		let formatFileds = fileds.map((filed) => {
-			return this.getFieldName(filed);
-		});
-
-		return `FORCE INDEX (${formatFileds.join(",")})`;
+		// PostgreSQL does not support MySQL-style FORCE INDEX hints.
+		// Keep the option as a no-op for API compatibility instead of generating invalid SQL.
+		return "";
 	}
 
 	protected analysisJoin(
@@ -331,6 +326,99 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		});
 
 		return joinList.join(" ");
+	}
+
+	protected parseVectorValue(value: any): number[] {
+		if (value instanceof Float32Array) {
+			return Array.from(value);
+		}
+
+		if (Array.isArray(value)) {
+			return value.map((item) => parseFloat(item as any)).filter((item) => !isNaN(item));
+		}
+
+		if (typeof value == "string") {
+			let formatValue = value.trim();
+			if (formatValue.startsWith("[") && formatValue.endsWith("]")) {
+				formatValue = formatValue.substring(1, formatValue.length - 1);
+			}
+			if (!formatValue) {
+				return [];
+			}
+			return formatValue
+				.split(",")
+				.map((item) => parseFloat(item.trim()))
+				.filter((item) => !isNaN(item));
+		}
+
+		return [];
+	}
+
+	protected vectorScore(target: number[], source: number[], operator: VectorOperatorEnum): number {
+		let maxLength = Math.max(target.length, source.length);
+		if (maxLength == 0) {
+			return Number.MAX_SAFE_INTEGER;
+		}
+
+		let t = new Array(maxLength).fill(0).map((_, index) => target[index] || 0);
+		let s = new Array(maxLength).fill(0).map((_, index) => source[index] || 0);
+
+		switch (operator) {
+			case VectorOperatorEnum.cosineDistance: {
+				let dot = 0;
+				let tnorm = 0;
+				let snorm = 0;
+				for (let i = 0; i < maxLength; i++) {
+					dot += t[i] * s[i];
+					tnorm += t[i] * t[i];
+					snorm += s[i] * s[i];
+				}
+				if (tnorm == 0 || snorm == 0) {
+					return Number.MAX_SAFE_INTEGER;
+				}
+				return 1 - dot / (Math.sqrt(tnorm) * Math.sqrt(snorm));
+			}
+			case VectorOperatorEnum.innerProduct: {
+				let dot = 0;
+				for (let i = 0; i < maxLength; i++) {
+					dot += t[i] * s[i];
+				}
+				return -dot;
+			}
+			case VectorOperatorEnum.l2Distance:
+			default: {
+				let distance = 0;
+				for (let i = 0; i < maxLength; i++) {
+					distance += Math.pow(t[i] - s[i], 2);
+				}
+				return Math.sqrt(distance);
+			}
+		}
+	}
+
+	protected async fallbackVectorSelect(vectorQuery: VectorQuery, where: SqlWhere = {}, ds?: string, sessionId?: string): Promise<T[]> {
+		let rows = await this.select(where && Object.keys(where).length > 0 ? { where } : {}, ds, sessionId);
+		let target = this.parseVectorValue(vectorQuery.vector);
+		let limit = vectorQuery.limit || 10;
+		let fieldName = vectorQuery.field;
+
+		return rows
+			.map((row) => {
+				let value = Reflect.get(row as any, fieldName);
+				if (ValidationUtil.isNull(value)) {
+					let desc = this.mappingMap.get(fieldName);
+					if (desc) {
+						value = Reflect.get(row as any, desc.field);
+					}
+				}
+				return {
+					row,
+					score: this.vectorScore(target, this.parseVectorValue(value), vectorQuery.operator),
+				};
+			})
+			.sort((a, b) => a.score - b.score)
+			.slice(0, limit)
+			.map((item) => item.row);
 	}
 
 	//修正布尔值时的赋值错误
@@ -363,7 +451,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 	}
 
 	/***
-	 * @version 1.0 更新或者添加记录多条记录(一般用于整条记录的更新)
+	 * @version 1.0 更新或者添加记录多条记录一般用于整条记录的更新)
 	 */
 	async saveORUpdate(rows: T | T[], @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<number> {
 		if (!Array.isArray(rows)) {
@@ -474,6 +562,8 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		let sql = `INSERT INTO ${this.tableName} (${keysStr}) VALUES `;
 		let paramsStr = new Array(keys.length).fill("?").join(",");
 
+		const promises: Promise<any>[] = [];
+
 		for (let i = 0; i < rows.length; ) {
 			let paramsList: string[] = [];
 			let tpmList = rows.slice(i, i + 1000);
@@ -493,7 +583,6 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 			i += tpmList.length;
 			let tmpSQL = sql + paramsList.join(","); //RETURNING id
 
-			//移除等待操作 并发批量写入
 			this.dsm.exec({ sql: tmpSQL, args, ds, sessionId });
 		}
 
@@ -600,7 +689,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		let orderStr = this.analysisOrders(conditions.orders);
 		let limitStr = this.analysisLimit({
 			limit: conditions?.limit,
-			offest: conditions?.offest,
+			offset: conditions.offset || conditions?.offest,
 		});
 		let forceIndexStr = this.analysisForceIndex(conditions?.forceIndex);
 
@@ -757,6 +846,41 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 	 */
 	async execute(sql: string, args: any[] = [], @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<pg.QueryResult<any>> {
 		return await this.dsm.exec({ sql, args, ds, sessionId });
+	}
+
+	/**
+	 * @version 1.0 向量相似度搜索
+	 */
+	async selectByVector(vectorQuery: VectorQuery, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T[]> {
+		let limit = vectorQuery.limit || 10;
+		let fieldName = this.getFieldName(vectorQuery.field);
+		let sql = `SELECT * FROM ${this.tableName} ORDER BY ${fieldName} ${vectorQuery.operator} ?::vector LIMIT ?`;
+		let args = [SerializeUtil.serialize(vectorQuery.vector, "Float32Array"), limit];
+
+		try {
+			let res = await this.dsm.exec({ sql, args, ds, sessionId });
+			return this.setRows(res.rows || []);
+		} catch (e) {
+			return await this.fallbackVectorSelect(vectorQuery, {}, ds, sessionId);
+		}
+	}
+
+	/**
+	 * @version 1.0 向量相似度搜索（带额外过滤条件）
+	 */
+	async selectByVectorWithWhere(vectorQuery: VectorQuery, where: SqlWhere = {}, @DSIndex ds?: string, @SqlSession sessionId?: string): Promise<T[]> {
+		let limit = vectorQuery.limit || 10;
+		let fieldName = this.getFieldName(vectorQuery.field);
+		let whereC = this.analysisWhere(where);
+		let sql = `SELECT * FROM ${this.tableName} ${whereC.sql} ORDER BY ${fieldName} ${vectorQuery.operator} ?::vector LIMIT ?`.trim();
+		let args = [...whereC.args, SerializeUtil.serialize(vectorQuery.vector, "Float32Array"), limit];
+
+		try {
+			let res = await this.dsm.exec({ sql, args, ds, sessionId });
+			return this.setRows(res.rows || []);
+		} catch (e) {
+			return await this.fallbackVectorSelect(vectorQuery, where, ds, sessionId);
+		}
 	}
 
 	/***

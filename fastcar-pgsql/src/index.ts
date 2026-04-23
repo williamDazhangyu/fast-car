@@ -6,6 +6,8 @@ import PgsqlDataSourceManager from "./dataSource/PgsqlDataSourceManager";
 import { SqlConfig, PgSqlConfig } from "./type/SqlConfig";
 import PgsqlMapper from "./operation/PgsqlMapper";
 import ReverseGenerate from "./util/ReverseGen";
+import { VectorOperatorEnum, VectorQuery, VectorQueryWithWhere } from "./type/VectorOperator";
+import { VectorIndexType, VectorIndexConfig } from "./type/VectorIndex";
 
 export {
 	PgsqlDataSource, //数据源
@@ -17,4 +19,10 @@ export {
 	PgsqlMapper,
 	WhereModel, //条件工具生成类
 	ReverseGenerate,
+	// 向量功能
+	VectorOperatorEnum, //向量操作符
+	VectorQuery, //向量查询配置
+	VectorQueryWithWhere, //带过滤的向量查询
+	VectorIndexType, //向量索引类型
+	VectorIndexConfig, //向量索引配置
 };

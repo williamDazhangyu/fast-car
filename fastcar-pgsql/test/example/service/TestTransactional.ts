@@ -12,8 +12,8 @@ class TestTransactional {
 	private dsm!: PgsqlDataSourceManager;
 
 	async exec() {
-		let sql = "update test set flag = 0 where id = 1 ";
-		let sql2 = "update test set flag = 0 where id = 2";
+		let sql = "update test set flag = false where id = 1 ";
+		let sql2 = "update test set flag = false where id = 2";
 
 		try {
 			let res = await this.dsm.batchExecute([{ sql }, { sql: sql2 }]);
@@ -30,7 +30,7 @@ class TestTransactional {
 		let res = await this.myMapper.updateOne(
 			{
 				where: { id: 1 },
-				row: { case_time: new Date() },
+				row: { updateTime: new Date() },
 			},
 			"",
 			sessionId
@@ -47,7 +47,7 @@ class TestTransactional {
 			this.myMapper.updateOne(
 				{
 					where: { id: 2 },
-					row: { case_time: new Date() },
+					row: { updateTime: new Date() },
 				},
 				"",
 				sessionId
@@ -55,7 +55,7 @@ class TestTransactional {
 			this.myMapper.updateOne(
 				{
 					where: { id: 3 },
-					row: { case_time: new Date() },
+					row: { updateTime: new Date() },
 				},
 				"",
 				sessionId
@@ -63,7 +63,7 @@ class TestTransactional {
 			this.myMapper.updateOne(
 				{
 					where: { id: 1 },
-					row: { case_time: new Date() },
+					row: { updateTime: new Date() },
 				},
 				"",
 				sessionId
@@ -80,7 +80,7 @@ class TestTransactional {
 		await this.myMapper.updateOne(
 			{
 				where: { id: 2 },
-				row: { case_time: new Date() },
+				row: { updateTime: new Date() },
 			},
 			"",
 			sessionId
@@ -94,7 +94,7 @@ class TestTransactional {
 		let res = await this.myMapper.updateOne(
 			{
 				where: { id: 3 },
-				row: { case_time: new Date() },
+				row: { updateTime: new Date() },
 			},
 			"",
 			sessionId
