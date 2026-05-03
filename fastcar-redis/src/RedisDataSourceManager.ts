@@ -1,9 +1,9 @@
-import RedisDataSource from "./RedisDataSource";
-import * as redis from "redis";
+import RedisDataSource, { RedisDataSourceConfig } from "./RedisDataSource";
+import { RedisClientType } from "redis";
 import { ApplicationStart, ApplicationStop, Autowired, Log } from "@fastcar/core/annotation";
 import { BootPriority, FastCarApplication, Logger } from "@fastcar/core";
 
-interface RedisConfig extends redis.ClientOpts {
+interface RedisConfig extends RedisDataSourceConfig {
 	source: string;
 }
 
@@ -26,29 +26,32 @@ class RedisDataSourceManager {
 		this.sourceMap = new Map();
 	}
 
-	start(): void {
+	async start(): Promise<void> {
+		if (this.sourceMap.size > 0) {
+			return;
+		}
+
 		let config: RedisConfig[] = this.app.getSetting("redis");
 		if (config && Array.isArray(config)) {
-			config.forEach((item) => {
+			await Promise.all(config.map(async (item) => {
 				let source = item.source;
 				Reflect.deleteProperty(item, "source");
 				let client = new RedisDataSource(item);
+				await client.connect();
 				this.sourceMap.set(source, client);
-			});
+			}));
 		} else {
 			this.sysLogger.warn("Redis configuration not found");
 		}
 	}
 
-	stop(): void {
-		this.sourceMap.forEach((client) => {
-			client.close();
-		});
+	async stop(): Promise<void> {
+		await Promise.all(Array.from(this.sourceMap.values()).map((client) => client.close()));
 
 		this.sourceMap.clear();
 	}
 
-	getClient(source: string = "default"): redis.RedisClient | null {
+	getClient(source: string = "default"): RedisClientType | null {
 		let client = this.sourceMap.get(source);
 		if (!client) {
 			return null;
