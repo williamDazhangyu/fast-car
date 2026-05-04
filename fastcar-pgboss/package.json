@@ -1,0 +1,74 @@
+{
+	"name": "@fastcar/pgboss",
+	"version": "0.0.1",
+	"description": "FastCar lifecycle and decorator integration for pg-boss.",
+	"homepage": "https://github.com/williamDazhangyu/fast-car",
+	"main": "target/index.js",
+	"types": "index.d.ts",
+	"author": "william_zhong",
+	"license": "MIT",
+	"exports": {
+		".": {
+			"types": "./index.d.ts",
+			"require": "./target/index.js",
+			"default": "./target/index.js"
+		},
+		"./annotation": {
+			"types": "./annotation.d.ts",
+			"require": "./target/annotation.js",
+			"default": "./target/annotation.js"
+		}
+	},
+	"keywords": [
+		"pgboss",
+		"pg-boss",
+		"queue",
+		"postgres",
+		"@fastcar/core",
+		"@fastcar/pgboss"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"files": [
+		"src",
+		"target",
+		"index.d.ts",
+		"annotation.d.ts",
+		"README.md",
+		"CHANGELOG.md",
+		"LICENSE"
+	],
+	"engines": {
+		"node": ">=20"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@fastcar/core": "^0.3.20",
+		"mocha": "^9.1.3",
+		"pg-boss": "^10.4.2",
+		"ts-node": "^10.7.0",
+		"tsconfig-paths": "^4.1.0",
+		"typescript": "5.6.3"
+	},
+	"peerDependencies": {
+		"@fastcar/core": ">=0.3.20 <1",
+		"pg-boss": "^10.3.0"
+	},
+	"scripts": {
+		"build": "tsc",
+		"test": "mocha -r ts-node/register/transpile-only -r tsconfig-paths/register \"test/**/*.unit.test.ts\" --timeout 10000 --exit",
+		"test:integration": "mocha -r ts-node/register/transpile-only -r tsconfig-paths/register \"test/**/*.integration.test.ts\" --timeout 30000 --exit",
+		"typecheck": "tsc --noEmit --allowJs false --typeRoots ../node_modules/@types index.d.ts annotation.d.ts",
+		"pack:check": "npm pack --dry-run",
+		"prepublishOnly": "npm run build && npm test && npm run typecheck && npm run pack:check"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/williamDazhangyu/fast-car.git",
+		"directory": "fastcar-pgboss"
+	},
+	"bugs": {
+		"url": "https://github.com/williamDazhangyu/fast-car/issues"
+	}
+}
