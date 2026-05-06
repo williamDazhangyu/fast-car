@@ -15,7 +15,7 @@ export default class WhereModel {
 		let keys = Object.keys(this.where);
 		keys.forEach((key) => {
 			let value = Reflect.get(this.where, key);
-			if (!excludeField.includes(key) && ValidationUtil.isNull(value)) {
+			if (!excludeField.includes(key) && (value === null || value === undefined)) {
 				Reflect.deleteProperty(this.where, key);
 			}
 		});

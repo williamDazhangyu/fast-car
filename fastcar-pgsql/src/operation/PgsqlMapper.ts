@@ -29,6 +29,42 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		this.tableName = table;
 	}
 
+	private getMappingInfo(key?: string) {
+		if (!key) {
+			return null;
+		}
+		let info = this.mappingMap.get(key);
+		if (!info) {
+			let mapKey = this.dbFields.get(key);
+			if (mapKey) {
+				info = this.mappingMap.get(mapKey);
+			}
+		}
+		return info || null;
+	}
+
+	private isVarcharDbType(dbType: string): boolean {
+		let type = (dbType || "").toLowerCase().trim();
+		return /^varchar(\s*\(\s*\d+\s*\))?$/.test(type) || /^character\s+varying(\s*\(\s*\d+\s*\))?$/.test(type);
+	}
+
+	//判断值在数据库层面是否应为空（null/undefined 始终为空；空字符串仅当字段为 varchar 类型时保留）
+	private isBlankForDb(value: any, key?: string): boolean {
+		if (value === null || value === undefined) {
+			return true;
+		}
+		if (typeof value === "string" && value === "") {
+			let info = this.getMappingInfo(key);
+			// varchar/character varying 类型字段：空字符串是合法值
+			if (info && this.isVarcharDbType(info.dbType)) {
+				return false;
+			}
+			// 非 varchar 类型字段的空字符串视为 null
+			return true;
+		}
+		return false;
+	}
+
 	//修正关键词的别名需转义的错误
 	//修正多列转义时错误
 	getFieldName(name: string): string {
@@ -51,15 +87,13 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		return !!info ? `"${alias}"` : alias;
 	}
 
-	//自动映射数据库字�?
-	//兼容不小心传了数据的�?
 	protected toDBValue(v: any, key: string, type: string, value: any = Reflect.get(v, key)): any {
 		//去数据库映射�?
 		let info = this.mappingMap.get(key);
 		if (info) {
-			//优先取数据库�?
+			//优先取数据库
 			let dbValue = Reflect.get(v, info.field);
-			if (ValidationUtil.isNotNull(dbValue)) {
+			if (!this.isBlankForDb(dbValue, key)) {
 				if (TypeUtil.isObject(dbValue) && Reflect.has(dbValue, "operate") && Reflect.has(dbValue, "value")) {
 					value = dbValue.value;
 				} else {
@@ -68,7 +102,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 			}
 		}
 
-		if (ValidationUtil.isNull(value)) {
+		if (this.isBlankForDb(value, key)) {
 			value = null;
 		}
 
@@ -126,7 +160,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 				if (TypeUtil.isArray(value)) {
 					//数组类型
 					Reflect.set(ov, OperatorEnum.in, value);
-				} else if (ValidationUtil.isNull(value)) {
+				} else if (this.isBlankForDb(value, key)) {
 					//空值类型
 					Reflect.set(ov, OperatorEnum.isNUll, value);
 				} else if (!TypeUtil.isObject(value)) {
@@ -144,7 +178,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 					let operatorValue = Reflect.get(ov, operatorKeys);
 					let formatOperatorKeys = operatorKeys.toUpperCase();
 
-					if (ValidationUtil.isNull(operatorValue)) {
+					if (this.isBlankForDb(operatorValue, key)) {
 						operatorValue = null;
 					}
 
@@ -254,7 +288,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 				str.push(`${alias} = ?`);
 			}
 
-			if (ValidationUtil.isNull(v)) {
+			if (this.isBlankForDb(v, key)) {
 				v = null;
 			}
 
@@ -486,7 +520,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 				let dbValue = this.toDBValue(row, item.name, item.type);
 
 				if (item.primaryKey) {
-					if (ValidationUtil.isNull(dbValue)) {
+					if (dbValue === null || dbValue === undefined) {
 						args.push("DEFAULT");
 						continue;
 					}
@@ -516,7 +550,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 
 		for (let item of this.mappingList) {
 			let dbValue = this.toDBValue(row, item.name, item.type);
-			if (ValidationUtil.isNotNull(dbValue)) {
+			if (dbValue !== null && dbValue !== undefined) {
 				params.push(`"${item.field}"`);
 				args.push(dbValue);
 			} else if (item.dbType == "json") {
@@ -572,7 +606,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 			tpmList.forEach((row: T) => {
 				this.mappingList.forEach((item) => {
 					let dbValue = this.toDBValue(row, item.name, item.type);
-					if (item.primaryKey && ValidationUtil.isNull(dbValue)) {
+					if (item.primaryKey && (dbValue === null || dbValue === undefined)) {
 						args.push("DEFAULT");
 					} else {
 						args.push(dbValue);
@@ -744,7 +778,7 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 
 		for (let item of this.mappingList) {
 			let dbValue = this.toDBValue(row, item.name, item.type);
-			if (ValidationUtil.isNotNull(dbValue)) {
+			if (dbValue !== null && dbValue !== undefined) {
 				if (item.primaryKey) {
 					Reflect.set(sqlQuery.where, item.field, dbValue);
 				}
@@ -827,9 +861,9 @@ class PgsqlMapper<T extends Object> extends BaseMapper<T> {
 		let conditions = {};
 		this.mappingList.forEach((item) => {
 			if (item.primaryKey) {
-				let value = Reflect.get(row, item.name);
-				if (ValidationUtil.isNotNull(value)) {
-					Reflect.set(conditions, item.field, value);
+				let dbValue = this.toDBValue(row, item.name, item.type);
+				if (dbValue !== null && dbValue !== undefined) {
+					Reflect.set(conditions, item.field, dbValue);
 				}
 			}
 		});

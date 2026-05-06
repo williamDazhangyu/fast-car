@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/pgsql",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"main": "target/index.js",
 	"exports": {
 		".": "./target/index.js",
