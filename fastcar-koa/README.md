@@ -47,9 +47,6 @@ npm install @fastcar/core @fastcar/server koa @koa/router
 # 文件上传
 npm install @koa/multer multer
 
-# 静态文件服务
-npm install koa-static koa-range koa-mount
-
 # 跨域支持
 npm install koa2-cors
 
@@ -63,7 +60,7 @@ npm install http-proxy-middleware koa2-connect
 npm install swagger-ui-dist
 
 # 类型定义（TypeScript 项目）
-npm install -D @types/koa @types/koa__multer @types/koa-mount @types/koa-range @types/koa-static @types/koa2-cors
+npm install -D @types/koa @types/koa__multer @types/koa2-cors
 ```
 
 ## 快速开始
@@ -134,6 +131,7 @@ koa:
     hostname: "0.0.0.0"
   koaStatic:
     "/static": "./resource/static"  # 路径别名映射
+    "/app": { path: "./resource/app", index: "index.html", fallback: "index.html" }
   koaBodyOptions:
     multipart: true
     formidable:
@@ -149,8 +147,8 @@ type KoaConfig = {
   // 服务器配置，支持多端口监听
   server: ServerConfig | ServerConfig[];
   
-  // 静态文件路径映射 { 访问路径: 文件系统路径 }
-  koaStatic?: { [key: string]: string };
+  // 静态文件路径映射，字符串为纯静态目录；对象可配置目录索引和 404 回退文件
+  koaStatic?: { [key: string]: string | { path: string; index?: string | false; fallback?: string } };
   
   // koa-body 配置（文件上传）
   koaBodyOptions?: { [key: string]: any };
@@ -263,7 +261,7 @@ import { KoaCors } from "@fastcar/koa";
 
 ### 5. KoaStatic
 
-静态文件服务（整合 koa-static + koa-range + koa-mount）。
+静态文件服务（内置实现，支持挂载路径、HEAD、Range 请求，可配置目录索引和 404 回退文件）。
 
 ```typescript
 import { KoaStatic } from "@fastcar/koa";
@@ -273,6 +271,7 @@ import { KoaStatic } from "@fastcar/koa";
 // koaStatic:
 //   "/": "./resource/public"
 //   "/uploads": "./uploads"
+//   "/app": { path: "./dist", index: "index.html", fallback: "index.html" }
 ```
 
 ### 6. KoaMulter

@@ -1,6 +1,6 @@
 {
 	"name": "@fastcar/koa",
-	"version": "0.1.23",
+	"version": "0.1.24",
 	"homepage": "https://github.com/williamDazhangyu/fast-car",
 	"description": "fastcar框架下对koa的包装",
 	"main": "target/index.js",
@@ -47,43 +47,19 @@
 		"@fastcar/core": "*",
 		"@fastcar/server": "*",
 		"@koa/multer": "*",
-		"@types/koa-mount": "*",
-		"@types/koa-range": "*",
-		"@types/koa-static": "*",
 		"@types/koa2-cors": "*",
 		"http-proxy-middleware": "*",
 		"koa-body": "*",
-		"koa-mount": "*",
-		"koa-range": "*",
-		"koa-static": "*",
 		"koa2-connect": "*",
 		"koa2-cors": "*",
 		"multer": "*",
 		"path-to-regexp": "*"
 	},
 	"peerDependenciesMeta": {
-		"@types/koa-mount": {
-			"optional": true
-		},
-		"@types/koa-range": {
-			"optional": true
-		},
-		"@types/koa-static": {
-			"optional": true
-		},
 		"@types/koa2-cors": {
 			"optional": true
 		},
 		"koa-body": {
-			"optional": true
-		},
-		"koa-mount": {
-			"optional": true
-		},
-		"koa-range": {
-			"optional": true
-		},
-		"koa-static": {
 			"optional": true
 		},
 		"koa2-cors": {

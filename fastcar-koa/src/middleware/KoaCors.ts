@@ -31,6 +31,21 @@ export default function KoaCors(app: FastCarApplication) {
 					return false;
 				});
 			}
+
+			if (corsConfig.allowMethods == "*" || corsConfig.allowHeaders == "*") {
+				return async (ctx: Context, next: () => Promise<any>) => {
+					let requestCorsConfig = { ...corsConfig };
+					if (corsConfig.allowMethods == "*") {
+						let method = ctx.get("Access-Control-Request-Method");
+						requestCorsConfig.allowMethods = method ? [method] : undefined;
+					}
+					if (corsConfig.allowHeaders == "*") {
+						let headers = ctx.get("Access-Control-Request-Headers");
+						requestCorsConfig.allowHeaders = headers ? [headers] : undefined;
+					}
+					return koa2Cors(requestCorsConfig)(ctx, next);
+				};
+			}
 		}
 		return koa2Cors(corsConfig);
 	}

@@ -6,6 +6,7 @@ import KoaMiddleware from "../../src/annotation/KoaMiddleware";
 import KoaBodyParser from "../../src/middleware/KoaBodyParser";
 import * as Koa from "koa";
 import ExceptionGlobalHandler from "../../src/middleware/ExceptionGlobalHandler";
+import KoaStatic from "../../src/middleware/KoaStatic";
 // import KoaCors from "../../src/middleware/koaCors";
 // import KoaMulter from "../../src/middleware/KoaMulter";
 
@@ -27,7 +28,7 @@ const m2 = (): Koa.Middleware => {
 
 @Application
 @EnableKoa //开启koa
-@KoaMiddleware(ExceptionGlobalHandler, KoaBodyParser)
+@KoaMiddleware(ExceptionGlobalHandler, KoaBodyParser, KoaStatic)
 // @KoaMiddleware(m1, m2)
 class APP {
 	app!: FastCarApplication;
